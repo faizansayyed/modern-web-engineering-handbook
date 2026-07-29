@@ -1,0 +1,4068 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Senior UI Engineer — Interview Q&A Reference Guide</title>
+  <link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/themes/prism-tomorrow.min.css" />
+
+  <style>
+    :root {
+      --bg: #f6f8fb;
+      --surface: #ffffff;
+      --surface-soft: #f1f5f9;
+      --text: #172033;
+      --muted: #64748b;
+      --border: #dbe3ef;
+      --primary: #2563eb;
+      --primary-soft: #dbeafe;
+      --success: #16a34a;
+      --warning: #d97706;
+      --danger: #dc2626;
+      --code-bg: #0f172a;
+      --code-text: #e5e7eb;
+      --shadow: 0 10px 30px rgba(15, 23, 42, 0.08);
+      --radius: 16px;
+      --max-width: 1180px;
+    }
+
+    body.dark {
+      --bg: #0b1120;
+      --surface: #111827;
+      --surface-soft: #1f2937;
+      --text: #e5e7eb;
+      --muted: #9ca3af;
+      --border: #334155;
+      --primary: #60a5fa;
+      --primary-soft: #172554;
+      --code-bg: #020617;
+      --code-text: #e5e7eb;
+      --shadow: 0 10px 30px rgba(0, 0, 0, 0.35);
+    }
+
+    * {
+      box-sizing: border-box;
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      margin: 0;
+      font-family:
+        Inter, ui-sans-serif, system-ui, -apple-system, BlinkMacSystemFont,
+        "Segoe UI", Roboto, Arial, sans-serif;
+      background:
+        radial-gradient(circle at top left, rgba(37, 99, 235, 0.12), transparent 35%),
+        var(--bg);
+      color: var(--text);
+      line-height: 1.7;
+    }
+
+    .progress-bar {
+      position: fixed;
+      top: 0;
+      left: 0;
+      height: 4px;
+      background: linear-gradient(90deg, var(--primary), #22c55e);
+      width: 0%;
+      z-index: 9999;
+    }
+
+    .app-shell {
+      max-width: var(--max-width);
+      margin: 0 auto;
+      padding: 24px;
+      display: grid;
+      grid-template-columns: 290px minmax(0, 1fr);
+      gap: 24px;
+    }
+
+    .hero {
+      grid-column: 1 / -1;
+      background:
+        linear-gradient(135deg, rgba(37, 99, 235, 0.95), rgba(14, 165, 233, 0.9)),
+        var(--surface);
+      color: white;
+      border-radius: 24px;
+      padding: 34px;
+      box-shadow: var(--shadow);
+      position: relative;
+      overflow: hidden;
+    }
+
+    .hero::after {
+      content: "";
+      position: absolute;
+      width: 280px;
+      height: 280px;
+      right: -90px;
+      top: -80px;
+      border-radius: 999px;
+      background: rgba(255, 255, 255, 0.16);
+    }
+
+    .hero h1 {
+      margin: 0 0 12px;
+      font-size: clamp(2rem, 4vw, 3.4rem);
+      line-height: 1.08;
+      letter-spacing: -0.04em;
+      max-width: 860px;
+    }
+
+    .hero p {
+      margin: 0;
+      max-width: 860px;
+      color: rgba(255, 255, 255, 0.88);
+      font-size: 1.05rem;
+    }
+
+    .hero-actions {
+      margin-top: 24px;
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      border: 1px solid var(--border);
+      background: var(--surface);
+      color: var(--text);
+      padding: 10px 14px;
+      border-radius: 999px;
+      font-weight: 700;
+      cursor: pointer;
+      transition: 0.2s ease;
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      text-decoration: none;
+      font-size: 0.92rem;
+    }
+
+    .hero .btn {
+      border-color: rgba(255, 255, 255, 0.35);
+      background: rgba(255, 255, 255, 0.16);
+      color: white;
+      backdrop-filter: blur(10px);
+    }
+
+    .btn:hover {
+      transform: translateY(-1px);
+      box-shadow: var(--shadow);
+    }
+
+    .sidebar {
+      position: sticky;
+      top: 20px;
+      align-self: start;
+      max-height: calc(100vh - 40px);
+      overflow: auto;
+      background: rgba(255, 255, 255, 0.75);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 16px;
+      box-shadow: var(--shadow);
+    }
+
+    body.dark .sidebar {
+      background: rgba(17, 24, 39, 0.75);
+    }
+
+    .search-box {
+      position: relative;
+      margin-bottom: 14px;
+    }
+
+    .search-box input {
+      width: 100%;
+      border: 1px solid var(--border);
+      border-radius: 999px;
+      padding: 12px 14px 12px 40px;
+      font-size: 0.95rem;
+      background: var(--surface);
+      color: var(--text);
+      outline: none;
+    }
+
+    .search-box span {
+      position: absolute;
+      left: 14px;
+      top: 50%;
+      transform: translateY(-50%);
+      color: var(--muted);
+    }
+
+    .filters {
+      display: flex;
+      gap: 8px;
+      flex-wrap: wrap;
+      margin-bottom: 16px;
+    }
+
+    .chip {
+      border: 1px solid var(--border);
+      background: var(--surface-soft);
+      color: var(--text);
+      border-radius: 999px;
+      padding: 7px 10px;
+      font-size: 0.78rem;
+      font-weight: 800;
+      cursor: pointer;
+    }
+
+    .chip.active {
+      background: var(--primary);
+      color: white;
+      border-color: var(--primary);
+    }
+
+    .toc-title {
+      margin: 16px 0 8px;
+      font-size: 0.78rem;
+      text-transform: uppercase;
+      letter-spacing: 0.12em;
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .toc {
+      display: grid;
+      gap: 6px;
+    }
+
+    .toc a {
+      color: var(--muted);
+      text-decoration: none;
+      padding: 8px 10px;
+      border-radius: 10px;
+      font-size: 0.9rem;
+      line-height: 1.35;
+    }
+
+    .toc a:hover,
+    .toc a.active {
+      background: var(--primary-soft);
+      color: var(--primary);
+    }
+
+    .content {
+      min-width: 0;
+    }
+
+    .toolbar {
+      position: sticky;
+      top: 0;
+      z-index: 50;
+      background: rgba(246, 248, 251, 0.82);
+      backdrop-filter: blur(14px);
+      border: 1px solid var(--border);
+      border-radius: var(--radius);
+      padding: 12px;
+      margin-bottom: 18px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      gap: 12px;
+      box-shadow: var(--shadow);
+    }
+
+    body.dark .toolbar {
+      background: rgba(11, 17, 32, 0.82);
+    }
+
+    .stats {
+      color: var(--muted);
+      font-size: 0.9rem;
+      font-weight: 700;
+    }
+
+    .doc {
+      display: grid;
+      gap: 18px;
+    }
+
+    .chapter {
+      background: var(--surface);
+      border: 1px solid var(--border);
+      border-radius: 22px;
+      padding: 24px;
+      box-shadow: var(--shadow);
+      scroll-margin-top: 90px;
+    }
+
+    .chapter h2 {
+      margin: 0 0 12px;
+      font-size: clamp(1.5rem, 2.5vw, 2.2rem);
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+    }
+
+    .interviewer-note {
+      border-left: 4px solid var(--primary);
+      background: var(--primary-soft);
+      color: var(--text);
+      padding: 14px 16px;
+      border-radius: 12px;
+      margin: 14px 0 22px;
+    }
+
+    .qa-card {
+      border: 1px solid var(--border);
+      border-radius: 18px;
+      margin: 16px 0;
+      overflow: hidden;
+      background: var(--surface);
+    }
+
+    .qa-card.hidden {
+      display: none;
+    }
+
+    .qa-question {
+      width: 100%;
+      border: 0;
+      background: var(--surface-soft);
+      color: var(--text);
+      text-align: left;
+      padding: 18px 20px;
+      cursor: pointer;
+      display: grid;
+      grid-template-columns: 1fr auto;
+      gap: 16px;
+      align-items: center;
+      font-weight: 900;
+      font-size: 1rem;
+      line-height: 1.45;
+    }
+
+    .qa-question:hover {
+      background: var(--primary-soft);
+    }
+
+    .qa-meta {
+      display: inline-flex;
+      gap: 8px;
+      align-items: center;
+      flex-wrap: wrap;
+    }
+
+    .level {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 999px;
+      padding: 3px 8px;
+      font-size: 0.74rem;
+      font-weight: 900;
+      margin-right: 8px;
+    }
+
+    .level.mid {
+      background: #dcfce7;
+      color: #166534;
+    }
+
+    .level.senior {
+      background: #dbeafe;
+      color: #1d4ed8;
+    }
+
+    .level.staff {
+      background: #fef3c7;
+      color: #92400e;
+    }
+
+    body.dark .level.mid {
+      background: rgba(22, 101, 52, 0.25);
+      color: #86efac;
+    }
+
+    body.dark .level.senior {
+      background: rgba(29, 78, 216, 0.25);
+      color: #93c5fd;
+    }
+
+    body.dark .level.staff {
+      background: rgba(146, 64, 14, 0.25);
+      color: #fcd34d;
+    }
+
+    .chevron {
+      color: var(--muted);
+      font-weight: 900;
+    }
+
+    .qa-answer {
+      padding: 20px;
+      display: none;
+    }
+
+    .qa-card.open .qa-answer {
+      display: block;
+    }
+
+    .qa-card.open .chevron {
+      transform: rotate(180deg);
+    }
+
+    h3,
+    h4 {
+      scroll-margin-top: 100px;
+    }
+
+    p {
+      margin: 0 0 14px;
+    }
+
+    ul,
+    ol {
+      padding-left: 24px;
+    }
+
+    li {
+      margin: 6px 0;
+    }
+
+    strong {
+      color: var(--text);
+    }
+
+    table {
+      width: 100%;
+      border-collapse: collapse;
+      margin: 18px 0;
+      overflow: hidden;
+      border-radius: 14px;
+      border: 1px solid var(--border);
+    }
+
+    th,
+    td {
+      border: 1px solid var(--border);
+      padding: 10px 12px;
+      text-align: left;
+      vertical-align: top;
+    }
+
+    th {
+      background: var(--surface-soft);
+    }
+
+    code:not(pre code) {
+      background: var(--surface-soft);
+      border: 1px solid var(--border);
+      padding: 2px 6px;
+      border-radius: 7px;
+      font-size: 0.92em;
+    }
+
+    pre {
+      position: relative;
+      background: var(--code-bg);
+      color: var(--code-text);
+      padding: 18px;
+      border-radius: 16px;
+      overflow: auto;
+      border: 1px solid rgba(148, 163, 184, 0.25);
+      margin: 16px 0;
+    }
+
+    pre code {
+      font-family:
+        ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas,
+        "Liberation Mono", "Courier New", monospace;
+      font-size: 0.88rem;
+      line-height: 1.65;
+      white-space: pre;
+    }
+
+    .copy-code {
+      border: 1px solid rgba(255, 255, 255, 0.25);
+      background: rgba(255, 255, 255, 0.08);
+      color: white;
+      border-radius: 999px;
+      padding: 5px 9px;
+      cursor: pointer;
+      font-size: 0.75rem;
+      font-weight: 800;
+    }
+
+    .code-block {
+      position: relative;
+      background: #1e1e1e;
+      color: #d4d4d4;
+      margin: 20px 0;
+      border: 0;
+      border-radius: 10px;
+      overflow-x: auto;
+      overflow-y: hidden;
+      padding: 16px;
+    }
+
+    .code-block code {
+      display: block;
+      white-space: pre;
+      tab-size: 2;
+      font-family: Consolas, Monaco, "Courier New", monospace;
+      font-size: 14px;
+      line-height: 1.6;
+      color: inherit;
+    }
+
+    .code-block .copy-code {
+      position: absolute;
+      top: 10px;
+      right: 10px;
+    }
+
+    mark {
+      background: #facc15;
+      color: #111827;
+      padding: 0 3px;
+      border-radius: 4px;
+    }
+
+    .empty-state {
+      display: none;
+      background: var(--surface);
+      border: 1px dashed var(--border);
+      border-radius: var(--radius);
+      padding: 26px;
+      text-align: center;
+      color: var(--muted);
+      font-weight: 700;
+    }
+
+    .footer {
+      color: var(--muted);
+      text-align: center;
+      padding: 32px 0 8px;
+      font-size: 0.9rem;
+    }
+
+    @media (max-width: 980px) {
+      .app-shell {
+        grid-template-columns: 1fr;
+      }
+
+      .sidebar {
+        position: relative;
+        top: auto;
+        max-height: none;
+      }
+
+      .toolbar {
+        position: relative;
+      }
+    }
+
+    @media (max-width: 620px) {
+      .app-shell {
+        padding: 14px;
+      }
+
+      .hero,
+      .chapter {
+        padding: 20px;
+      }
+
+      .toolbar {
+        align-items: stretch;
+        flex-direction: column;
+      }
+
+      .hero-actions {
+        flex-direction: column;
+      }
+
+      .btn {
+        justify-content: center;
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="progress-bar" id="progressBar"></div>
+
+  <div class="app-shell">
+    <header class="hero">
+      <h1>Senior UI Engineer — Interview Q&A Reference Guide</h1>
+      <p>
+        Clean offline learning page for React, Next.js, State Management,
+        Real-time, Performance, Testing, Accessibility, i18n, Observability,
+        System Design, and Senior/Staff Engineering Mindset.
+      </p>
+
+      <div class="hero-actions">
+        <button class="btn" id="expandAllBtn">Expand all answers</button>
+        <button class="btn" id="collapseAllBtn">Collapse all answers</button>
+        <button class="btn" id="themeBtn">Toggle dark mode</button>
+        <button class="btn" id="printBtn">Print / Save as PDF</button>
+      </div>
+    </header>
+
+    <aside class="sidebar">
+      <div class="search-box">
+        <span>⌕</span>
+        <input id="searchInput" type="search" placeholder="Search questions, answers, topics..." autocomplete="off" />
+      </div>
+
+      <div class="filters">
+        <button class="chip active" data-level="all">All</button>
+        <button class="chip" data-level="Mid">Mid</button>
+        <button class="chip" data-level="Senior">Senior</button>
+        <button class="chip" data-level="Staff+">Staff+</button>
+      </div>
+
+      <div class="toc-title">Chapters</div>
+      <nav class="toc" id="toc"></nav>
+    </aside>
+
+    <main class="content">
+      <div class="toolbar">
+        <div class="stats" id="stats">Rendering guide...</div>
+        <button class="btn" id="backTopBtn">Back to top</button>
+      </div>
+
+      <section class="empty-state" id="emptyState">
+        No matching Q&A found. Try a different search term or remove filters.
+      </section>
+
+      <article class="doc" id="doc"></article>
+
+      <footer class="footer">
+        Offline static page. No external libraries. Content is rendered locally in your browser.
+      </footer>
+    </main>
+  </div>
+
+  <!--
+    PASTE YOUR EXACT Q&A CONTENT BELOW.
+    Do not edit or rewrite your questions and answers.
+    The script will render headings, Q&A cards, code blocks, tables, lists, and search.
+  -->
+  <template id="guide-source">
+    # Core Web Technologies — Interview Q&A Reference Guide
+### JavaScript · TypeScript · CSS · HTML
+### Target Level: 5–8+ Years UI Engineering | Production-Grade Knowledge
+
+---
+
+## How to Use This Guide
+
+- Tagged by difficulty: `[Mid]` `[Senior]` `[Staff+]`
+- Every answer includes production code, not textbook snippets
+- "Old → New" sections show which modern patterns replace legacy code
+- Tricky edge cases are called out explicitly — these are what interviewers test
+
+---
+
+## TABLE OF CONTENTS
+
+**Part 1 — JavaScript (Modern ES2015–ES2024)**
+1. Event Loop & Async Model
+2. Closures, Scope & Hoisting
+3. Prototypes, Classes & `this`
+4. Iterators, Generators & Async Iteration
+5. Proxy, Reflect & Metaprogramming
+6. Memory Management & Performance
+7. Module System
+8. Modern API Replacements (Old → New)
+
+**Part 2 — TypeScript**
+9. Type System Fundamentals
+10. Generics & Conditional Types
+11. Utility Types & Mapped Types
+12. Type Guards & Narrowing
+13. Declaration Files & Module Augmentation
+14. Advanced Patterns in Production
+
+**Part 3 — CSS**
+15. Layout Systems (Flexbox, Grid, Container Queries)
+16. Specificity, Cascade & Layers
+17. Modern CSS Features Replacing JS/Libraries
+18. Animation & Performance
+19. Responsive Design & Accessibility
+20. Architecture at Scale
+
+**Part 4 — HTML**
+21. Semantic HTML & Document Structure
+22. Forms & Validation
+23. Web APIs & Browser Features
+24. Performance & Loading
+25. Security
+
+---
+
+---
+
+# PART 1 — JAVASCRIPT
+
+---
+
+# CHAPTER 1 — EVENT LOOP & ASYNC MODEL
+
+> **What interviewers are evaluating:** Whether you actually understand how JavaScript executes, not just that it's "single-threaded and async." They test this with output-order questions that trip up anyone relying on intuition.
+
+---
+
+### Q1.1 `[Senior]` What is the output of this code and why?
+
+```javascript
+console.log('1')
+
+setTimeout(() => console.log('2'), 0)
+
+Promise.resolve().then(() => console.log('3'))
+
+queueMicrotask(() => console.log('4'))
+
+console.log('5')
+```
+
+**Answer:**
+
+```
+1
+5
+3
+4
+2
+```
+
+**Why:**
+
+JavaScript has a single call stack and two task queues:
+
+1. **Microtask queue** (higher priority): Promises (`.then`, `.catch`, `.finally`), `queueMicrotask()`, `MutationObserver`
+2. **Macrotask queue** (lower priority): `setTimeout`, `setInterval`, `setImmediate`, I/O, UI rendering
+
+**Execution order:**
+1. `console.log('1')` — synchronous, executes immediately
+2. `setTimeout(fn, 0)` — schedules callback in macrotask queue
+3. `Promise.resolve().then(fn)` — schedules callback in microtask queue
+4. `queueMicrotask(fn)` — schedules callback in microtask queue
+5. `console.log('5')` — synchronous, executes immediately
+
+After the call stack is empty, the event loop drains **all microtasks first** (in order: `3`, then `4`), then processes **one macrotask** (`2`).
+
+**The tricky part:** `setTimeout(fn, 0)` does NOT mean "run immediately." It means "run after the current synchronous code AND all microtasks are done."
+
+---
+
+### Q1.2 `[Senior]` What is the output? This is a classic interview trap.
+
+```javascript
+for (var i = 0; i < 3; i++) {
+  setTimeout(() => console.log(i), 100)
+}
+```
+
+**Answer:** `3 3 3`
+
+**Why:** `var` is function-scoped (or global). By the time the `setTimeout` callbacks execute, the loop has finished and `i` is `3`. All three closures reference the same `i`.
+
+**Old fix — IIFE:**
+```javascript
+for (var i = 0; i < 3; i++) {
+  (function(j) {
+    setTimeout(() => console.log(j), 100)
+  })(i)
+}
+// Output: 0 1 2
+```
+
+**Modern fix — `let`:**
+```javascript
+for (let i = 0; i < 3; i++) {
+  setTimeout(() => console.log(i), 100)
+}
+// Output: 0 1 2
+```
+
+`let` creates a new binding for each loop iteration. Each closure captures its own `i`. This is one of the most important `var` → `let` behavioral differences — it's not just "block scoping," it's per-iteration scoping in loops.
+
+---
+
+### Q1.3 `[Staff+]` Explain the difference between `Promise.all`, `Promise.allSettled`, `Promise.race`, and `Promise.any`. When do you use each in production?
+
+**Answer:**
+
+| Method | Resolves when | Rejects when | Use case |
+|---|---|---|---|
+| `Promise.all` | All promises resolve | Any one rejects (fast-fail) | Load 5 API calls; need all or fail |
+| `Promise.allSettled` | All promises settle (resolve or reject) | Never rejects | Load 5 widgets; show what worked, handle what failed |
+| `Promise.race` | First promise settles (resolve or reject) | First promise rejects | Timeout pattern |
+| `Promise.any` | First promise resolves | All promises reject (`AggregateError`) | Try 3 CDNs; use whichever responds first |
+
+**Production examples:**
+
+```typescript
+// Promise.all — dashboard data loading
+// If ANY endpoint fails, the entire dashboard shows an error
+const [users, metrics, feed] = await Promise.all([
+  fetchUsers(),
+  fetchMetrics(),
+  fetchFeed(),
+])
+
+// Promise.allSettled — resilient widget loading
+// Each widget loads independently; failed widgets show error state
+const results = await Promise.allSettled([
+  fetchWidget('revenue'),
+  fetchWidget('signups'),
+  fetchWidget('errors'),
+])
+
+results.forEach((result, i) => {
+  if (result.status === 'fulfilled') {
+    renderWidget(i, result.value)
+  } else {
+    renderWidgetError(i, result.reason)
+  }
+})
+
+// Promise.race — timeout pattern
+async function fetchWithTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
+  const timeout = new Promise<never>((_, reject) =>
+    setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms)
+  )
+  return Promise.race([promise, timeout])
+}
+
+const data = await fetchWithTimeout(fetch('/api/data'), 5000)
+
+// Promise.any — CDN fallback
+async function loadScript(urls: string[]): Promise<string> {
+  return Promise.any(
+    urls.map(url => fetch(url).then(r => {
+      if (!r.ok) throw new Error(`${r.status}`)
+      return r.text()
+    }))
+  )
+}
+```
+
+**Old approach that `Promise.allSettled` replaced:**
+```javascript
+// OLD: Manual try/catch per promise with Promise.all
+const results = await Promise.all([
+  fetchA().catch(err => ({ error: err })),
+  fetchB().catch(err => ({ error: err })),
+])
+
+// NEW: Clean, standardized
+const results = await Promise.allSettled([fetchA(), fetchB()])
+```
+
+---
+
+### Q1.4 `[Staff+]` What is the output? Explain the async/await execution order.
+
+```javascript
+async function foo() {
+  console.log('foo start')
+  await bar()
+  console.log('foo end')
+}
+
+async function bar() {
+  console.log('bar')
+}
+
+console.log('script start')
+foo()
+console.log('script end')
+```
+
+**Answer:**
+
+```
+script start
+foo start
+bar
+script end
+foo end
+```
+
+**Why:**
+1. `console.log('script start')` — synchronous
+2. `foo()` is called — enters `foo`, logs `'foo start'`
+3. `await bar()` — calls `bar()` synchronously, logs `'bar'`
+4. The `await` pauses `foo` and yields control back to the caller. Everything after `await` becomes a microtask
+5. `console.log('script end')` — synchronous, runs immediately
+6. Call stack empty → microtask queue → `console.log('foo end')`
+
+**Key insight:** `await` doesn't pause the entire program — it pauses only the function containing it and returns control to the caller. Code after an `await` is equivalent to a `.then()` callback.
+
+---
+
+---
+
+# CHAPTER 2 — CLOSURES, SCOPE & HOISTING
+
+> **What interviewers are evaluating:** Deep understanding of lexical scope and how closures create private state — the foundation of module patterns, hooks, and memoization.
+
+---
+
+### Q2.1 `[Senior]` Implement a `once()` utility that ensures a function is only called once, returning the cached result on subsequent calls.
+
+**Answer:**
+
+```typescript
+function once<T extends (...args: any[]) => any>(fn: T): T {
+  let called = false
+  let result: ReturnType<T>
+
+  return function (this: any, ...args: Parameters<T>): ReturnType<T> {
+    if (!called) {
+      called = true
+      result = fn.apply(this, args)
+    }
+    return result
+  } as T
+}
+
+// Usage
+const initializeDB = once(() => {
+  console.log('Connecting to database...')
+  return { connection: 'active' }
+})
+
+initializeDB() // Logs "Connecting to database...", returns { connection: 'active' }
+initializeDB() // No log, returns cached { connection: 'active' }
+initializeDB() // No log, returns cached { connection: 'active' }
+```
+
+**Why this is a closure question:** `called` and `result` are trapped in the closure. They persist across calls but are invisible from outside. This is the same mechanism behind React's `useRef` and `useState` — the hook system stores values in closures attached to fiber nodes.
+
+**Production use:** Database connection initialization, one-time analytics events, expensive computation caching, singleton initialization.
+
+---
+
+### Q2.2 `[Senior]` What is hoisting? Explain the difference between `var`, `let`, `const`, and function declarations.
+
+**Answer:**
+
+Hoisting is JavaScript's behavior of processing declarations before executing code. But different declarations hoist differently.
+
+```javascript
+// FUNCTION DECLARATIONS — fully hoisted (name + body)
+greet() // Works! Outputs "hello"
+function greet() { console.log('hello') }
+
+// VAR — hoisted but initialized to undefined
+console.log(x) // undefined (not ReferenceError)
+var x = 5
+
+// LET and CONST — hoisted but NOT initialized (Temporal Dead Zone)
+console.log(y) // ReferenceError: Cannot access 'y' before initialization
+let y = 10
+
+// FUNCTION EXPRESSIONS — follow their binding's hoisting rules
+console.log(fn) // undefined (var hoisted, but assignment hasn't run)
+var fn = function() { return 42 }
+
+console.log(fn2) // ReferenceError (let TDZ)
+let fn2 = function() { return 42 }
+```
+
+**Temporal Dead Zone (TDZ):**
+The TDZ is the region between the start of the scope and the `let`/`const` declaration. The variable exists (it's hoisted) but is not accessible.
+
+```javascript
+{
+  // TDZ starts here for x
+  console.log(typeof x) // ReferenceError — NOT "undefined"
+  let x = 5             // TDZ ends here
+}
+```
+
+**Tricky edge case:**
+```javascript
+var x = 1
+function f() {
+  console.log(x) // What prints?
+  var x = 2
+}
+f()
+```
+**Answer:** `undefined`. The `var x` inside `f` is hoisted to the top of `f`, shadowing the outer `x`. But the assignment hasn't run yet.
+
+---
+
+### Q2.3 `[Senior]` Implement a `createCounter()` that returns an object with `increment`, `decrement`, and `getCount` — without using classes.
+
+**Answer:**
+
+```typescript
+function createCounter(initial = 0) {
+  let count = initial
+
+  return {
+    increment() { count++ },
+    decrement() { count-- },
+    getCount() { return count },
+    reset() { count = initial },
+  }
+}
+
+const counter = createCounter(10)
+counter.increment()
+counter.increment()
+counter.decrement()
+console.log(counter.getCount()) // 11
+console.log(counter.count)      // undefined — truly private
+```
+
+**Why this matters in production:**
+
+This is the module pattern — JavaScript's only true encapsulation before `#private` fields. It's how:
+- Redux `createStore` works internally
+- React's hook state is stored (closures inside the fiber tree)
+- Node.js modules achieve isolation
+
+**Old → New comparison:**
+```javascript
+// OLD: "Private" via naming convention (not enforced)
+class Counter {
+  _count = 0 // Accessible: counter._count = 999
+}
+
+// NEW (ES2022): True private fields
+class Counter {
+  #count = 0 // SyntaxError if accessed: counter.#count from outside
+  increment() { this.#count++ }
+  getCount() { return this.#count }
+}
+```
+
+---
+
+---
+
+# CHAPTER 3 — PROTOTYPES, CLASSES & `this`
+
+> **What interviewers are evaluating:** Whether you understand JavaScript's object model and can debug `this` binding issues that occur in real codebases.
+
+---
+
+### Q3.1 `[Senior]` What is the output? Explain all four `this` binding rules.
+
+```javascript
+const obj = {
+  name: 'Alice',
+  greet() {
+    console.log(this.name)
+  },
+  greetLater() {
+    setTimeout(function() {
+      console.log(this.name)
+    }, 100)
+  },
+  greetLaterArrow() {
+    setTimeout(() => {
+      console.log(this.name)
+    }, 100)
+  },
+}
+
+obj.greet()           // ?
+obj.greetLater()      // ?
+obj.greetLaterArrow() // ?
+
+const fn = obj.greet
+fn()                  // ?
+```
+
+**Answer:**
+
+```
+Alice       — obj.greet(): implicit binding, this = obj
+undefined   — greetLater(): function() loses this binding in setTimeout
+Alice       — greetLaterArrow(): arrow function inherits this from greetLater's scope
+undefined   — fn(): default binding, this = globalThis (or undefined in strict mode)
+```
+
+**The four rules (in priority order):**
+
+1. **`new` binding:** `new Foo()` → `this` = newly created object
+2. **Explicit binding:** `fn.call(obj)`, `fn.apply(obj)`, `fn.bind(obj)` → `this` = obj
+3. **Implicit binding:** `obj.fn()` → `this` = obj (the object before the dot)
+4. **Default binding:** `fn()` → `this` = `globalThis` (or `undefined` in strict mode)
+
+**Arrow functions break all four rules:**
+Arrow functions don't have their own `this`. They capture `this` from the enclosing lexical scope at definition time — forever. You cannot `.call()` or `.bind()` an arrow function to change its `this`.
+
+**Production consequence — React class components (legacy):**
+```javascript
+// OLD: Class component with this bug
+class Form extends React.Component {
+  handleSubmit() {
+    console.log(this.state) // BUG: this is undefined when called from event
+  }
+
+  render() {
+    // onClick passes a reference — implicit binding is lost
+    return <button onClick={this.handleSubmit}>Submit</button>
+  }
+}
+
+// FIX 1: Bind in constructor
+constructor() {
+  this.handleSubmit = this.handleSubmit.bind(this)
+}
+
+// FIX 2: Arrow function class field (modern)
+handleSubmit = () => {
+  console.log(this.state) // Arrow captures this from class instance
+}
+```
+
+**This is one reason functional components with hooks won — no `this` at all.**
+
+---
+
+### Q3.2 `[Senior]` What is the prototype chain? How does `Object.create()` differ from `class extends`?
+
+**Answer:**
+
+Every JavaScript object has an internal `[[Prototype]]` link to another object. When you access a property, JavaScript walks up this chain until it finds it or reaches `null`.
+
+```javascript
+const animal = { eats: true }
+const rabbit = Object.create(animal) // rabbit's prototype = animal
+rabbit.jumps = true
+
+console.log(rabbit.eats)  // true — found on prototype
+console.log(rabbit.jumps)  // true — own property
+
+console.log(rabbit.hasOwnProperty('eats'))  // false — inherited
+console.log(rabbit.hasOwnProperty('jumps')) // true — own
+```
+
+**`Object.create()` vs `class extends`:**
+
+```javascript
+// Object.create — direct prototype linkage
+const base = {
+  greet() { return `Hello, ${this.name}` }
+}
+
+const user = Object.create(base)
+user.name = 'Alice'
+user.greet() // "Hello, Alice"
+
+// class extends — syntactic sugar over prototype chain
+class Base {
+  greet() { return `Hello, ${this.name}` }
+}
+
+class User extends Base {
+  constructor(name) {
+    super()
+    this.name = name
+  }
+}
+
+new User('Alice').greet() // "Hello, Alice"
+```
+
+**Under the hood, both create the same prototype chain:**
+```
+user → base → Object.prototype → null
+User instance → User.prototype → Base.prototype → Object.prototype → null
+```
+
+**Production relevance:**
+- `Object.create(null)` creates an object with no prototype — used for dictionaries/maps without inherited `toString`, `hasOwnProperty` pollution
+- Understanding the prototype chain is critical for debugging `instanceof` failures across realms (iframes, workers)
+
+---
+
+### Q3.3 `[Staff+]` What are `#private` class fields and how do they differ from TypeScript's `private` keyword?
+
+**Answer:**
+
+```typescript
+// TypeScript private — compile-time only
+class TSUser {
+  private name: string     // Erased at runtime — JS sees a regular property
+  constructor(name: string) { this.name = name }
+}
+
+const u = new TSUser('Alice')
+console.log((u as any).name) // "Alice" — accessible at runtime!
+
+// JavaScript #private — runtime enforcement
+class JSUser {
+  #name: string            // True private — SyntaxError to access from outside
+  constructor(name: string) { this.#name = name }
+  getName() { return this.#name }
+}
+
+const j = new JSUser('Alice')
+console.log(j.#name)      // SyntaxError: Private field '#name' not declared
+console.log(j.getName())  // "Alice"
+```
+
+**Key differences:**
+
+| Feature | TypeScript `private` | JS `#private` |
+|---|---|---|
+| Enforced at runtime | No — erased by compiler | Yes — SyntaxError |
+| Visible in console/debugger | Yes | Hidden |
+| Accessible via `(obj as any).prop` | Yes | No |
+| Subclass can access | No (TS error) but yes at runtime | No — truly inaccessible |
+| Available since | TypeScript 1.0 | ES2022 |
+
+**Production recommendation:** Use `#private` for secrets, tokens, or internal state that must not leak. Use TypeScript `private` for developer intent signaling when runtime enforcement isn't needed.
+
+---
+
+---
+
+# CHAPTER 4 — ITERATORS, GENERATORS & ASYNC ITERATION
+
+> **What interviewers are evaluating:** Whether you understand lazy evaluation and can implement custom iteration protocols — relevant for streams, pagination, and data processing pipelines.
+
+---
+
+### Q4.1 `[Senior]` How do you make a custom object iterable with `for...of`?
+
+**Answer:**
+
+Implement the `Symbol.iterator` protocol:
+
+```typescript
+class DateRange {
+  constructor(
+    private start: Date,
+    private end: Date,
+  ) {}
+
+  *[Symbol.iterator]() {
+    const current = new Date(this.start)
+    while (current <= this.end) {
+      yield new Date(current)
+      current.setDate(current.getDate() + 1)
+    }
+  }
+}
+
+// Usage — works with for...of, spread, destructuring, Array.from
+const week = new DateRange(new Date('2024-01-01'), new Date('2024-01-07'))
+
+for (const day of week) {
+  console.log(day.toISOString().split('T')[0])
+}
+// 2024-01-01, 2024-01-02, ..., 2024-01-07
+
+const dates = [...week] // Array of 7 Date objects
+const [first, second] = week // Destructuring works
+```
+
+**Why generators (`*` and `yield`) matter:**
+
+Generators are lazy — they compute values on demand, not all at once. For a range of 10 million dates, a generator uses O(1) memory instead of O(n).
+
+---
+
+### Q4.2 `[Staff+]` Implement an async generator that paginates through an API automatically.
+
+**Answer:**
+
+```typescript
+async function* fetchAllPages<T>(
+  url: string,
+  pageSize = 20,
+): AsyncGenerator<T[], void, undefined> {
+  let page = 1
+  let hasMore = true
+
+  while (hasMore) {
+    const response = await fetch(`${url}?page=${page}&limit=${pageSize}`)
+    const data: T[] = await response.json()
+
+    yield data
+
+    hasMore = data.length === pageSize
+    page++
+  }
+}
+
+// Usage — processes one page at a time, doesn't load everything into memory
+async function processAllUsers() {
+  for await (const batch of fetchAllPages<User>('/api/users')) {
+    for (const user of batch) {
+      await processUser(user)
+    }
+    console.log(`Processed batch of ${batch.length} users`)
+  }
+}
+```
+
+**Production use cases:**
+- Paginating through database records for export
+- Processing event streams (Kafka, SSE)
+- Reading large files line-by-line (`readline` interface in Node)
+- Implementing cursor-based pagination in GraphQL
+
+**Old approach this replaced:**
+```javascript
+// OLD: Recursive callback or manual loop
+async function fetchAll(url, page = 1, accumulated = []) {
+  const data = await fetch(`${url}?page=${page}`).then(r => r.json())
+  accumulated.push(...data)
+  if (data.length === 20) {
+    return fetchAll(url, page + 1, accumulated) // Holds all data in memory
+  }
+  return accumulated
+}
+```
+
+---
+
+---
+
+# CHAPTER 5 — PROXY, REFLECT & METAPROGRAMMING
+
+> **What interviewers are evaluating:** Whether you've worked with advanced runtime features used in frameworks, ORMs, and reactivity systems.
+
+---
+
+### Q5.1 `[Staff+]` How do Proxy and Reflect work? Give a production use case.
+
+**Answer:**
+
+A `Proxy` wraps an object and intercepts fundamental operations (get, set, delete, function call, etc.) through handler traps.
+
+```typescript
+// Observable state — used by Vue.js, MobX, and similar reactivity systems
+function createReactive<T extends object>(
+  target: T,
+  onChange: (prop: string, value: any) => void,
+): T {
+  return new Proxy(target, {
+    set(obj, prop, value, receiver) {
+      const result = Reflect.set(obj, prop, value, receiver)
+      onChange(String(prop), value)
+      return result
+    },
+    get(obj, prop, receiver) {
+      const value = Reflect.get(obj, prop, receiver)
+      // Recursively proxy nested objects
+      if (typeof value === 'object' && value !== null) {
+        return createReactive(value, onChange)
+      }
+      return value
+    },
+  })
+}
+
+// Usage
+const state = createReactive({ count: 0, user: { name: 'Alice' } }, (prop, value) => {
+  console.log(`Changed: ${prop} = ${value}`)
+})
+
+state.count = 5           // Logs: "Changed: count = 5"
+state.user.name = 'Bob'   // Logs: "Changed: name = Bob"
+```
+
+**Why `Reflect`?**
+`Reflect` provides the default behavior for each Proxy trap. Use `Reflect.set` instead of `obj[prop] = value` to ensure correct prototype chain behavior and to forward the `receiver` argument properly.
+
+**Production use cases:**
+- **Vue 3's reactivity system** — entire reactivity is built on Proxy
+- **Validation layers** — reject invalid property assignments at runtime
+- **API client SDK** — intercept property access to dynamically build API URLs:
+
+```typescript
+// Dynamic API client using Proxy
+const api = new Proxy({}, {
+  get(_, resource: string) {
+    return {
+      get: (id: string) => fetch(`/api/${resource}/${id}`).then(r => r.json()),
+      list: () => fetch(`/api/${resource}`).then(r => r.json()),
+    }
+  },
+})
+
+await api.users.get('123')     // GET /api/users/123
+await api.products.list()       // GET /api/products
+```
+
+---
+
+---
+
+# CHAPTER 6 — MEMORY MANAGEMENT & PERFORMANCE
+
+---
+
+### Q6.1 `[Senior]` What causes memory leaks in JavaScript? Give three real production examples and their fixes.
+
+**Answer:**
+
+JavaScript uses garbage collection (mark-and-sweep). A memory leak occurs when objects are no longer needed but are still reachable — the GC can't collect them.
+
+**Leak 1: Forgotten event listeners**
+```typescript
+// BUG: Listener never removed — element and handler stay in memory
+function setupScrollLogger() {
+  const data = new Array(10000).fill('x') // Large data captured in closure
+
+  window.addEventListener('scroll', () => {
+    console.log(data.length) // Closure keeps data alive forever
+  })
+}
+
+// FIX: Store reference and remove on cleanup
+function setupScrollLogger() {
+  const data = new Array(10000).fill('x')
+  const handler = () => console.log(data.length)
+
+  window.addEventListener('scroll', handler)
+  return () => window.removeEventListener('scroll', handler)
+}
+
+const cleanup = setupScrollLogger()
+// Later: cleanup()
+```
+
+**Leak 2: Detached DOM nodes**
+```typescript
+// BUG: Element removed from DOM but still referenced in JS
+let cachedElement = document.getElementById('tooltip')
+document.body.removeChild(cachedElement)
+// cachedElement still holds a reference — entire subtree stays in memory
+
+// FIX: Use WeakRef (ES2021)
+let cachedRef = new WeakRef(document.getElementById('tooltip'))
+// Later:
+const element = cachedRef.deref() // Returns element or undefined if GC'd
+```
+
+**Leak 3: Closures holding unneeded references**
+```typescript
+// BUG: Unused variable in closure prevents GC of large data
+function createHandler(hugeData: ArrayBuffer) {
+  const id = processData(hugeData)
+
+  return function handler() {
+    console.log(id) // Only uses id, but closure captures hugeData too
+  }
+}
+
+// FIX: Narrow the closure scope
+function createHandler(hugeData: ArrayBuffer) {
+  const id = processData(hugeData)
+  hugeData = null! // Release reference explicitly
+
+  return function handler() {
+    console.log(id)
+  }
+}
+```
+
+**Modern tools for detection:**
+- Chrome DevTools → Memory → Heap Snapshot → Compare snapshots
+- `FinalizationRegistry` (ES2021) — callback when object is GC'd
+- `WeakRef`, `WeakMap`, `WeakSet` — hold references without preventing GC
+
+---
+
+### Q6.2 `[Senior]` Explain `WeakMap` and `WeakSet`. Why do they exist and when do you use them?
+
+**Answer:**
+
+`WeakMap` and `WeakSet` hold references to objects **without preventing garbage collection**. If the only reference to an object is inside a WeakMap/WeakSet, the object can be GC'd.
+
+```typescript
+// Regular Map — prevents GC
+const cache = new Map()
+let user = { name: 'Alice' }
+cache.set(user, computeExpensiveResult(user))
+user = null // Object still alive — cache.keys() holds a reference
+
+// WeakMap — allows GC
+const cache = new WeakMap()
+let user = { name: 'Alice' }
+cache.set(user, computeExpensiveResult(user))
+user = null // Object is eligible for GC — WeakMap releases it automatically
+```
+
+**Production use cases:**
+
+**1. Private data storage (pre-#private fields):**
+```typescript
+const privateData = new WeakMap<object, { password: string }>()
+
+class User {
+  constructor(name: string, password: string) {
+    this.name = name
+    privateData.set(this, { password }) // Truly private, GC-friendly
+  }
+
+  checkPassword(input: string): boolean {
+    return privateData.get(this)?.password === input
+  }
+}
+```
+
+**2. DOM metadata without memory leaks:**
+```typescript
+const elementMetadata = new WeakMap<HTMLElement, { clickCount: number }>()
+
+function trackClicks(element: HTMLElement) {
+  element.addEventListener('click', () => {
+    const meta = elementMetadata.get(element) ?? { clickCount: 0 }
+    meta.clickCount++
+    elementMetadata.set(element, meta)
+  })
+}
+// When element is removed from DOM and dereferenced, WeakMap entry is auto-cleaned
+```
+
+**Constraints:**
+- Keys must be objects (not primitives)
+- Not iterable — you can't enumerate entries (by design — you shouldn't depend on contents that may be GC'd)
+- No `.size` property
+
+---
+
+---
+
+# CHAPTER 7 — MODULE SYSTEM
+
+---
+
+### Q7.1 `[Senior]` What is the difference between `import/export` (ESM) and `require/module.exports` (CJS)? Why does it matter?
+
+**Answer:**
+
+| Feature | ESM (`import/export`) | CJS (`require/module.exports`) |
+|---|---|---|
+| Parsing | Static (resolved at parse time) | Dynamic (resolved at runtime) |
+| Tree-shaking | Yes — bundler can eliminate unused exports | No — entire module included |
+| Top-level `await` | Supported | Not supported |
+| Default in | Browsers, modern Node | Node (legacy), bundlers |
+| Loading | Asynchronous | Synchronous |
+
+**Why static analysis matters:**
+
+```typescript
+// ESM — bundler KNOWS which exports are used
+import { formatDate } from './utils' // Only formatDate is included in bundle
+
+// CJS — bundler CANNOT know until runtime
+const utils = require('./utils') // Entire module included
+utils.formatDate()
+```
+
+**Production impact:** A large utility library with 200 functions as ESM exports only ships the 3 functions you actually import. The same library as CJS ships all 200 — potentially adding 50KB+ to your bundle.
+
+**Conditional imports — ESM vs CJS:**
+```typescript
+// CJS — dynamic require works
+if (process.env.NODE_ENV === 'test') {
+  const mock = require('./mock')
+}
+
+// ESM — use dynamic import()
+if (process.env.NODE_ENV === 'test') {
+  const mock = await import('./mock')
+}
+```
+
+**Interop headaches in Node.js:**
+```javascript
+// In ESM file, importing CJS module
+import cjsModule from './legacy.cjs' // Gets default export
+
+// In CJS file, importing ESM module
+const esmModule = await import('./modern.mjs') // Must use dynamic import
+```
+
+---
+
+---
+
+# CHAPTER 8 — MODERN API REPLACEMENTS (OLD → NEW)
+
+> **What interviewers are evaluating:** Whether you stay current and understand why modern APIs exist, not just that they do.
+
+---
+
+### Q8.1 `[Mid]` What modern JavaScript features have replaced common utility library functions? Give five examples.
+
+**Answer:**
+
+**1. Lodash `_.cloneDeep` → `structuredClone` (2022)**
+```javascript
+// OLD
+import { cloneDeep } from 'lodash'
+const copy = cloneDeep(complexObject)
+
+// NEW — built into every runtime
+const copy = structuredClone(complexObject)
+// Handles: nested objects, Date, Map, Set, ArrayBuffer, circular references
+// Does NOT handle: functions, DOM nodes, Error objects
+```
+
+**2. Lodash `_.get` → Optional chaining `?.` (ES2020)**
+```javascript
+// OLD
+const city = _.get(user, 'address.city', 'Unknown')
+
+// NEW
+const city = user?.address?.city ?? 'Unknown'
+```
+
+**3. Lodash `_.flatten` / `_.flatMap` → `Array.prototype.flat/flatMap` (ES2019)**
+```javascript
+// OLD
+_.flatten([[1, 2], [3, [4]]]) // [1, 2, 3, [4]]
+_.flattenDeep([[1, [2, [3]]]]) // [1, 2, 3]
+
+// NEW
+[[1, 2], [3, [4]]].flat()       // [1, 2, 3, [4]]
+[[1, [2, [3]]]].flat(Infinity)  // [1, 2, 3]
+```
+
+**4. `String.prototype.replaceAll` (ES2021)**
+```javascript
+// OLD
+'hello-world-foo'.split('-').join(' ') // "hello world foo"
+'hello-world-foo'.replace(/-/g, ' ')   // "hello world foo"
+
+// NEW
+'hello-world-foo'.replaceAll('-', ' ') // "hello world foo"
+```
+
+**5. `Object.fromEntries` (ES2019)**
+```javascript
+// OLD
+const obj = {}
+entries.forEach(([key, value]) => { obj[key] = value })
+
+// NEW
+const obj = Object.fromEntries(entries)
+
+// Powerful composition: filter object keys
+const filtered = Object.fromEntries(
+  Object.entries(config).filter(([key]) => key.startsWith('NEXT_'))
+)
+```
+
+**6. `Array.prototype.at()` (ES2022)**
+```javascript
+// OLD
+const last = arr[arr.length - 1]
+
+// NEW
+const last = arr.at(-1)
+const secondToLast = arr.at(-2)
+```
+
+**7. `Object.hasOwn()` (ES2022)**
+```javascript
+// OLD — can break if object overrides hasOwnProperty
+obj.hasOwnProperty('key')
+Object.prototype.hasOwnProperty.call(obj, 'key')
+
+// NEW — safe, always works
+Object.hasOwn(obj, 'key')
+```
+
+**8. `Object.groupBy()` (ES2024)**
+```javascript
+// OLD
+const grouped = items.reduce((acc, item) => {
+  const key = item.category
+  ;(acc[key] ??= []).push(item)
+  return acc
+}, {})
+
+// NEW
+const grouped = Object.groupBy(items, item => item.category)
+```
+
+---
+
+---
+
+# PART 2 — TYPESCRIPT
+
+---
+
+# CHAPTER 9 — TYPE SYSTEM FUNDAMENTALS
+
+> **What interviewers are evaluating:** Whether you use TypeScript as a safety net or truly leverage the type system to prevent bugs at compile time.
+
+---
+
+### Q9.1 `[Mid]` What is the difference between `type` and `interface`? When do you use each?
+
+**Answer:**
+
+Both can describe object shapes, but they have different capabilities:
+
+```typescript
+// Interface — extendable, mergeable
+interface User {
+  id: string
+  name: string
+}
+
+interface User {
+  email: string // Declaration merging — extends the same interface
+}
+// User now has id, name, AND email
+
+// Type — unions, intersections, mapped types, primitives
+type Status = 'active' | 'inactive' | 'banned' // Union — interfaces can't do this
+type UserOrAdmin = User | Admin // Union type
+type ReadonlyUser = Readonly<User> // Mapped utility type
+```
+
+**When to use each:**
+
+| Use case | Choose |
+|---|---|
+| Object shapes (API responses, props) | `interface` — extendable, better error messages |
+| Union types | `type` — only option |
+| Intersection types | `type` — cleaner syntax |
+| Mapped/conditional types | `type` — only option |
+| Declaration merging (extending library types) | `interface` — only option |
+| Primitives/tuples | `type` — only option |
+
+**Production rule:** Use `interface` for things that represent a contract (props, API shape, class shape). Use `type` for everything else (unions, utility types, computed types).
+
+---
+
+### Q9.2 `[Senior]` What is the difference between `any`, `unknown`, and `never`? This is a common mistake.
+
+**Answer:**
+
+```typescript
+// any — disables type checking entirely. Avoid.
+let x: any = 5
+x.foo.bar.baz() // No error at compile time — crashes at runtime
+
+// unknown — type-safe alternative to any. Must narrow before using.
+let y: unknown = 5
+y.toFixed(2) // ERROR: Object is of type 'unknown'
+
+if (typeof y === 'number') {
+  y.toFixed(2) // OK — narrowed to number
+}
+
+// never — represents values that should never occur
+function throwError(msg: string): never {
+  throw new Error(msg) // Function never returns
+}
+
+// never in exhaustive switch
+type Shape = 'circle' | 'square' | 'triangle'
+
+function getArea(shape: Shape): number {
+  switch (shape) {
+    case 'circle': return Math.PI * 10
+    case 'square': return 100
+    case 'triangle': return 50
+    default:
+      const _exhaustive: never = shape // Error if a case is missing
+      throw new Error(`Unhandled shape: ${_exhaustive}`)
+  }
+}
+```
+
+**Why `unknown` over `any` in production:**
+
+```typescript
+// API response — you don't know what the server sends
+async function fetchData(url: string): Promise<unknown> {
+  const response = await fetch(url)
+  return response.json()
+}
+
+// Consumer must validate before using
+const data = await fetchData('/api/user')
+
+// BAD: Cast to any and pray
+const name = (data as any).name
+
+// GOOD: Validate with type guard
+function isUser(data: unknown): data is User {
+  return (
+    typeof data === 'object' &&
+    data !== null &&
+    'name' in data &&
+    typeof (data as User).name === 'string'
+  )
+}
+
+if (isUser(data)) {
+  console.log(data.name) // Type-safe
+}
+```
+
+---
+
+### Q9.3 `[Senior]` What is the difference between `==` and `===` in JavaScript, and how does TypeScript handle this?
+
+**Answer:**
+
+`==` performs type coercion before comparison. `===` does not — it checks value AND type.
+
+```javascript
+// Type coercion nightmares with ==
+0 == ''          // true (both coerce to 0)
+0 == '0'         // true
+'' == '0'        // false (inconsistent!)
+false == '0'     // true
+false == ''      // true
+null == undefined // true
+NaN == NaN       // false (nothing equals NaN)
+
+// === — no surprises
+0 === ''         // false
+0 === '0'        // false
+null === undefined // false
+```
+
+**TypeScript's role:**
+TypeScript's strict mode prevents comparing incompatible types:
+
+```typescript
+// TypeScript catches nonsensical comparisons
+if (someString === someNumber) {} // Error: This comparison appears to be unintentional
+
+// But allows legitimate narrowing
+if (typeof x === 'string') {} // OK — type guard pattern
+```
+
+**Production rule:** Always use `===`. The only legitimate `==` is `value == null` which checks for both `null` and `undefined` in one expression — and even that has a `===` alternative: `value === null || value === undefined`.
+
+---
+
+---
+
+# CHAPTER 10 — GENERICS & CONDITIONAL TYPES
+
+> **What interviewers are evaluating:** Whether you can write reusable, type-safe abstractions — not just consume them.
+
+---
+
+### Q10.1 `[Senior]` Write a generic function that safely accesses a nested property by path.
+
+**Answer:**
+
+```typescript
+// Type-safe deep property access
+type PathValue<T, P extends string> =
+  P extends `${infer Key}.${infer Rest}`
+    ? Key extends keyof T
+      ? PathValue<T[Key], Rest>
+      : never
+    : P extends keyof T
+      ? T[P]
+      : never
+
+function get<T, P extends string>(
+  obj: T,
+  path: P,
+): PathValue<T, P> {
+  return path.split('.').reduce((current: any, key) => current?.[key], obj)
+}
+
+// Usage — fully type-safe
+interface Config {
+  database: {
+    host: string
+    port: number
+    credentials: {
+      username: string
+      password: string
+    }
+  }
+}
+
+const config: Config = {
+  database: { host: 'localhost', port: 5432, credentials: { username: 'admin', password: 'secret' } }
+}
+
+const host = get(config, 'database.host')                   // type: string
+const port = get(config, 'database.port')                   // type: number
+const user = get(config, 'database.credentials.username')   // type: string
+const bad = get(config, 'database.nonexistent')             // type: never — compile error
+```
+
+---
+
+### Q10.2 `[Staff+]` Explain conditional types and `infer`. Write a utility that extracts the return type of an async function.
+
+**Answer:**
+
+Conditional types follow the pattern `T extends U ? X : Y` — if T is assignable to U, resolve to X, otherwise Y.
+
+`infer` declares a type variable inside a conditional type that TypeScript infers from the match:
+
+```typescript
+// Built-in ReturnType does this:
+type ReturnType<T extends (...args: any) => any> =
+  T extends (...args: any) => infer R ? R : any
+
+// But for async functions, ReturnType gives you Promise<User>, not User
+type AsyncReturnType<T extends (...args: any) => Promise<any>> =
+  T extends (...args: any) => Promise<infer R> ? R : never
+
+// Usage
+async function fetchUser(): Promise<User> { /* ... */ }
+
+type Result = AsyncReturnType<typeof fetchUser> // User (not Promise<User>)
+```
+
+**More practical conditional types:**
+
+```typescript
+// Extract event payload from an event map
+type EventMap = {
+  'user.created': { userId: string; email: string }
+  'user.deleted': { userId: string }
+  'order.placed': { orderId: string; amount: number }
+}
+
+type EventPayload<E extends keyof EventMap> = EventMap[E]
+
+function emit<E extends keyof EventMap>(event: E, payload: EventPayload<E>) {
+  // Type-safe event emission
+}
+
+emit('user.created', { userId: '1', email: 'a@b.com' }) // OK
+emit('user.created', { userId: '1' })                    // Error: missing email
+emit('order.placed', { userId: '1' })                    // Error: wrong shape
+```
+
+---
+
+---
+
+# CHAPTER 11 — UTILITY TYPES & MAPPED TYPES
+
+---
+
+### Q11.1 `[Senior]` Explain `Partial`, `Required`, `Pick`, `Omit`, and `Record`. Show production use cases.
+
+**Answer:**
+
+```typescript
+interface User {
+  id: string
+  name: string
+  email: string
+  avatar?: string
+}
+
+// Partial<T> — all properties optional
+// Use: Update payloads where you only send changed fields
+type UserUpdate = Partial<User>
+// { id?: string; name?: string; email?: string; avatar?: string }
+function updateUser(id: string, patch: Partial<Omit<User, 'id'>>) {}
+updateUser('1', { name: 'Bob' }) // Only update name
+
+// Required<T> — all properties required
+// Use: Ensure all config options are explicitly set
+type StrictUser = Required<User>
+// { id: string; name: string; email: string; avatar: string }
+
+// Pick<T, K> — subset of properties
+// Use: API responses that only include certain fields
+type UserPreview = Pick<User, 'id' | 'name'>
+// { id: string; name: string }
+
+// Omit<T, K> — exclude specific properties
+// Use: Creating new entities (server assigns id)
+type CreateUserInput = Omit<User, 'id'>
+// { name: string; email: string; avatar?: string }
+
+// Record<K, V> — object with keys K and values V
+// Use: Lookup tables, dictionaries
+type UserRoles = Record<string, 'admin' | 'user' | 'guest'>
+const roles: UserRoles = { alice: 'admin', bob: 'user' }
+```
+
+**Composing utility types (production pattern):**
+```typescript
+// API mutation input — no id (server generates), all other fields required
+type CreateUserDTO = Required<Omit<User, 'id'>>
+
+// API patch input — id required, everything else optional
+type PatchUserDTO = Pick<User, 'id'> & Partial<Omit<User, 'id'>>
+```
+
+---
+
+### Q11.2 `[Staff+]` Write a custom mapped type that makes all properties of an object deeply readonly.
+
+**Answer:**
+
+```typescript
+type DeepReadonly<T> = {
+  readonly [K in keyof T]: T[K] extends object
+    ? T[K] extends Function
+      ? T[K]                    // Don't freeze functions
+      : DeepReadonly<T[K]>      // Recurse into nested objects
+    : T[K]                      // Primitives are naturally readonly
+}
+
+// Usage
+interface AppState {
+  user: {
+    name: string
+    preferences: {
+      theme: 'light' | 'dark'
+      language: string
+    }
+  }
+  items: string[]
+}
+
+type FrozenState = DeepReadonly<AppState>
+
+const state: FrozenState = {
+  user: { name: 'Alice', preferences: { theme: 'light', language: 'en' } },
+  items: ['a', 'b'],
+}
+
+state.user.name = 'Bob'                    // Error: Cannot assign to 'name'
+state.user.preferences.theme = 'dark'       // Error: Cannot assign to 'theme'
+state.items.push('c')                       // Error: Property 'push' does not exist
+```
+
+**Production use:** Redux/Zustand store types — state should never be mutated directly. `DeepReadonly` catches mutations at compile time rather than relying on runtime immutability checks like Immer.
+
+---
+
+---
+
+# CHAPTER 12 — TYPE GUARDS & NARROWING
+
+---
+
+### Q12.1 `[Senior]` What are the different ways to narrow types in TypeScript? Rank them by reliability.
+
+**Answer:**
+
+```typescript
+// 1. typeof — works for primitives
+function process(value: string | number) {
+  if (typeof value === 'string') {
+    value.toUpperCase() // Narrowed to string
+  }
+}
+
+// 2. instanceof — works for class instances
+function handleError(err: Error | string) {
+  if (err instanceof TypeError) {
+    err.message // Narrowed to TypeError
+  }
+}
+
+// 3. 'in' operator — checks for property existence
+function render(shape: Circle | Rectangle) {
+  if ('radius' in shape) {
+    shape.radius // Narrowed to Circle
+  }
+}
+
+// 4. Discriminated union (BEST for complex types)
+type Result =
+  | { status: 'success'; data: User }
+  | { status: 'error'; error: string }
+
+function handle(result: Result) {
+  if (result.status === 'success') {
+    result.data // Narrowed — TypeScript knows this branch has data
+  } else {
+    result.error // Narrowed — TypeScript knows this branch has error
+  }
+}
+
+// 5. Custom type predicate (user-defined type guard)
+function isUser(value: unknown): value is User {
+  return (
+    typeof value === 'object' &&
+    value !== null &&
+    'id' in value &&
+    'name' in value
+  )
+}
+
+// 6. Assertion function (throws if wrong)
+function assertIsUser(value: unknown): asserts value is User {
+  if (typeof value !== 'object' || value === null || !('id' in value)) {
+    throw new Error('Not a User')
+  }
+}
+```
+
+**Reliability ranking:**
+1. **Discriminated unions** — best; TypeScript exhaustively narrows
+2. **`typeof`** — excellent for primitives; limited to `string | number | boolean | symbol | bigint | undefined | function | object`
+3. **`in` operator** — good for structural differentiation
+4. **Custom type predicates** — powerful but you must implement correctly; TypeScript trusts your implementation
+5. **`instanceof`** — works for classes; breaks across realms (iframe, worker)
+
+**Production best practice — discriminated unions:**
+```typescript
+// API response pattern used across entire application
+type ApiResponse<T> =
+  | { ok: true; data: T }
+  | { ok: false; error: { code: string; message: string } }
+
+// Narrowing is automatic and exhaustive
+async function fetchUser(id: string): Promise<ApiResponse<User>> {
+  const res = await fetch(`/api/users/${id}`)
+  if (!res.ok) {
+    return { ok: false, error: { code: 'FETCH_FAILED', message: res.statusText } }
+  }
+  return { ok: true, data: await res.json() }
+}
+
+const result = await fetchUser('1')
+if (result.ok) {
+  console.log(result.data.name) // Type-safe access
+} else {
+  console.log(result.error.code) // Type-safe error
+}
+```
+
+---
+
+---
+
+# CHAPTER 13 — DECLARATION FILES & MODULE AUGMENTATION
+
+---
+
+### Q13.1 `[Senior]` How do you add types to a library that doesn't have them? How do you extend existing type declarations?
+
+**Answer:**
+
+**Adding types for an untyped library:**
+```typescript
+// src/types/legacy-analytics.d.ts
+declare module 'legacy-analytics' {
+  export function track(event: string, data?: Record<string, unknown>): void
+  export function identify(userId: string, traits?: Record<string, unknown>): void
+  export function page(name: string): void
+}
+
+// Now you can import with type safety
+import { track, identify } from 'legacy-analytics'
+track('button.click', { buttonId: 'cta' }) // Type-checked
+```
+
+**Extending existing library types (module augmentation):**
+```typescript
+// Extending Express Request with custom user property
+declare module 'express-serve-static-core' {
+  interface Request {
+    user?: {
+      id: string
+      role: 'admin' | 'user'
+    }
+  }
+}
+
+// Now req.user is available everywhere
+app.get('/profile', (req, res) => {
+  if (req.user?.role === 'admin') { /* ... */ }
+})
+```
+
+**Extending Window:**
+```typescript
+// src/types/global.d.ts
+declare global {
+  interface Window {
+    analytics: {
+      track: (event: string) => void
+    }
+    __APP_VERSION__: string
+  }
+}
+
+export {} // Required to make this a module
+
+// Now window.analytics is typed everywhere
+window.analytics.track('page.view')
+```
+
+**Extending ProcessEnv (Next.js pattern):**
+```typescript
+// src/types/env.d.ts
+declare namespace NodeJS {
+  interface ProcessEnv {
+    DATABASE_URL: string
+    NEXT_PUBLIC_APP_URL: string
+    NODE_ENV: 'development' | 'production' | 'test'
+  }
+}
+
+// Now process.env.DATABASE_URL is typed as string (not string | undefined)
+```
+
+---
+
+---
+
+# CHAPTER 14 — ADVANCED TYPESCRIPT PATTERNS IN PRODUCTION
+
+---
+
+### Q14.1 `[Staff+]` How do you create a type-safe event emitter in TypeScript?
+
+**Answer:**
+
+```typescript
+type EventMap = Record<string, any>
+
+class TypedEmitter<Events extends EventMap> {
+  private listeners = new Map<keyof Events, Set<Function>>()
+
+  on<E extends keyof Events>(event: E, listener: (payload: Events[E]) => void): () => void {
+    if (!this.listeners.has(event)) {
+      this.listeners.set(event, new Set())
+    }
+    this.listeners.get(event)!.add(listener)
+
+    // Return unsubscribe function
+    return () => this.listeners.get(event)?.delete(listener)
+  }
+
+  emit<E extends keyof Events>(event: E, payload: Events[E]): void {
+    this.listeners.get(event)?.forEach(fn => fn(payload))
+  }
+}
+
+// Usage — all events and payloads are type-checked
+interface AppEvents {
+  'user:login': { userId: string; timestamp: number }
+  'user:logout': { userId: string }
+  'feed:new-item': { itemId: string; content: string }
+  'notification:show': { message: string; type: 'success' | 'error' }
+}
+
+const bus = new TypedEmitter<AppEvents>()
+
+bus.on('user:login', ({ userId, timestamp }) => {
+  // userId: string, timestamp: number — fully typed
+})
+
+bus.emit('user:login', { userId: '123', timestamp: Date.now() }) // OK
+bus.emit('user:login', { userId: 123 })  // Error: number not assignable to string
+bus.emit('unknown:event', {})             // Error: not a valid event
+```
+
+---
+
+### Q14.2 `[Staff+]` What is the `satisfies` operator and why was it added?
+
+**Answer:**
+
+`satisfies` (TypeScript 4.9) validates that an expression matches a type WITHOUT widening it. It gives you type-checking AND preserves the narrow literal type.
+
+```typescript
+type Color = 'red' | 'green' | 'blue'
+type Theme = Record<string, Color | Color[]>
+
+// Problem with type annotation — widens the type
+const theme: Theme = {
+  primary: 'red',
+  secondary: 'blue',
+  accents: ['red', 'green'],
+}
+theme.primary.toUpperCase() // Error: string | string[] has no toUpperCase
+// TypeScript only knows it's Color | Color[] — lost the narrow 'red' type
+
+// Solution with satisfies — validates without widening
+const theme = {
+  primary: 'red',
+  secondary: 'blue',
+  accents: ['red', 'green'],
+} satisfies Theme
+theme.primary.toUpperCase()  // OK! TypeScript knows it's 'red' (string literal)
+theme.accents.map(c => c)    // OK! TypeScript knows it's string[] (not string | string[])
+
+// Catches errors too
+const badTheme = {
+  primary: 'red',
+  secondary: 'purple', // Error: 'purple' not assignable to Color
+} satisfies Theme
+```
+
+**Production use cases:**
+
+```typescript
+// Route configuration — validate shape but preserve literal types
+const routes = {
+  home: '/',
+  profile: '/profile/:id',
+  settings: '/settings',
+} satisfies Record<string, string>
+
+// TypeScript knows routes.home is '/' not just string
+type HomeRoute = typeof routes.home // '/' (literal type preserved)
+```
+
+---
+
+---
+
+# PART 3 — CSS
+
+---
+
+# CHAPTER 15 — LAYOUT SYSTEMS
+
+> **What interviewers are evaluating:** Whether you reach for Flexbox/Grid instinctively or still use floats, clearfix, and absolute positioning for layouts.
+
+---
+
+### Q15.1 `[Senior]` When do you use Flexbox vs. Grid? Give production examples where using the wrong one causes problems.
+
+**Answer:**
+
+**Flexbox = one-dimensional layout** (row OR column)
+**Grid = two-dimensional layout** (rows AND columns simultaneously)
+
+**Use Flexbox for:**
+```css
+/* Navigation bar — items in a row, flexible spacing */
+.navbar {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+/* Card content — stack items vertically, push footer to bottom */
+.card {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+.card-footer {
+  margin-top: auto; /* Pushes footer to bottom regardless of content height */
+}
+
+/* Centering — the classic */
+.centered {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+}
+```
+
+**Use Grid for:**
+```css
+/* Dashboard layout — rows and columns matter */
+.dashboard {
+  display: grid;
+  grid-template-columns: 250px 1fr 300px; /* Sidebar | Main | Panel */
+  grid-template-rows: 60px 1fr 40px;      /* Header | Content | Footer */
+  grid-template-areas:
+    "header  header  header"
+    "sidebar main   panel"
+    "footer  footer  footer";
+  min-height: 100vh;
+}
+
+/* Auto-fill responsive grid — no media queries needed */
+.card-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+  gap: 1rem;
+}
+```
+
+**Where using the wrong one causes problems:**
+
+```css
+/* BAD: Flexbox for a 2D grid — items don't align across rows */
+.product-grid {
+  display: flex;
+  flex-wrap: wrap;
+}
+.product-card {
+  flex: 0 0 33.33%;
+  /* Problem: If one card is taller, the next row starts unevenly */
+  /* Problem: Last row with 2 items — they stretch to fill or leave a gap */
+}
+
+/* GOOD: Grid handles 2D alignment naturally */
+.product-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 1rem;
+  /* All cards align perfectly regardless of height */
+}
+```
+
+---
+
+### Q15.2 `[Senior]` What are Container Queries and how do they replace media queries for component-based design?
+
+**Answer:**
+
+Container Queries (2023) let a component respond to its **container's** size rather than the **viewport** size. This is the single most important CSS feature for component-based architecture.
+
+**The problem with media queries:**
+```css
+/* This card changes layout based on VIEWPORT width */
+@media (max-width: 768px) {
+  .card { flex-direction: column; }
+}
+
+/* Problem: If this card is placed in a sidebar that's 300px wide,
+   it still renders as horizontal layout on a 1200px viewport.
+   The card doesn't know it's in a narrow container. */
+```
+
+**Container Queries fix this:**
+```css
+/* Define containment context on the parent */
+.card-container {
+  container-type: inline-size;
+  container-name: card-wrapper;
+}
+
+/* Card responds to its CONTAINER width, not viewport */
+.card {
+  display: grid;
+  grid-template-columns: 200px 1fr;
+  gap: 1rem;
+}
+
+@container card-wrapper (max-width: 400px) {
+  .card {
+    grid-template-columns: 1fr; /* Stack vertically in narrow containers */
+  }
+}
+
+@container card-wrapper (min-width: 600px) {
+  .card {
+    grid-template-columns: 300px 1fr auto; /* Add third column when wide */
+  }
+}
+```
+
+**Container Query Units:**
+```css
+/* Size relative to container, not viewport */
+.card-title {
+  font-size: clamp(1rem, 3cqi, 1.5rem); /* cqi = 1% of container inline size */
+}
+```
+
+**Old approach this replaces:**
+Previously required `ResizeObserver` in JavaScript to measure container width and apply classes dynamically. Container Queries do this purely in CSS with zero JavaScript.
+
+---
+
+---
+
+# CHAPTER 16 — SPECIFICITY, CASCADE & LAYERS
+
+> **What interviewers are evaluating:** Whether you can debug CSS conflicts without `!important` and understand the cascade at a deep level.
+
+---
+
+### Q16.1 `[Senior]` Explain CSS specificity. What is the exact specificity of each selector below?
+
+```css
+#header .nav a:hover {}
+div.container > ul li.active {}
+[data-theme="dark"] .card::before {}
+:where(.nav) a {}
+:is(.nav, #sidebar) a {}
+```
+
+**Answer:**
+
+Specificity is calculated as three buckets: (ID — Class — Element)
+
+| Selector | IDs | Classes/Attrs/Pseudo-classes | Elements/Pseudo-elements | Score |
+|---|---|---|---|---|
+| `#header .nav a:hover` | 1 | 2 (.nav, :hover) | 1 (a) | 1-2-1 |
+| `div.container > ul li.active` | 0 | 2 (.container, .active) | 3 (div, ul, li) | 0-2-3 |
+| `[data-theme="dark"] .card::before` | 0 | 2 ([data-theme], .card) | 1 (::before) | 0-2-1 |
+| `:where(.nav) a` | 0 | 0 | 1 (a) | 0-0-1 |
+| `:is(.nav, #sidebar) a` | 1 | 0 | 1 (a) | 1-0-1 |
+
+**The tricky parts:**
+
+**`:where()` has ZERO specificity.** Everything inside `:where()` is ignored for specificity. This is crucial for CSS resets and utility libraries:
+```css
+/* Base styles that are easy to override */
+:where(h1, h2, h3) { margin-top: 0; } /* Specificity: 0-0-0 */
+
+/* Any class override works without specificity wars */
+.my-heading { margin-top: 2rem; } /* Specificity: 0-1-0 — wins */
+```
+
+**`:is()` uses the HIGHEST specificity of its arguments.** `:is(.nav, #sidebar)` has the specificity of `#sidebar` (1-0-0), even when matching `.nav`.
+
+---
+
+### Q16.2 `[Staff+]` What are CSS Cascade Layers (`@layer`) and how do they solve the specificity war problem?
+
+**Answer:**
+
+Cascade Layers (2022) let you explicitly control the priority order of CSS rules, independent of specificity. Within a lower-priority layer, even `#id` selectors lose to a `.class` selector in a higher-priority layer.
+
+```css
+/* Define layer order — last layer has highest priority */
+@layer reset, base, components, utilities;
+
+/* Reset layer — lowest priority */
+@layer reset {
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  h1 { font-size: 2rem; } /* Even though this is specific, components layer overrides */
+}
+
+/* Base layer */
+@layer base {
+  body { font-family: system-ui; color: #333; }
+  a { color: blue; text-decoration: none; }
+}
+
+/* Components layer — higher priority than base */
+@layer components {
+  .card { padding: 1rem; border-radius: 8px; }
+  .card a { color: inherit; } /* Overrides base a style within cards */
+}
+
+/* Utilities layer — highest priority */
+@layer utilities {
+  .text-center { text-align: center; }
+  .hidden { display: none; }
+  .mt-4 { margin-top: 1rem; }
+}
+```
+
+**Why this matters for production:**
+
+Before layers, adding a third-party CSS library could break your styles if its selectors had higher specificity. With layers:
+
+```css
+/* Third-party CSS in a low-priority layer — your code always wins */
+@layer third-party {
+  @import url('some-library.css');
+}
+
+@layer app {
+  /* Your styles always override the library, regardless of specificity */
+  .button { background: blue; }
+}
+```
+
+**Old approach this replaces:**
+- `!important` wars
+- Artificially inflating specificity (`html body div.container .button`)
+- Careful source order management
+- BEM naming to keep specificity flat
+
+---
+
+---
+
+# CHAPTER 17 — MODERN CSS FEATURES REPLACING JS/LIBRARIES
+
+---
+
+### Q17.1 `[Senior]` What CSS features have replaced the need for JavaScript or CSS-in-JS libraries? Give five examples with before/after.
+
+**Answer:**
+
+**1. CSS Custom Properties (Variables) replacing theme JS**
+```css
+/* OLD: JavaScript-based theming */
+/* document.body.style.setProperty('--color-primary', '#0066ff') */
+
+/* NEW: Pure CSS theming with custom properties */
+:root {
+  --color-primary: #0066ff;
+  --color-bg: #ffffff;
+  --spacing-unit: 8px;
+}
+
+[data-theme="dark"] {
+  --color-primary: #66b3ff;
+  --color-bg: #1a1a1a;
+}
+
+.button {
+  background: var(--color-primary);
+  padding: calc(var(--spacing-unit) * 2);
+}
+```
+
+**2. `clamp()` replacing JS-based responsive font sizing**
+```css
+/* OLD: JavaScript ResizeObserver or multiple media queries */
+h1 { font-size: 1.5rem; }
+@media (min-width: 768px) { h1 { font-size: 2rem; } }
+@media (min-width: 1200px) { h1 { font-size: 3rem; } }
+
+/* NEW: Single line, fluid scaling */
+h1 {
+  font-size: clamp(1.5rem, 2vw + 1rem, 3rem);
+  /* Minimum 1.5rem, scales with viewport, maximum 3rem */
+}
+```
+
+**3. `:has()` (parent selector) replacing JS class toggling**
+```css
+/* OLD: JavaScript adds class to parent when input is focused */
+/* input.addEventListener('focus', () => parent.classList.add('focused')) */
+
+/* NEW: Pure CSS parent selection */
+.form-group:has(input:focus) {
+  border-color: blue;
+  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.2);
+}
+
+.form-group:has(input:invalid) {
+  border-color: red;
+}
+
+/* Conditional layout based on child content */
+.card:has(img) {
+  grid-template-columns: 200px 1fr; /* Layout with image */
+}
+
+.card:not(:has(img)) {
+  grid-template-columns: 1fr; /* Layout without image */
+}
+```
+
+**4. CSS `@property` replacing JS-animated custom properties**
+```css
+/* Register a custom property with type — enables animation */
+@property --gradient-angle {
+  syntax: '<angle>';
+  initial-value: 0deg;
+  inherits: false;
+}
+
+.animated-border {
+  --gradient-angle: 0deg;
+  border-image: conic-gradient(from var(--gradient-angle), red, blue, red) 1;
+  animation: rotate 3s linear infinite;
+}
+
+@keyframes rotate {
+  to { --gradient-angle: 360deg; }
+}
+```
+
+**5. Scroll-driven animations replacing IntersectionObserver**
+```css
+/* OLD: JavaScript IntersectionObserver to animate on scroll */
+
+/* NEW: Pure CSS scroll-driven animation */
+.fade-in {
+  animation: fadeIn linear both;
+  animation-timeline: view();
+  animation-range: entry 0% entry 100%;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(20px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+```
+
+**6. CSS Nesting (2023) replacing Sass nesting**
+```css
+/* OLD: Required Sass/SCSS */
+.card {
+  padding: 1rem;
+  & .title { font-size: 1.5rem; }
+  &:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
+  &.featured { border: 2px solid gold; }
+}
+
+/* NEW: Native CSS nesting — no preprocessor needed */
+.card {
+  padding: 1rem;
+
+  .title {
+    font-size: 1.5rem;
+  }
+
+  &:hover {
+    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
+  }
+
+  &.featured {
+    border: 2px solid gold;
+  }
+}
+```
+
+---
+
+---
+
+# CHAPTER 18 — ANIMATION & PERFORMANCE
+
+---
+
+### Q18.1 `[Senior]` Which CSS properties are safe to animate and which cause layout thrashing? Why?
+
+**Answer:**
+
+Browser rendering follows a pipeline:
+```
+Style → Layout → Paint → Composite
+```
+
+**Composite-only (cheapest — GPU accelerated):**
+```css
+/* GOOD: These skip Layout and Paint — animate on GPU */
+transform: translateX(100px);  /* Movement */
+transform: scale(1.2);         /* Sizing */
+transform: rotate(45deg);      /* Rotation */
+opacity: 0.5;                  /* Transparency */
+filter: blur(4px);             /* Visual effects */
+```
+
+**Paint-only (medium cost):**
+```css
+/* OK but triggers repaint — no layout shift */
+color: red;
+background-color: blue;
+box-shadow: 0 2px 4px rgba(0,0,0,0.2);
+border-color: green;
+```
+
+**Layout-triggering (most expensive — causes reflow):**
+```css
+/* BAD for animation — forces layout recalculation */
+width: 200px;          /* Triggers layout */
+height: 100px;         /* Triggers layout */
+margin: 10px;          /* Triggers layout */
+padding: 10px;         /* Triggers layout */
+top/left/right/bottom; /* Triggers layout */
+font-size: 16px;       /* Triggers layout */
+```
+
+**Production example — smooth accordion:**
+```css
+/* BAD: Animating height causes layout on every frame */
+.accordion-content {
+  transition: height 0.3s ease;
+  height: 0;
+  overflow: hidden;
+}
+.accordion-content.open {
+  height: 200px; /* Layout thrashing — 60fps impossible with complex content */
+}
+
+/* GOOD: Use grid trick for height animation without layout cost */
+.accordion-content {
+  display: grid;
+  grid-template-rows: 0fr;
+  transition: grid-template-rows 0.3s ease;
+  overflow: hidden;
+}
+.accordion-content.open {
+  grid-template-rows: 1fr; /* Smooth, no layout thrashing */
+}
+.accordion-content > div {
+  min-height: 0; /* Required for the grid trick to work */
+}
+```
+
+**The `will-change` hint:**
+```css
+/* Tell browser to pre-composite this element */
+.card {
+  will-change: transform; /* Browser creates a GPU layer ahead of time */
+  transition: transform 0.2s ease;
+}
+
+/* WARNING: Don't overuse — each will-change creates a GPU layer, consuming memory */
+/* Apply only to elements that will actually animate soon */
+```
+
+---
+
+### Q18.2 `[Senior]` What is the `prefers-reduced-motion` media query? Why is it critical for production?
+
+**Answer:**
+
+Some users experience motion sickness, seizures, or discomfort from animations. `prefers-reduced-motion` respects their OS-level accessibility setting.
+
+```css
+/* Full animation by default */
+.card {
+  transition: transform 0.3s ease, opacity 0.3s ease;
+}
+
+.card:hover {
+  transform: translateY(-4px);
+}
+
+/* Reduce or remove motion for users who prefer it */
+@media (prefers-reduced-motion: reduce) {
+  .card {
+    transition: none;
+  }
+
+  .card:hover {
+    transform: none;
+  }
+
+  /* Alternative: keep transition but make it instant */
+  * {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}
+```
+
+**In React:**
+```typescript
+function useReducedMotion(): boolean {
+  const [prefersReduced, setPrefersReduced] = useState(false)
+
+  useEffect(() => {
+    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
+    setPrefersReduced(mq.matches)
+
+    const handler = (e: MediaQueryListEvent) => setPrefersReduced(e.matches)
+    mq.addEventListener('change', handler)
+    return () => mq.removeEventListener('change', handler)
+  }, [])
+
+  return prefersReduced
+}
+```
+
+**Why it's critical:**
+- WCAG 2.1 Success Criterion 2.3.3 (AAA) requires motion can be disabled
+- Vestibular disorders affect ~35% of adults over 40
+- Auto-playing animations can trigger seizures (photosensitive epilepsy)
+- Legal compliance (ADA, EN 301 549)
+
+---
+
+---
+
+# CHAPTER 19 — RESPONSIVE DESIGN & ACCESSIBILITY
+
+---
+
+### Q19.1 `[Senior]` What is the difference between `rem`, `em`, `px`, `vh/vw`, and when should you use each?
+
+**Answer:**
+
+| Unit | Relative to | Use for |
+|---|---|---|
+| `px` | Nothing — absolute | Borders, box-shadows, fine details |
+| `rem` | Root `<html>` font-size | Font sizes, spacing, layout dimensions |
+| `em` | Parent element's font-size | Component-local scaling (padding relative to font) |
+| `vh/vw` | Viewport height/width | Full-screen sections, hero areas |
+| `dvh/dvw` | Dynamic viewport (mobile) | Full-screen that accounts for mobile browser chrome |
+| `%` | Parent element | Fluid widths |
+| `ch` | Width of "0" character | Input/textarea widths for readability |
+| `lh` | Line height | Vertical rhythm |
+
+**Why `rem` is the default for production:**
+```css
+/* If user changes browser font size (accessibility),
+   rem-based layouts scale proportionally */
+html { font-size: 16px; } /* Default — don't hardcode this */
+
+h1 { font-size: 2rem; }     /* 32px — scales with user preference */
+.container { padding: 1.5rem; } /* 24px — scales proportionally */
+.sidebar { width: 16rem; }   /* 256px — scales proportionally */
+```
+
+**Why `vh` is broken on mobile and `dvh` fixes it:**
+```css
+/* BUG: 100vh on mobile includes the browser address bar height
+   Content is hidden behind the bar */
+.hero { height: 100vh; } /* Too tall on iOS Safari */
+
+/* FIX: Dynamic viewport height accounts for browser chrome */
+.hero { height: 100dvh; } /* Correct height on mobile */
+
+/* Fallback pattern */
+.hero {
+  height: 100vh; /* Fallback */
+  height: 100dvh; /* Modern browsers override */
+}
+```
+
+**When `em` is correct:**
+```css
+/* Button padding should scale with its font size */
+.button {
+  font-size: 1rem;
+  padding: 0.5em 1em; /* Padding scales if font-size changes */
+}
+
+.button.large {
+  font-size: 1.25rem;
+  /* Padding automatically scales — still 0.5em 1em but now bigger */
+}
+```
+
+---
+
+---
+
+# CHAPTER 20 — CSS ARCHITECTURE AT SCALE
+
+---
+
+### Q20.1 `[Staff+]` How do you organize CSS in a large application? Compare BEM, CSS Modules, Tailwind, and CSS-in-JS.
+
+**Answer:**
+
+| Approach | Scoping | Bundle | Runtime cost | DX |
+|---|---|---|---|---|
+| BEM | Convention (human discipline) | One CSS file | None | Verbose class names |
+| CSS Modules | Compile-time hash | Per-component CSS | None | Best of both worlds |
+| Tailwind | Utility classes | Purged CSS | None | Fast prototyping, long class strings |
+| CSS-in-JS (styled-components) | Runtime generated | In JS bundle | Yes — generates at runtime | Co-located with components |
+| CSS-in-JS (vanilla-extract) | Compile-time generated | Extracted CSS | None | Type-safe, zero runtime |
+
+**Production recommendation by project type:**
+
+**Component library → CSS Modules or vanilla-extract**
+Consumers shouldn't need your styling library. CSS Modules produce plain CSS. No runtime dependency.
+
+**Marketing site → Tailwind**
+Fast iteration, designer-developer collaboration, excellent for one-off layouts.
+
+**Large app with design system → vanilla-extract or CSS Modules + CSS custom properties**
+Type-safe tokens, zero runtime cost, explicit contracts between design and engineering.
+
+**CSS Modules in practice:**
+```css
+/* Button.module.css */
+.root {
+  padding: 0.5rem 1rem;
+  border-radius: 4px;
+  font-weight: 600;
+}
+
+.primary {
+  composes: root;
+  background: var(--color-primary);
+  color: white;
+}
+```
+
+```typescript
+import styles from './Button.module.css'
+
+function Button({ variant = 'primary', children }) {
+  return <button className={styles[variant]}>{children}</button>
+}
+// Rendered: <button class="Button_primary_x7k2z">Click</button>
+// Hash ensures no naming conflicts across the entire app
+```
+
+---
+
+---
+
+# PART 4 — HTML
+
+---
+
+# CHAPTER 21 — SEMANTIC HTML & DOCUMENT STRUCTURE
+
+> **What interviewers are evaluating:** Whether you use HTML as a meaningful structure or just as a div soup with CSS classes. Semantic HTML is the foundation of accessibility.
+
+---
+
+### Q21.1 `[Senior]` Why does semantic HTML matter? Rewrite this div soup using proper semantics.
+
+**Before:**
+```html
+<div class="header">
+  <div class="logo">My App</div>
+  <div class="nav">
+    <div class="nav-item"><a href="/">Home</a></div>
+    <div class="nav-item"><a href="/about">About</a></div>
+  </div>
+</div>
+<div class="main">
+  <div class="article">
+    <div class="title">Blog Post Title</div>
+    <div class="date">January 15, 2024</div>
+    <div class="content">Article text...</div>
+  </div>
+  <div class="sidebar">
+    <div class="widget">Related posts</div>
+  </div>
+</div>
+<div class="footer">
+  <div>© 2024 My App</div>
+</div>
+```
+
+**After — semantic HTML:**
+```html
+<header>
+  <a href="/" aria-label="My App - Home">My App</a>
+  <nav aria-label="Main navigation">
+    <ul>
+      <li><a href="/">Home</a></li>
+      <li><a href="/about">About</a></li>
+    </ul>
+  </nav>
+</header>
+
+<main>
+  <article>
+    <h1>Blog Post Title</h1>
+    <time datetime="2024-01-15">January 15, 2024</time>
+    <p>Article text...</p>
+  </article>
+
+  <aside aria-label="Related content">
+    <h2>Related posts</h2>
+    <!-- Related post links -->
+  </aside>
+</main>
+
+<footer>
+  <p><small>© 2024 My App</small></p>
+</footer>
+```
+
+**Why this matters:**
+
+1. **Screen readers** use landmarks (`header`, `nav`, `main`, `aside`, `footer`) to let users jump between sections. Div soup provides no navigation structure.
+
+2. **SEO** — search engines understand `<article>`, `<time datetime>`, `<nav>` and weight content accordingly.
+
+3. **Browser features** — Reader Mode uses `<article>` to extract content. `<time datetime>` enables browser-native date features.
+
+4. **Accessibility tree** — the browser builds an accessibility tree from HTML semantics. `<div>` has no role. `<nav>` has role "navigation." This is what assistive technologies consume.
+
+---
+
+### Q21.2 `[Senior]` What is the difference between `<section>`, `<article>`, `<aside>`, and `<div>`? When do you use each?
+
+**Answer:**
+
+| Element | Meaning | Appears in outline | Use when |
+|---|---|---|---|
+| `<article>` | Self-contained, independently distributable content | Yes | Blog post, comment, product card, social media post |
+| `<section>` | Thematic grouping of content, typically with a heading | Yes | Chapter of an article, tab panel, form section |
+| `<aside>` | Tangentially related to surrounding content | Yes | Sidebar, pull quote, related links, ads |
+| `<div>` | No semantic meaning — grouping only | No | Layout wrapper, styling hook, no meaningful semantics |
+
+**The test:**
+- "Would this make sense on its own, syndicated in an RSS feed?" → `<article>`
+- "Is this a distinct section with its own heading?" → `<section>`
+- "Is this related but not essential to the main content?" → `<aside>`
+- "Is this purely for layout/styling?" → `<div>`
+
+**Articles can nest sections, and sections can nest articles:**
+```html
+<!-- Article with sections -->
+<article>
+  <h1>CSS Layout Guide</h1>
+  <section>
+    <h2>Flexbox</h2>
+    <p>...</p>
+  </section>
+  <section>
+    <h2>Grid</h2>
+    <p>...</p>
+  </section>
+</article>
+
+<!-- Section containing multiple articles -->
+<section aria-labelledby="comments-heading">
+  <h2 id="comments-heading">Comments</h2>
+  <article>
+    <h3>Alice</h3>
+    <p>Great post!</p>
+  </article>
+  <article>
+    <h3>Bob</h3>
+    <p>Very helpful.</p>
+  </article>
+</section>
+```
+
+---
+
+---
+
+# CHAPTER 22 — FORMS & VALIDATION
+
+---
+
+### Q22.1 `[Senior]` What HTML form features reduce the need for JavaScript validation? Show production examples.
+
+**Answer:**
+
+Modern HTML provides extensive built-in validation before JavaScript even runs:
+
+```html
+<form novalidate> <!-- novalidate if you handle validation in JS -->
+
+  <!-- Required field -->
+  <input type="text" required aria-required="true" />
+
+  <!-- Email validation (built-in regex) -->
+  <input type="email" required />
+
+  <!-- Custom pattern -->
+  <input
+    type="text"
+    pattern="[A-Z]{2,3}-\d{4}"
+    title="Format: XX-0000 or XXX-0000"
+    placeholder="AB-1234"
+  />
+
+  <!-- Number with range -->
+  <input type="number" min="1" max="100" step="1" />
+
+  <!-- Character length -->
+  <input type="text" minlength="3" maxlength="50" />
+
+  <!-- URL validation -->
+  <input type="url" placeholder="https://example.com" />
+
+  <!-- Date with range -->
+  <input type="date" min="2024-01-01" max="2025-12-31" />
+
+  <!-- Datalist — autocomplete suggestions -->
+  <input type="text" list="cities" />
+  <datalist id="cities">
+    <option value="New York" />
+    <option value="London" />
+    <option value="Tokyo" />
+  </datalist>
+
+  <button type="submit">Submit</button>
+</form>
+```
+
+**Styling validation states without JavaScript:**
+```css
+/* Style valid/invalid inputs */
+input:valid {
+  border-color: green;
+}
+
+input:invalid {
+  border-color: red;
+}
+
+/* Only show invalid styling after user interaction */
+input:invalid:not(:placeholder-shown):not(:focus) {
+  border-color: red;
+  background: #fff0f0;
+}
+
+/* Style the submit button based on form validity */
+form:invalid button[type="submit"] {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+```
+
+**The `<dialog>` element replacing custom modals:**
+```html
+<!-- Built-in modal with backdrop, focus trap, Escape key handling -->
+<dialog id="confirm-dialog">
+  <form method="dialog">
+    <h2>Confirm Action</h2>
+    <p>Are you sure?</p>
+    <button value="cancel">Cancel</button>
+    <button value="confirm">Confirm</button>
+  </form>
+</dialog>
+
+<script>
+  const dialog = document.getElementById('confirm-dialog')
+  dialog.showModal() // Opens as modal with backdrop
+  dialog.addEventListener('close', () => {
+    console.log(dialog.returnValue) // 'cancel' or 'confirm'
+  })
+</script>
+```
+
+```css
+dialog::backdrop {
+  background: rgba(0, 0, 0, 0.5);
+  backdrop-filter: blur(4px);
+}
+```
+
+**Old approach replaced:** Custom modal divs with manual focus trapping, Escape key listeners, scroll locking, and backdrop click handling — all built into `<dialog>` natively.
+
+---
+
+---
+
+# CHAPTER 23 — WEB APIs & BROWSER FEATURES
+
+---
+
+### Q23.1 `[Senior]` What modern Web APIs have replaced common JavaScript patterns? Give five examples.
+
+**Answer:**
+
+**1. `IntersectionObserver` replacing scroll event listeners**
+```javascript
+// OLD: Scroll handler — fires on every pixel, blocks main thread
+window.addEventListener('scroll', () => {
+  elements.forEach(el => {
+    const rect = el.getBoundingClientRect() // Forces layout recalculation
+    if (rect.top < window.innerHeight) {
+      el.classList.add('visible')
+    }
+  })
+})
+
+// NEW: IntersectionObserver — no scroll handler, no layout thrashing
+const observer = new IntersectionObserver((entries) => {
+  entries.forEach(entry => {
+    if (entry.isIntersecting) {
+      entry.target.classList.add('visible')
+      observer.unobserve(entry.target) // Stop observing after triggered
+    }
+  })
+}, { threshold: 0.1 })
+
+document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el))
+```
+
+**2. `AbortController` replacing manual cancellation flags**
+```javascript
+// OLD: Boolean flag to track cancellation
+let cancelled = false
+fetch(url).then(data => {
+  if (!cancelled) processData(data) // Race condition possible
+})
+function cancel() { cancelled = true }
+
+// NEW: AbortController — cancels the actual HTTP request
+const controller = new AbortController()
+fetch(url, { signal: controller.signal })
+  .then(processData)
+  .catch(err => {
+    if (err.name === 'AbortError') console.log('Cancelled')
+  })
+
+controller.abort() // Cancels the actual network request
+```
+
+**3. `navigator.clipboard` replacing `document.execCommand('copy')`**
+```javascript
+// OLD: Hacky text selection and execCommand
+const textarea = document.createElement('textarea')
+textarea.value = text
+document.body.appendChild(textarea)
+textarea.select()
+document.execCommand('copy') // Deprecated
+document.body.removeChild(textarea)
+
+// NEW: Clipboard API — async, permission-based, clean
+await navigator.clipboard.writeText('Copied text')
+const text = await navigator.clipboard.readText()
+```
+
+**4. `URL` and `URLSearchParams` replacing manual string manipulation**
+```javascript
+// OLD: Manual query string parsing
+const params = window.location.search
+  .substring(1)
+  .split('&')
+  .reduce((acc, pair) => {
+    const [key, value] = pair.split('=')
+    acc[decodeURIComponent(key)] = decodeURIComponent(value)
+    return acc
+  }, {})
+
+// NEW: Built-in URL API
+const url = new URL('https://example.com/search?q=hello&page=2')
+url.searchParams.get('q')      // 'hello'
+url.searchParams.set('page', '3')
+url.searchParams.append('filter', 'new')
+url.toString() // 'https://example.com/search?q=hello&page=3&filter=new'
+```
+
+**5. `navigator.sendBeacon` replacing `fetch` in `beforeunload`**
+```javascript
+// OLD: fetch in beforeunload — unreliable, browser may cancel it
+window.addEventListener('beforeunload', () => {
+  fetch('/api/analytics', {
+    method: 'POST',
+    body: JSON.stringify(analyticsData),
+    keepalive: true, // Needed but not always reliable
+  })
+})
+
+// NEW: sendBeacon — guaranteed delivery, non-blocking
+window.addEventListener('beforeunload', () => {
+  navigator.sendBeacon('/api/analytics', JSON.stringify(analyticsData))
+})
+```
+
+---
+
+---
+
+# CHAPTER 24 — HTML PERFORMANCE & LOADING
+
+---
+
+### Q24.1 `[Senior]` How do `loading="lazy"`, `fetchpriority`, `<link rel="preload">`, and `<link rel="preconnect">` affect page performance?
+
+**Answer:**
+
+**`loading="lazy"` — defer offscreen images**
+```html
+<!-- Images below the fold load only when scrolled into view -->
+<img src="photo.webp" loading="lazy" alt="..." width="400" height="300" />
+
+<!-- NEVER lazy-load the LCP image (hero/banner) -->
+<img src="hero.webp" loading="eager" fetchpriority="high" alt="..." />
+```
+
+**`fetchpriority` — tell the browser what matters most**
+```html
+<!-- High priority — LCP image -->
+<img src="hero.webp" fetchpriority="high" alt="Hero image" />
+
+<!-- Low priority — below-fold or decorative -->
+<img src="decoration.svg" fetchpriority="low" alt="" />
+
+<!-- High priority fetch -->
+<script src="critical.js" fetchpriority="high"></script>
+```
+
+**`<link rel="preload">` — start downloading before parser discovers it**
+```html
+<head>
+  <!-- Preload LCP image — browser starts downloading immediately -->
+  <link rel="preload" as="image" href="/hero.webp" />
+
+  <!-- Preload critical font -->
+  <link rel="preload" as="font" href="/fonts/Inter.woff2" type="font/woff2" crossorigin />
+
+  <!-- Preload critical CSS -->
+  <link rel="preload" as="style" href="/critical.css" />
+</head>
+```
+
+**`<link rel="preconnect">` — establish connection to third-party origin early**
+```html
+<head>
+  <!-- DNS lookup + TCP + TLS handshake — done before any requests -->
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://cdn.example.com" crossorigin />
+
+  <!-- dns-prefetch — lighter version, just DNS lookup -->
+  <link rel="dns-prefetch" href="https://analytics.example.com" />
+</head>
+```
+
+**`<script>` loading strategies:**
+```html
+<!-- Blocks rendering — avoid unless critical -->
+<script src="critical.js"></script>
+
+<!-- async — downloads in parallel, executes as soon as ready (order not guaranteed) -->
+<script async src="analytics.js"></script>
+
+<!-- defer — downloads in parallel, executes after HTML parsing, in order -->
+<script defer src="app.js"></script>
+
+<!-- module — deferred by default, strict mode, supports import/export -->
+<script type="module" src="app.mjs"></script>
+```
+
+**Production loading strategy:**
+```html
+<head>
+  <!-- 1. Preconnect to critical origins -->
+  <link rel="preconnect" href="https://api.example.com" />
+
+  <!-- 2. Preload critical resources -->
+  <link rel="preload" as="image" href="/hero.webp" />
+  <link rel="preload" as="font" href="/font.woff2" type="font/woff2" crossorigin />
+
+  <!-- 3. Critical CSS inline -->
+  <style>/* Above-fold styles */</style>
+
+  <!-- 4. Non-critical CSS deferred -->
+  <link rel="stylesheet" href="/styles.css" media="print" onload="this.media='all'" />
+
+  <!-- 5. Scripts deferred -->
+  <script defer src="/app.js"></script>
+  <script async src="/analytics.js"></script>
+</head>
+```
+
+---
+
+---
+
+# CHAPTER 25 — HTML SECURITY
+
+---
+
+### Q25.1 `[Senior]` What HTML security attributes and headers should every production application set?
+
+**Answer:**
+
+**1. Content Security Policy (CSP)**
+```html
+// <meta http-equiv="Content-Security-Policy"
+//   content="default-src 'self'; script-src 'self' 'nonce-abc123'; style-src 'self' 'unsafe-inline'; img-src 'self' https://cdn.example.com; connect-src 'self' https://api.example.com">
+```
+Prevents XSS by controlling which resources the browser can load. `script-src 'self'` blocks inline scripts and scripts from other origins.
+
+**2. Referrer Policy**
+```html
+// <meta name="referrer" content="strict-origin-when-cross-origin" />
+```
+Controls what URL information is sent in the Referer header. Prevents leaking internal URLs to third parties.
+
+**3. `rel="noopener noreferrer"` on external links**
+```html
+<!-- OLD: target="_blank" leaks window.opener reference -->
+<a href="https://external.com" target="_blank">External</a>
+
+<!-- SECURE: Prevents the opened page from accessing window.opener -->
+<a href="https://external.com" target="_blank" rel="noopener noreferrer">External</a>
+
+<!-- Note: Modern browsers default to noopener for target="_blank" since 2021,
+     but explicit is safer for older browser support -->
+```
+
+**4. `<iframe>` sandboxing**
+```html
+<!-- Restrict iframe capabilities -->
+<iframe
+  src="https://widget.example.com"
+  sandbox="allow-scripts allow-same-origin"
+  loading="lazy"
+  title="Payment widget"
+></iframe>
+
+<!-- sandbox with no value = maximum restriction -->
+<iframe src="untrusted.html" sandbox title="Untrusted content"></iframe>
+```
+
+**5. Subresource Integrity (SRI)**
+```html
+<!-- Verify CDN-hosted scripts haven't been tampered with -->
+<script
+  src="https://cdn.example.com/library.js"
+  integrity="sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC"
+  crossorigin="anonymous"
+></script>
+```
+
+**6. Input sanitization for `innerHTML`**
+```javascript
+// DANGEROUS — XSS vulnerability
+element.innerHTML = userInput
+
+// SAFE — use textContent for text
+element.textContent = userInput
+
+// SAFE — use DOMPurify for HTML
+import DOMPurify from 'dompurify'
+element.innerHTML = DOMPurify.sanitize(userInput)
+
+// React handles this by default — dangerouslySetInnerHTML is explicitly marked
+<div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(htmlContent) }} />
+```
+
+---
+
+---
+
+## Quick Reference — Question Index by Topic and Level
+
+| Topic | Mid | Senior | Staff+ |
+|---|---|---|---|
+| **JS: Event Loop** | — | Output order questions | Promise.all vs allSettled vs race vs any |
+| **JS: Closures** | — | once() implementation; hoisting rules | — |
+| **JS: this & Prototypes** | — | Four binding rules; prototype chain | #private fields vs TS private |
+| **JS: Iterators** | — | Custom iterable | Async generator pagination |
+| **JS: Proxy** | — | — | Reactive state; dynamic API client |
+| **JS: Memory** | — | Three leak patterns; WeakMap/WeakSet | — |
+| **JS: Modules** | — | ESM vs CJS; tree-shaking impact | — |
+| **JS: Modern APIs** | Old → New replacements | — | — |
+| **TS: Fundamentals** | type vs interface | any vs unknown vs never; === vs == | — |
+| **TS: Generics** | — | Type-safe deep access | Conditional types; infer |
+| **TS: Utility Types** | — | Partial/Pick/Omit/Record | DeepReadonly mapped type |
+| **TS: Narrowing** | — | Six narrowing techniques | — |
+| **TS: Declarations** | — | Module augmentation; .d.ts | — |
+| **TS: Advanced** | — | — | Type-safe event emitter; satisfies |
+| **CSS: Layout** | — | Flexbox vs Grid; Container Queries | — |
+| **CSS: Specificity** | — | Specificity calculation; :where vs :is | @layer cascade layers |
+| **CSS: Modern** | — | :has(), clamp(), nesting, scroll animations | — |
+| **CSS: Animation** | — | Composite vs layout properties; reduced-motion | — |
+| **CSS: Units** | — | rem vs em vs px vs dvh | — |
+| **CSS: Architecture** | — | — | BEM vs Modules vs Tailwind vs CSS-in-JS |
+| **HTML: Semantics** | — | Div soup → semantic rewrite; section vs article | — |
+| **HTML: Forms** | — | Native validation; `<dialog>` | — |
+| **HTML: Web APIs** | — | IntersectionObserver, AbortController, Clipboard | — |
+| **HTML: Performance** | — | loading, fetchpriority, preload, preconnect | — |
+| **HTML: Security** | — | CSP, SRI, sanitization, iframe sandbox | — |
+
+---
+
+## Old → New Cheat Sheet
+
+| Old Pattern | Modern Replacement | Since |
+|---|---|---|
+| `var` | `let` / `const` | ES2015 |
+| `_.cloneDeep()` | `structuredClone()` | 2022 |
+| `_.get(obj, 'a.b.c')` | `obj?.a?.b?.c ?? fallback` | ES2020 |
+| `obj.hasOwnProperty(k)` | `Object.hasOwn(obj, k)` | ES2022 |
+| `arr[arr.length - 1]` | `arr.at(-1)` | ES2022 |
+| `str.replace(/x/g, 'y')` | `str.replaceAll('x', 'y')` | ES2021 |
+| `reduce` for grouping | `Object.groupBy()` | ES2024 |
+| Callback pyramids | `async/await` | ES2017 |
+| `Promise.all` + `.catch` per item | `Promise.allSettled` | ES2020 |
+| `document.execCommand('copy')` | `navigator.clipboard.writeText()` | 2018 |
+| `scroll` event + `getBoundingClientRect` | `IntersectionObserver` | 2016 |
+| Boolean cancellation flags | `AbortController` | 2017 |
+| Custom modal divs | `<dialog>` element | 2022 |
+| Media queries for components | Container Queries `@container` | 2023 |
+| `!important` wars | `@layer` cascade layers | 2022 |
+| Sass nesting | Native CSS nesting | 2023 |
+| JS theme switching | `:has()` + CSS custom properties | 2023 |
+| JS scroll animations | Scroll-driven animations CSS | 2024 |
+| `100vh` on mobile | `100dvh` | 2022 |
+| TypeScript `private` | `#private` class fields | ES2022 |
+| Manual type assertion | `satisfies` operator | TS 4.9 |
+| `_.flatten` | `Array.prototype.flat()` | ES2019 |
+| `fetch` in `beforeunload` | `navigator.sendBeacon()` | 2014 |
+
+---
+
+*End of Core Web Technologies Interview Q&A Guide*
+*Topics covered: JavaScript (event loop, closures, prototypes, iterators, proxy, memory, modules, modern APIs), TypeScript (type system, generics, conditional types, utility types, narrowing, declarations, advanced patterns), CSS (layout, specificity, layers, modern features, animation, responsive, architecture), HTML (semantics, forms, web APIs, performance, security).*
+
+
+  </template>
+
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-json.min.js"></script>
+  <script>
+    const source = document
+      .getElementById("guide-source")
+      .innerHTML
+      .trim()
+      .replace(/\\#/g, "#")
+      .replace(/\\`/g, "`")
+      .replace(/\\</g, "<")
+      .replace(/\\>/g, ">")
+      .replace(/\\\\/g, "\\");
+    const doc = document.getElementById("doc");
+    const toc = document.getElementById("toc");
+    const stats = document.getElementById("stats");
+    const searchInput = document.getElementById("searchInput");
+    const emptyState = document.getElementById("emptyState");
+    const progressBar = document.getElementById("progressBar");
+
+    let activeLevel = "all";
+    let allCards = [];
+    let allChapters = [];
+
+    function escapeHtml(value) {
+      return value
+        .replaceAll("&", "&amp;")
+        .replaceAll("<", "&lt;")
+        .replaceAll(">", "&gt;");
+    }
+
+    function slugify(text) {
+      return text
+        .toLowerCase()
+        .replace(/[`'#.]/g, "")
+        .replace(/[^a-z0-9]+/g, "-")
+        .replace(/(^-|-$)/g, "");
+    }
+
+    function normalizeMarkdown(text) {
+      return text
+        .replace(/\\`/g, "`")
+        .replace(/\\</g, "<")
+        .replace(/\\>/g, ">")
+        .replace(/\\\*/g, "*")
+        .replace(/\\\\/g, "\\");
+    }
+
+    function parseInline(text) {
+      text = normalizeMarkdown(text);
+
+      return escapeHtml(text)
+        .replace(/\*\*(.*?)\*\*/g, "<strong>$1</strong>")
+        .replace(/`([^`]+)`/g, "<code>$1</code>");
+    }
+
+    function dedentCode(lines) {
+      const nonEmptyLines = lines.filter(line => line.trim());
+      if (!nonEmptyLines.length) return lines.join("\n");
+
+      const minIndent = Math.min(
+        ...nonEmptyLines.map(line => line.match(/^(\s*)/)[0].length)
+      );
+
+      return lines.map(line => line.slice(minIndent)).join("\n");
+    }
+
+    function normalizeCodeLanguage(language) {
+      const aliases = {
+        js: "javascript",
+        ts: "typescript",
+        html: "markup",
+        xml: "markup",
+        text: "none",
+        plaintext: "none"
+      };
+
+      const normalized = language.trim().toLowerCase();
+      return aliases[normalized] || normalized || "none";
+    }
+
+    function parseMarkdownBlock(lines) {
+      lines = lines.map(line => normalizeMarkdown(line));
+
+      let html = "";
+      let inCode = false;
+      let codeLang = "";
+      let codeBuffer = [];
+      let inUl = false;
+      let inOl = false;
+      let inTable = false;
+      let tableRows = [];
+
+      function closeLists() {
+        if (inUl) {
+          html += "</ul>";
+          inUl = false;
+        }
+        if (inOl) {
+          html += "</ol>";
+          inOl = false;
+        }
+      }
+
+      function flushTable() {
+        if (!inTable) return;
+
+        html += "<table>";
+        tableRows.forEach((row, index) => {
+          if (/^\s*\|?\s*-+/.test(row)) return;
+
+          const cells = row
+            .trim()
+            .replace(/^\|/, "")
+            .replace(/\|$/, "")
+            .split("|")
+            .map(cell => cell.trim());
+
+          html += index === 0 ? "<thead><tr>" : "<tr>";
+          cells.forEach(cell => {
+            html += index === 0
+              ? `<th>${parseInline(cell)}</th>`
+              : `<td>${parseInline(cell)}</td>`;
+          });
+          html += index === 0 ? "</tr></thead><tbody>" : "</tr>";
+        });
+        html += "</tbody></table>";
+
+        inTable = false;
+        tableRows = [];
+      }
+
+      lines.forEach(rawLine => {
+        const line = rawLine.replace(/\r$/, "");
+
+        if (line.trim().startsWith("```")) {
+          if (!inCode) {
+            closeLists();
+            flushTable();
+            inCode = true;
+            codeLang = normalizeCodeLanguage(
+              line.trim().replace("```", "").trim()
+            );
+            codeBuffer = [];
+          } else {
+            inCode = false;
+            const rawCode = codeBuffer.join("\n");
+            const code = escapeHtml(dedentCode(rawCode.split("\n")));
+            html += `
+              <pre class="code-block">
+                <button class="copy-code" type="button">Copy</button>
+                <code class="language-${codeLang}">${code}</code>
+              </pre>
+            `;
+            codeLang = "";
+            codeBuffer = [];
+          }
+          return;
+        }
+
+        if (inCode) {
+          codeBuffer.push(rawLine);
+          return;
+        }
+
+        if (/^\|.*\|$/.test(line.trim())) {
+          closeLists();
+          inTable = true;
+          tableRows.push(line);
+          return;
+        } else {
+          flushTable();
+        }
+
+        if (!line.trim()) {
+          closeLists();
+          html += "";
+          return;
+        }
+
+        if (line.startsWith(">")) {
+          closeLists();
+          html += `<div class="interviewer-note">${parseInline(line.replace(/^>\s?/, ""))}</div>`;
+          return;
+        }
+
+        if (/^---+$/.test(line.trim())) {
+          closeLists();
+          html += "";
+          return;
+        }
+
+        if (/^\d+\.\s+/.test(line)) {
+          if (!inOl) {
+            closeLists();
+            html += "<ol>";
+            inOl = true;
+          }
+          html += `<li>${parseInline(line.replace(/^\d+\.\s+/, ""))}</li>`;
+          return;
+        }
+
+        if (/^-\s+/.test(line)) {
+          if (!inUl) {
+            closeLists();
+            html += "<ul>";
+            inUl = true;
+          }
+          html += `<li>${parseInline(line.replace(/^-\s+/, ""))}</li>`;
+          return;
+        }
+
+        closeLists();
+
+        if (line.startsWith("#### ")) {
+          html += `<h4>${parseInline(line.replace("#### ", ""))}</h4>`;
+        } else if (line.startsWith("### ")) {
+          html += `<h3>${parseInline(line.replace("### ", ""))}</h3>`;
+        } else if (line.startsWith("## ")) {
+          html += `<h2>${parseInline(line.replace("## ", ""))}</h2>`;
+        } else if (line.startsWith("# ")) {
+          html += `<h2>${parseInline(line.replace("# ", ""))}</h2>`;
+        } else {
+          html += `<p>${parseInline(line)}</p>`;
+        }
+      });
+
+      closeLists();
+      flushTable();
+
+      return html;
+    }
+
+    function splitIntoChapters(markdown) {
+      const lines = markdown.split("\n");
+      const chapters = [];
+      let current = null;
+
+      lines.forEach(line => {
+        const trimmed = line.trim();
+
+        if (/^#\s+CHAPTER\b/i.test(trimmed)) {
+          if (current) chapters.push(current);
+
+          current = {
+            title: trimmed.replace(/^#\s*/, ""),
+            id: slugify(trimmed),
+            lines: [trimmed]
+          };
+          return;
+        }
+
+        if (!current) {
+          current = {
+            title: "Introduction",
+            id: "intro",
+            lines: []
+          };
+        }
+
+        current.lines.push(line);
+      });
+
+      if (current) chapters.push(current);
+      return chapters;
+    }
+
+    function splitChapterIntoCards(chapterLines) {
+      const parts = [];
+      let intro = [];
+      let currentQuestion = null;
+      let currentLines = [];
+
+      chapterLines.forEach(line => {
+        if (/^###\s+Q/i.test(line.trim())) {
+          if (currentQuestion) {
+            parts.push({
+              type: "qa",
+              question: currentQuestion,
+              lines: currentLines
+            });
+          } else if (intro.length) {
+            parts.push({
+              type: "intro",
+              lines: intro
+            });
+          }
+
+          currentQuestion = line.replace(/^###\s+/, "").trim();
+          currentLines = [];
+        } else if (currentQuestion) {
+          currentLines.push(line);
+        } else {
+          intro.push(line);
+        }
+      });
+
+      if (currentQuestion) {
+        parts.push({
+          type: "qa",
+          question: currentQuestion,
+          lines: currentLines
+        });
+      } else if (intro.length) {
+        parts.push({
+          type: "intro",
+          lines: intro
+        });
+      }
+
+      return parts;
+    }
+
+    function getLevel(question) {
+      if (question.includes("[Staff+]")) return "Staff+";
+      if (question.includes("[Senior]")) return "Senior";
+      if (question.includes("[Mid]")) return "Mid";
+      return "General";
+    }
+
+    function levelClass(level) {
+      if (level === "Staff+") return "staff";
+      if (level === "Senior") return "senior";
+      if (level === "Mid") return "mid";
+      return "";
+    }
+
+    function render() {
+      const chapters = splitIntoChapters(source);
+      allChapters = chapters;
+
+      const rendered = chapters.map(chapter => {
+        const parts = splitChapterIntoCards(chapter.lines);
+        const inner = parts.map(part => {
+          if (part.type === "intro") {
+            return parseMarkdownBlock(part.lines);
+          }
+
+          const level = getLevel(part.question);
+          const questionText = parseInline(part.question);
+          const answerHtml = parseMarkdownBlock(part.lines);
+
+          return `
+            <section class="qa-card" data-level="${level}" data-search="${escapeHtml(
+            (part.question + " " + part.lines.join(" ")).toLowerCase()
+          )}">
+              <button class="qa-question" type="button">
+                <span>
+                  <span class="level ${levelClass(level)}">${level}</span>
+                  ${questionText}
+                </span>
+                <span class="chevron">⌄</span>
+              </button>
+              <div class="qa-answer">${answerHtml}</div>
+            </section>
+          `;
+        }).join("");
+
+        return `
+          <section class="chapter" id="${chapter.id}">
+            ${inner}
+          </section>
+        `;
+      }).join("");
+
+      doc.innerHTML = rendered;
+      Prism.highlightAllUnder(doc);
+
+      toc.innerHTML = chapters
+        .map(chapter => `<a href="#${chapter.id}">${escapeHtml(chapter.title)}</a>`)
+        .join("");
+
+      allCards = Array.from(document.querySelectorAll(".qa-card"));
+
+      document.querySelectorAll(".qa-question").forEach(button => {
+        button.addEventListener("click", () => {
+          button.closest(".qa-card").classList.toggle("open");
+        });
+      });
+
+      document.querySelectorAll(".copy-code").forEach(button => {
+        button.addEventListener("click", async () => {
+          const code = button.closest("pre").querySelector("code").textContent;
+          await navigator.clipboard.writeText(code);
+          const oldText = button.textContent;
+          button.textContent = "Copied";
+          setTimeout(() => {
+            button.textContent = oldText;
+          }, 1000);
+        });
+      });
+
+      updateStats();
+      applyFilters();
+    }
+
+    function updateStats() {
+      const total = allCards.length;
+      const mid = allCards.filter(card => card.dataset.level === "Mid").length;
+      const senior = allCards.filter(card => card.dataset.level === "Senior").length;
+      const staff = allCards.filter(card => card.dataset.level === "Staff+").length;
+
+      stats.textContent = `${total} questions • ${mid} Mid • ${senior} Senior • ${staff} Staff+`;
+    }
+
+    function applyFilters() {
+      const query = searchInput.value.trim().toLowerCase();
+      let visible = 0;
+
+      allCards.forEach(card => {
+        const matchesLevel = activeLevel === "all" || card.dataset.level === activeLevel;
+        const matchesSearch = !query || card.dataset.search.includes(query);
+        const shouldShow = matchesLevel && matchesSearch;
+
+        card.classList.toggle("hidden", !shouldShow);
+        if (shouldShow) visible++;
+      });
+
+      emptyState.style.display = visible === 0 ? "block" : "none";
+    }
+
+    searchInput.addEventListener("input", applyFilters);
+
+    document.querySelectorAll(".chip").forEach(chip => {
+      chip.addEventListener("click", () => {
+        document.querySelectorAll(".chip").forEach(c => c.classList.remove("active"));
+        chip.classList.add("active");
+        activeLevel = chip.dataset.level;
+        applyFilters();
+      });
+    });
+
+    document.getElementById("expandAllBtn").addEventListener("click", () => {
+      allCards.forEach(card => card.classList.add("open"));
+    });
+
+    document.getElementById("collapseAllBtn").addEventListener("click", () => {
+      allCards.forEach(card => card.classList.remove("open"));
+    });
+
+    document.getElementById("themeBtn").addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      localStorage.setItem("guide-theme", document.body.classList.contains("dark") ? "dark" : "light");
+    });
+
+    document.getElementById("printBtn").addEventListener("click", () => {
+      window.print();
+    });
+
+    document.getElementById("backTopBtn").addEventListener("click", () => {
+      window.scrollTo({ top: 0, behavior: "smooth" });
+    });
+
+    window.addEventListener("scroll", () => {
+      const scrollTop = window.scrollY;
+      const height = document.documentElement.scrollHeight - window.innerHeight;
+      const percentage = height > 0 ? (scrollTop / height) * 100 : 0;
+      progressBar.style.width = `${percentage}%`;
+
+      const links = Array.from(toc.querySelectorAll("a"));
+      const sections = links
+        .map(link => document.querySelector(link.getAttribute("href")))
+        .filter(Boolean);
+
+      let activeSection = null;
+
+      sections.forEach(section => {
+        const rect = section.getBoundingClientRect();
+        if (rect.top <= 120) activeSection = section;
+      });
+
+      links.forEach(link => {
+        link.classList.toggle(
+          "active",
+          activeSection && link.getAttribute("href") === `#${activeSection.id}`
+        );
+      });
+    });
+
+    if (localStorage.getItem("guide-theme") === "dark") {
+      document.body.classList.add("dark");
+    }
+
+    render();
+  </script>
+</body>
+
+</html>
