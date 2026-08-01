@@ -646,2937 +646,3352 @@
     Do not edit or rewrite your questions and answers.
     The script will render headings, Q&A cards, code blocks, tables, lists, and search.
   -->
-  <template id="guide-source">
-    # Core Web Technologies — Interview Q&A Reference Guide
-### JavaScript · TypeScript · CSS · HTML
-### Target Level: 5–8+ Years UI Engineering | Production-Grade Knowledge
+  <script type="text/plain" id="guide-source">
+    # Senior Frontend Engineering Interview Q&A Bible
+    ### JavaScript · TypeScript · React · Browser Internals · CSS · HTML · Networking · Performance · Architecture
+    ### Target Level: 5-8+ Years UI Engineering | Senior / Staff Interview Preparation
+
+    ---
+
+    ## How to Use This Guide
+
+    This guide is designed for deeper understanding, not only quick memorization.
+
+    Each important topic is structured with:
+
+    - **Prerequisites**: what you should know before the topic
+    - **Short answer**: interview-friendly direct answer
+    - **Deep explanation**: how it actually works internally
+    - **Why it exists**: what problem the feature solves
+    - **Real-world scenario**: production-style question
+    - **Common mistakes**: what interviewers often catch
+    - **Senior insight**: how experienced engineers think about it
+
+    ---
+
+    ## TABLE OF CONTENTS
+
+    **Part 0 - JavaScript Foundations**
+    1. JavaScript Engine and Runtime
+    2. Execution Context
+    3. Call Stack
+    4. Scope Chain and Lexical Environment
+    5. Hoisting
+    6. Closures
+
+    **Part 1 - Advanced JavaScript**
+    7. Event Loop and Async Model
+    8. Promises in Production
+    9. Deep Copy vs Shallow Copy
+    10. Debouncing and Throttling
+    11. Memoization and Currying
+    12. Prototypes, Classes and `this`
+    13. Memory Management, WeakMap and WeakSet
+    14. Modules, Tree Shaking and Bundling
+    15. Web Workers and CPU-heavy Work
+
+    **Part 2 - Browser Internals and Performance**
+    16. Critical Rendering Path
+    17. Reflow, Repaint and Composite
+    18. Web Performance Investigation
+    19. Browser Storage
+    20. Service Workers and Offline Strategy
 
----
+    **Part 3 - TypeScript**
+    21. Type System Fundamentals
+    22. Generics and Conditional Types
+    23. Type Guards and Runtime Validation
+    24. Advanced TypeScript Patterns
+    25. Branded Types and Template Literal Types
 
-## How to Use This Guide
+    **Part 4 - React Advanced**
+    26. React Rendering Lifecycle
+    27. Reconciliation, Fiber and Keys
+    28. Hooks Internals and Rules of Hooks
+    29. Stale Closures in React
+    30. React Performance Optimization
+    31. Concurrent React, Suspense and Transitions
+    32. SSR, CSR, SSG, ISR and Hydration
 
-- Tagged by difficulty: `[Mid]` `[Senior]` `[Staff+]`
-- Every answer includes production code, not textbook snippets
-- "Old → New" sections show which modern patterns replace legacy code
-- Tricky edge cases are called out explicitly — these are what interviewers test
+    **Part 5 - Networking and Security**
+    33. HTTP, HTTPS and Request Lifecycle
+    34. CORS and Preflight Requests
+    35. Cookies, Sessions and JWT
+    36. Caching, ETag, CDN and Cache-Control
+    37. Frontend Security
 
----
+    **Part 6 - CSS and HTML Advanced**
+    38. Flexbox, Grid and Container Queries
+    39. Cascade, Specificity and Layers
+    40. CSS Performance and Animation
+    41. Semantic HTML and Accessibility
+    42. Forms, Validation and Native Browser Features
 
-## TABLE OF CONTENTS
+    **Part 7 - Senior / Staff Engineering**
+    43. Frontend System Design
+    44. Design Systems
+    45. Observability and Monitoring
+    46. Code Review and Technical Leadership
 
-**Part 1 — JavaScript (Modern ES2015–ES2024)**
-1. Event Loop & Async Model
-2. Closures, Scope & Hoisting
-3. Prototypes, Classes & `this`
-4. Iterators, Generators & Async Iteration
-5. Proxy, Reflect & Metaprogramming
-6. Memory Management & Performance
-7. Module System
-8. Modern API Replacements (Old → New)
+    ---
 
-**Part 2 — TypeScript**
-9. Type System Fundamentals
-10. Generics & Conditional Types
-11. Utility Types & Mapped Types
-12. Type Guards & Narrowing
-13. Declaration Files & Module Augmentation
-14. Advanced Patterns in Production
+    # PART 0 - JAVASCRIPT FOUNDATIONS
 
-**Part 3 — CSS**
-15. Layout Systems (Flexbox, Grid, Container Queries)
-16. Specificity, Cascade & Layers
-17. Modern CSS Features Replacing JS/Libraries
-18. Animation & Performance
-19. Responsive Design & Accessibility
-20. Architecture at Scale
+    ---
 
-**Part 4 — HTML**
-21. Semantic HTML & Document Structure
-22. Forms & Validation
-23. Web APIs & Browser Features
-24. Performance & Loading
-25. Security
+    # CHAPTER 1 - JAVASCRIPT ENGINE AND RUNTIME
 
----
+    > **What interviewers are evaluating:** Whether you understand how JavaScript actually runs, not just how to write syntax.
 
----
+    ---
 
-# PART 1 — JAVASCRIPT
+    ### Q1.1 `[Prerequisite]` What happens when JavaScript code runs?
 
----
+    **Short Answer:**
 
-# CHAPTER 1 — EVENT LOOP & ASYNC MODEL
+    JavaScript code is parsed, converted into an internal representation, compiled or interpreted by the engine, and then executed inside a runtime environment such as the browser or Node.js.
 
-> **What interviewers are evaluating:** Whether you actually understand how JavaScript executes, not just that it's "single-threaded and async." They test this with output-order questions that trip up anyone relying on intuition.
+    **Deep Explanation:**
 
----
+    A modern engine such as V8 does not simply read JavaScript line by line like a basic script interpreter. It performs multiple steps:
 
-### Q1.1 `[Senior]` What is the output of this code and why?
+    ```text
+    Source Code
+    ↓
+    Parser
+    ↓
+    AST - Abstract Syntax Tree
+    ↓
+    Interpreter
+    ↓
+    Bytecode
+    ↓
+    JIT Compiler
+    ↓
+    Optimized Machine Code
+    ```
 
-```javascript
-console.log('1')
+    The engine first parses your code and checks syntax. Then it creates an Abstract Syntax Tree. The interpreter starts executing quickly, while the optimizing compiler watches for hot paths, meaning frequently executed code. If a function runs many times with stable input shapes, the engine may optimize it into faster machine code.
 
-setTimeout(() => console.log('2'), 0)
+    **Why this matters:**
 
-Promise.resolve().then(() => console.log('3'))
+    Senior engineers often debug performance issues where the problem is not the algorithm alone, but repeated unnecessary work, unstable object shapes, or de-optimized hot paths.
 
-queueMicrotask(() => console.log('4'))
+    **Real-world scenario:**
 
-console.log('5')
-```
+    You are building a data grid with 50,000 rows. Filtering, sorting and rendering become slow. Understanding the engine helps you reason about:
 
-**Answer:**
+    - repeated object allocations
+    - unstable object shapes
+    - unnecessary re-computation
+    - excessive DOM updates
+    - expensive loops inside render paths
 
-```
-1
-5
-3
-4
-2
-```
+    **Common mistake:**
 
-**Why:**
+    Thinking JavaScript performance is only about writing fewer lines. In production, the bigger problems are usually repeated work, memory pressure, layout thrashing, bundle size and network waterfalls.
 
-JavaScript has a single call stack and two task queues:
+    **Senior insight:**
 
-1. **Microtask queue** (higher priority): Promises (`.then`, `.catch`, `.finally`), `queueMicrotask()`, `MutationObserver`
-2. **Macrotask queue** (lower priority): `setTimeout`, `setInterval`, `setImmediate`, I/O, UI rendering
+    The JavaScript engine is fast. Most frontend performance issues happen because we force the browser to do too much work, not because JavaScript itself is slow.
 
-**Execution order:**
-1. `console.log('1')` — synchronous, executes immediately
-2. `setTimeout(fn, 0)` — schedules callback in macrotask queue
-3. `Promise.resolve().then(fn)` — schedules callback in microtask queue
-4. `queueMicrotask(fn)` — schedules callback in microtask queue
-5. `console.log('5')` — synchronous, executes immediately
-
-After the call stack is empty, the event loop drains **all microtasks first** (in order: `3`, then `4`), then processes **one macrotask** (`2`).
-
-**The tricky part:** `setTimeout(fn, 0)` does NOT mean "run immediately." It means "run after the current synchronous code AND all microtasks are done."
-
----
-
-### Q1.2 `[Senior]` What is the output? This is a classic interview trap.
-
-```javascript
-for (var i = 0; i < 3; i++) {
-  setTimeout(() => console.log(i), 100)
-}
-```
-
-**Answer:** `3 3 3`
-
-**Why:** `var` is function-scoped (or global). By the time the `setTimeout` callbacks execute, the loop has finished and `i` is `3`. All three closures reference the same `i`.
-
-**Old fix — IIFE:**
-```javascript
-for (var i = 0; i < 3; i++) {
-  (function(j) {
-    setTimeout(() => console.log(j), 100)
-  })(i)
-}
-// Output: 0 1 2
-```
-
-**Modern fix — `let`:**
-```javascript
-for (let i = 0; i < 3; i++) {
-  setTimeout(() => console.log(i), 100)
-}
-// Output: 0 1 2
-```
-
-`let` creates a new binding for each loop iteration. Each closure captures its own `i`. This is one of the most important `var` → `let` behavioral differences — it's not just "block scoping," it's per-iteration scoping in loops.
-
----
-
-### Q1.3 `[Staff+]` Explain the difference between `Promise.all`, `Promise.allSettled`, `Promise.race`, and `Promise.any`. When do you use each in production?
-
-**Answer:**
-
-| Method | Resolves when | Rejects when | Use case |
-|---|---|---|---|
-| `Promise.all` | All promises resolve | Any one rejects (fast-fail) | Load 5 API calls; need all or fail |
-| `Promise.allSettled` | All promises settle (resolve or reject) | Never rejects | Load 5 widgets; show what worked, handle what failed |
-| `Promise.race` | First promise settles (resolve or reject) | First promise rejects | Timeout pattern |
-| `Promise.any` | First promise resolves | All promises reject (`AggregateError`) | Try 3 CDNs; use whichever responds first |
-
-**Production examples:**
-
-```typescript
-// Promise.all — dashboard data loading
-// If ANY endpoint fails, the entire dashboard shows an error
-const [users, metrics, feed] = await Promise.all([
-  fetchUsers(),
-  fetchMetrics(),
-  fetchFeed(),
-])
-
-// Promise.allSettled — resilient widget loading
-// Each widget loads independently; failed widgets show error state
-const results = await Promise.allSettled([
-  fetchWidget('revenue'),
-  fetchWidget('signups'),
-  fetchWidget('errors'),
-])
-
-results.forEach((result, i) => {
-  if (result.status === 'fulfilled') {
-    renderWidget(i, result.value)
-  } else {
-    renderWidgetError(i, result.reason)
-  }
-})
-
-// Promise.race — timeout pattern
-async function fetchWithTimeout<T>(promise: Promise<T>, ms: number): Promise<T> {
-  const timeout = new Promise<never>((_, reject) =>
-    setTimeout(() => reject(new Error(`Timeout after ${ms}ms`)), ms)
-  )
-  return Promise.race([promise, timeout])
-}
-
-const data = await fetchWithTimeout(fetch('/api/data'), 5000)
-
-// Promise.any — CDN fallback
-async function loadScript(urls: string[]): Promise<string> {
-  return Promise.any(
-    urls.map(url => fetch(url).then(r => {
-      if (!r.ok) throw new Error(`${r.status}`)
-      return r.text()
-    }))
-  )
-}
-```
-
-**Old approach that `Promise.allSettled` replaced:**
-```javascript
-// OLD: Manual try/catch per promise with Promise.all
-const results = await Promise.all([
-  fetchA().catch(err => ({ error: err })),
-  fetchB().catch(err => ({ error: err })),
-])
-
-// NEW: Clean, standardized
-const results = await Promise.allSettled([fetchA(), fetchB()])
-```
-
----
-
-### Q1.4 `[Staff+]` What is the output? Explain the async/await execution order.
-
-```javascript
-async function foo() {
-  console.log('foo start')
-  await bar()
-  console.log('foo end')
-}
-
-async function bar() {
-  console.log('bar')
-}
-
-console.log('script start')
-foo()
-console.log('script end')
-```
-
-**Answer:**
-
-```
-script start
-foo start
-bar
-script end
-foo end
-```
-
-**Why:**
-1. `console.log('script start')` — synchronous
-2. `foo()` is called — enters `foo`, logs `'foo start'`
-3. `await bar()` — calls `bar()` synchronously, logs `'bar'`
-4. The `await` pauses `foo` and yields control back to the caller. Everything after `await` becomes a microtask
-5. `console.log('script end')` — synchronous, runs immediately
-6. Call stack empty → microtask queue → `console.log('foo end')`
-
-**Key insight:** `await` doesn't pause the entire program — it pauses only the function containing it and returns control to the caller. Code after an `await` is equivalent to a `.then()` callback.
-
----
-
----
-
-# CHAPTER 2 — CLOSURES, SCOPE & HOISTING
-
-> **What interviewers are evaluating:** Deep understanding of lexical scope and how closures create private state — the foundation of module patterns, hooks, and memoization.
-
----
-
-### Q2.1 `[Senior]` Implement a `once()` utility that ensures a function is only called once, returning the cached result on subsequent calls.
-
-**Answer:**
-
-```typescript
-function once<T extends (...args: any[]) => any>(fn: T): T {
-  let called = false
-  let result: ReturnType<T>
-
-  return function (this: any, ...args: Parameters<T>): ReturnType<T> {
-    if (!called) {
-      called = true
-      result = fn.apply(this, args)
+    ---
+
+    ### Q1.2 `[Senior]` What is the difference between JavaScript engine and JavaScript runtime?
+
+    **Short Answer:**
+
+    The engine executes JavaScript. The runtime provides extra APIs around it.
+
+    **Detailed Explanation:**
+
+    The JavaScript engine understands the ECMAScript language. It provides core language behavior such as:
+
+    - variables
+    - functions
+    - objects
+    - promises
+    - classes
+    - arrays
+    - memory management
+
+    The runtime provides environment-specific APIs.
+
+    **Browser runtime provides:**
+
+    ```text
+    DOM APIs
+    fetch
+    setTimeout
+    localStorage
+    Web Workers
+    Canvas
+    Clipboard API
+    IntersectionObserver
+    ```
+
+    **Node.js runtime provides:**
+
+    ```text
+    fs
+    path
+    http
+    process
+    Buffer
+    streams
+    crypto
+    ```
+
+    **Example:**
+
+    ```js
+    console.log('JavaScript engine can run this')
+
+    fetch('/api/users')
+    // fetch is not the JavaScript language itself.
+    // It is provided by the browser or modern Node runtime.
+    ```
+
+    **Why this matters:**
+
+    When interviewers ask, "JavaScript is single-threaded, then how does setTimeout work?" the answer involves the runtime. The engine runs JS on one main thread, while the browser runtime manages timers, network callbacks and event queues.
+
+    **Senior insight:**
+
+    Many async features are not executed by the engine alone. The runtime schedules work and pushes callbacks back to JavaScript when the call stack is free.
+
+    ---
+
+    # CHAPTER 2 - EXECUTION CONTEXT
+
+    > **What interviewers are evaluating:** Whether you know what actually happens before code is executed.
+
+    ---
+
+    ### Q2.1 `[Prerequisite]` What is an Execution Context?
+
+    **Short Answer:**
+
+    Execution Context is the environment created by JavaScript to run a piece of code.
+
+    **Types:**
+
+    ```text
+    1. Global Execution Context
+    2. Function Execution Context
+    3. Eval Execution Context
+    ```
+
+    **Deep Explanation:**
+
+    Whenever JavaScript runs, it creates an execution context. The global code gets one global execution context. Each function call creates a new function execution context.
+
+    Each execution context contains:
+
+    - variable environment
+    - lexical environment
+    - `this` binding
+    - outer scope reference
+
+    **Two phases:**
+
+    ```text
+    1. Creation Phase
+    2. Execution Phase
+    ```
+
+    During the creation phase, JavaScript allocates memory for variables and functions. During the execution phase, assignments and function calls actually run.
+
+    **Example:**
+
+    ```js
+    console.log(a)
+    var a = 10
+
+    function greet() {
+      console.log('hello')
     }
-    return result
-  } as T
-}
-
-// Usage
-const initializeDB = once(() => {
-  console.log('Connecting to database...')
-  return { connection: 'active' }
-})
-
-initializeDB() // Logs "Connecting to database...", returns { connection: 'active' }
-initializeDB() // No log, returns cached { connection: 'active' }
-initializeDB() // No log, returns cached { connection: 'active' }
-```
-
-**Why this is a closure question:** `called` and `result` are trapped in the closure. They persist across calls but are invisible from outside. This is the same mechanism behind React's `useRef` and `useState` — the hook system stores values in closures attached to fiber nodes.
-
-**Production use:** Database connection initialization, one-time analytics events, expensive computation caching, singleton initialization.
-
----
-
-### Q2.2 `[Senior]` What is hoisting? Explain the difference between `var`, `let`, `const`, and function declarations.
-
-**Answer:**
-
-Hoisting is JavaScript's behavior of processing declarations before executing code. But different declarations hoist differently.
-
-```javascript
-// FUNCTION DECLARATIONS — fully hoisted (name + body)
-greet() // Works! Outputs "hello"
-function greet() { console.log('hello') }
+    ```
 
-// VAR — hoisted but initialized to undefined
-console.log(x) // undefined (not ReferenceError)
-var x = 5
-
-// LET and CONST — hoisted but NOT initialized (Temporal Dead Zone)
-console.log(y) // ReferenceError: Cannot access 'y' before initialization
-let y = 10
-
-// FUNCTION EXPRESSIONS — follow their binding's hoisting rules
-console.log(fn) // undefined (var hoisted, but assignment hasn't run)
-var fn = function() { return 42 }
-
-console.log(fn2) // ReferenceError (let TDZ)
-let fn2 = function() { return 42 }
-```
-
-**Temporal Dead Zone (TDZ):**
-The TDZ is the region between the start of the scope and the `let`/`const` declaration. The variable exists (it's hoisted) but is not accessible.
-
-```javascript
-{
-  // TDZ starts here for x
-  console.log(typeof x) // ReferenceError — NOT "undefined"
-  let x = 5             // TDZ ends here
-}
-```
-
-**Tricky edge case:**
-```javascript
-var x = 1
-function f() {
-  console.log(x) // What prints?
-  var x = 2
-}
-f()
-```
-**Answer:** `undefined`. The `var x` inside `f` is hoisted to the top of `f`, shadowing the outer `x`. But the assignment hasn't run yet.
-
----
-
-### Q2.3 `[Senior]` Implement a `createCounter()` that returns an object with `increment`, `decrement`, and `getCount` — without using classes.
-
-**Answer:**
-
-```typescript
-function createCounter(initial = 0) {
-  let count = initial
-
-  return {
-    increment() { count++ },
-    decrement() { count-- },
-    getCount() { return count },
-    reset() { count = initial },
-  }
-}
-
-const counter = createCounter(10)
-counter.increment()
-counter.increment()
-counter.decrement()
-console.log(counter.getCount()) // 11
-console.log(counter.count)      // undefined — truly private
-```
-
-**Why this matters in production:**
-
-This is the module pattern — JavaScript's only true encapsulation before `#private` fields. It's how:
-- Redux `createStore` works internally
-- React's hook state is stored (closures inside the fiber tree)
-- Node.js modules achieve isolation
-
-**Old → New comparison:**
-```javascript
-// OLD: "Private" via naming convention (not enforced)
-class Counter {
-  _count = 0 // Accessible: counter._count = 999
-}
-
-// NEW (ES2022): True private fields
-class Counter {
-  #count = 0 // SyntaxError if accessed: counter.#count from outside
-  increment() { this.#count++ }
-  getCount() { return this.#count }
-}
-```
-
----
-
----
-
-# CHAPTER 3 — PROTOTYPES, CLASSES & `this`
-
-> **What interviewers are evaluating:** Whether you understand JavaScript's object model and can debug `this` binding issues that occur in real codebases.
-
----
-
-### Q3.1 `[Senior]` What is the output? Explain all four `this` binding rules.
-
-```javascript
-const obj = {
-  name: 'Alice',
-  greet() {
-    console.log(this.name)
-  },
-  greetLater() {
-    setTimeout(function() {
-      console.log(this.name)
-    }, 100)
-  },
-  greetLaterArrow() {
-    setTimeout(() => {
-      console.log(this.name)
-    }, 100)
-  },
-}
-
-obj.greet()           // ?
-obj.greetLater()      // ?
-obj.greetLaterArrow() // ?
-
-const fn = obj.greet
-fn()                  // ?
-```
-
-**Answer:**
-
-```
-Alice       — obj.greet(): implicit binding, this = obj
-undefined   — greetLater(): function() loses this binding in setTimeout
-Alice       — greetLaterArrow(): arrow function inherits this from greetLater's scope
-undefined   — fn(): default binding, this = globalThis (or undefined in strict mode)
-```
-
-**The four rules (in priority order):**
-
-1. **`new` binding:** `new Foo()` → `this` = newly created object
-2. **Explicit binding:** `fn.call(obj)`, `fn.apply(obj)`, `fn.bind(obj)` → `this` = obj
-3. **Implicit binding:** `obj.fn()` → `this` = obj (the object before the dot)
-4. **Default binding:** `fn()` → `this` = `globalThis` (or `undefined` in strict mode)
-
-**Arrow functions break all four rules:**
-Arrow functions don't have their own `this`. They capture `this` from the enclosing lexical scope at definition time — forever. You cannot `.call()` or `.bind()` an arrow function to change its `this`.
-
-**Production consequence — React class components (legacy):**
-```javascript
-// OLD: Class component with this bug
-class Form extends React.Component {
-  handleSubmit() {
-    console.log(this.state) // BUG: this is undefined when called from event
-  }
-
-  render() {
-    // onClick passes a reference — implicit binding is lost
-    return <button onClick={this.handleSubmit}>Submit</button>
-  }
-}
-
-// FIX 1: Bind in constructor
-constructor() {
-  this.handleSubmit = this.handleSubmit.bind(this)
-}
-
-// FIX 2: Arrow function class field (modern)
-handleSubmit = () => {
-  console.log(this.state) // Arrow captures this from class instance
-}
-```
-
-**This is one reason functional components with hooks won — no `this` at all.**
-
----
-
-### Q3.2 `[Senior]` What is the prototype chain? How does `Object.create()` differ from `class extends`?
-
-**Answer:**
-
-Every JavaScript object has an internal `[[Prototype]]` link to another object. When you access a property, JavaScript walks up this chain until it finds it or reaches `null`.
-
-```javascript
-const animal = { eats: true }
-const rabbit = Object.create(animal) // rabbit's prototype = animal
-rabbit.jumps = true
+    During creation phase:
 
-console.log(rabbit.eats)  // true — found on prototype
-console.log(rabbit.jumps)  // true — own property
+    ```text
+    a = undefined
+    greet = full function reference
+    ```
 
-console.log(rabbit.hasOwnProperty('eats'))  // false — inherited
-console.log(rabbit.hasOwnProperty('jumps')) // true — own
-```
-
-**`Object.create()` vs `class extends`:**
+    During execution phase:
 
-```javascript
-// Object.create — direct prototype linkage
-const base = {
-  greet() { return `Hello, ${this.name}` }
-}
-
-const user = Object.create(base)
-user.name = 'Alice'
-user.greet() // "Hello, Alice"
-
-// class extends — syntactic sugar over prototype chain
-class Base {
-  greet() { return `Hello, ${this.name}` }
-}
-
-class User extends Base {
-  constructor(name) {
-    super()
-    this.name = name
-  }
-}
-
-new User('Alice').greet() // "Hello, Alice"
-```
-
-**Under the hood, both create the same prototype chain:**
-```
-user → base → Object.prototype → null
-User instance → User.prototype → Base.prototype → Object.prototype → null
-```
-
-**Production relevance:**
-- `Object.create(null)` creates an object with no prototype — used for dictionaries/maps without inherited `toString`, `hasOwnProperty` pollution
-- Understanding the prototype chain is critical for debugging `instanceof` failures across realms (iframes, workers)
-
----
-
-### Q3.3 `[Staff+]` What are `#private` class fields and how do they differ from TypeScript's `private` keyword?
-
-**Answer:**
-
-```typescript
-// TypeScript private — compile-time only
-class TSUser {
-  private name: string     // Erased at runtime — JS sees a regular property
-  constructor(name: string) { this.name = name }
-}
-
-const u = new TSUser('Alice')
-console.log((u as any).name) // "Alice" — accessible at runtime!
-
-// JavaScript #private — runtime enforcement
-class JSUser {
-  #name: string            // True private — SyntaxError to access from outside
-  constructor(name: string) { this.#name = name }
-  getName() { return this.#name }
-}
-
-const j = new JSUser('Alice')
-console.log(j.#name)      // SyntaxError: Private field '#name' not declared
-console.log(j.getName())  // "Alice"
-```
-
-**Key differences:**
-
-| Feature | TypeScript `private` | JS `#private` |
-|---|---|---|
-| Enforced at runtime | No — erased by compiler | Yes — SyntaxError |
-| Visible in console/debugger | Yes | Hidden |
-| Accessible via `(obj as any).prop` | Yes | No |
-| Subclass can access | No (TS error) but yes at runtime | No — truly inaccessible |
-| Available since | TypeScript 1.0 | ES2022 |
-
-**Production recommendation:** Use `#private` for secrets, tokens, or internal state that must not leak. Use TypeScript `private` for developer intent signaling when runtime enforcement isn't needed.
-
----
-
----
-
-# CHAPTER 4 — ITERATORS, GENERATORS & ASYNC ITERATION
-
-> **What interviewers are evaluating:** Whether you understand lazy evaluation and can implement custom iteration protocols — relevant for streams, pagination, and data processing pipelines.
-
----
-
-### Q4.1 `[Senior]` How do you make a custom object iterable with `for...of`?
-
-**Answer:**
-
-Implement the `Symbol.iterator` protocol:
-
-```typescript
-class DateRange {
-  constructor(
-    private start: Date,
-    private end: Date,
-  ) {}
-
-  *[Symbol.iterator]() {
-    const current = new Date(this.start)
-    while (current <= this.end) {
-      yield new Date(current)
-      current.setDate(current.getDate() + 1)
+    ```text
+    console.log(a) -> undefined
+    a = 10
+    ```
+
+    **Why this exists:**
+
+    The engine needs to know what names are available before running code. This is why function declarations are available before their physical line in the file.
+
+    **Common interview trap:**
+
+    ```js
+    console.log(x)
+    let x = 10
+    ```
+
+    This throws a `ReferenceError`, not `undefined`, because `let` and `const` are hoisted but remain in the Temporal Dead Zone until initialized.
+
+    **Senior insight:**
+
+    Execution context explains hoisting, closures, scope chain, `this`, and async continuation after `await`. It is one of the root concepts behind many advanced JavaScript questions.
+
+    ---
+
+    # CHAPTER 3 - CALL STACK
+
+    ---
+
+    ### Q3.1 `[Prerequisite]` What is the Call Stack?
+
+    **Short Answer:**
+
+    The call stack tracks which function is currently executing and which function should resume after it finishes.
+
+    **Example:**
+
+    ```js
+    function first() {
+      second()
     }
-  }
-}
 
-// Usage — works with for...of, spread, destructuring, Array.from
-const week = new DateRange(new Date('2024-01-01'), new Date('2024-01-07'))
-
-for (const day of week) {
-  console.log(day.toISOString().split('T')[0])
-}
-// 2024-01-01, 2024-01-02, ..., 2024-01-07
-
-const dates = [...week] // Array of 7 Date objects
-const [first, second] = week // Destructuring works
-```
-
-**Why generators (`*` and `yield`) matter:**
-
-Generators are lazy — they compute values on demand, not all at once. For a range of 10 million dates, a generator uses O(1) memory instead of O(n).
-
----
-
-### Q4.2 `[Staff+]` Implement an async generator that paginates through an API automatically.
-
-**Answer:**
-
-```typescript
-async function* fetchAllPages<T>(
-  url: string,
-  pageSize = 20,
-): AsyncGenerator<T[], void, undefined> {
-  let page = 1
-  let hasMore = true
-
-  while (hasMore) {
-    const response = await fetch(`${url}?page=${page}&limit=${pageSize}`)
-    const data: T[] = await response.json()
-
-    yield data
-
-    hasMore = data.length === pageSize
-    page++
-  }
-}
-
-// Usage — processes one page at a time, doesn't load everything into memory
-async function processAllUsers() {
-  for await (const batch of fetchAllPages<User>('/api/users')) {
-    for (const user of batch) {
-      await processUser(user)
+    function second() {
+      third()
     }
-    console.log(`Processed batch of ${batch.length} users`)
-  }
-}
-```
 
-**Production use cases:**
-- Paginating through database records for export
-- Processing event streams (Kafka, SSE)
-- Reading large files line-by-line (`readline` interface in Node)
-- Implementing cursor-based pagination in GraphQL
+    function third() {
+      console.log('done')
+    }
 
-**Old approach this replaced:**
-```javascript
-// OLD: Recursive callback or manual loop
-async function fetchAll(url, page = 1, accumulated = []) {
-  const data = await fetch(`${url}?page=${page}`).then(r => r.json())
-  accumulated.push(...data)
-  if (data.length === 20) {
-    return fetchAll(url, page + 1, accumulated) // Holds all data in memory
-  }
-  return accumulated
-}
-```
+    first()
+    ```
 
----
+    Stack flow:
 
----
+    ```text
+    Global Execution Context
+    ↓
+    first()
+    ↓
+    second()
+    ↓
+    third()
+    ```
 
-# CHAPTER 5 — PROXY, REFLECT & METAPROGRAMMING
+    After `third()` finishes, it is removed from the stack. Then `second()` finishes, then `first()` finishes.
 
-> **What interviewers are evaluating:** Whether you've worked with advanced runtime features used in frameworks, ORMs, and reactivity systems.
+    **Why it matters:**
 
----
+    The call stack is synchronous. JavaScript can only execute one stack frame at a time on the main thread.
 
-### Q5.1 `[Staff+]` How do Proxy and Reflect work? Give a production use case.
+    **Stack overflow example:**
 
-**Answer:**
+    ```js
+    function recurse() {
+      recurse()
+    }
 
-A `Proxy` wraps an object and intercepts fundamental operations (get, set, delete, function call, etc.) through handler traps.
+    recurse()
+    ```
 
-```typescript
-// Observable state — used by Vue.js, MobX, and similar reactivity systems
-function createReactive<T extends object>(
-  target: T,
-  onChange: (prop: string, value: any) => void,
-): T {
-  return new Proxy(target, {
-    set(obj, prop, value, receiver) {
-      const result = Reflect.set(obj, prop, value, receiver)
-      onChange(String(prop), value)
-      return result
-    },
-    get(obj, prop, receiver) {
-      const value = Reflect.get(obj, prop, receiver)
-      // Recursively proxy nested objects
-      if (typeof value === 'object' && value !== null) {
-        return createReactive(value, onChange)
+    This keeps adding stack frames until the browser throws:
+
+    ```text
+    RangeError: Maximum call stack size exceeded
+    ```
+
+    **Real-world scenario:**
+
+    In React, an accidental state update during render can cause repeated renders:
+
+    ```jsx
+    function Counter() {
+      const [count, setCount] = useState(0)
+      setCount(count + 1) // Wrong: state update during render
+      return <div>{count}</div>
+    }
+    ```
+
+    This does not literally look like recursive function code, but it creates an infinite render loop.
+
+    **Senior insight:**
+
+    When debugging complex UI behavior, always identify whether the issue is synchronous stack execution, async queue scheduling, or React render scheduling.
+
+    ---
+
+    # CHAPTER 4 - SCOPE CHAIN AND LEXICAL ENVIRONMENT
+
+    ---
+
+    ### Q4.1 `[Senior]` How does JavaScript find variables?
+
+    **Short Answer:**
+
+    JavaScript looks for variables in the current scope first. If not found, it walks up the outer scope chain until it reaches the global scope.
+
+    **Example:**
+
+    ```js
+    const country = 'India'
+
+    function outer() {
+      const city = 'Mumbai'
+
+      function inner() {
+        const area = 'Bandra'
+        console.log(area)
+        console.log(city)
+        console.log(country)
       }
+
+      inner()
+    }
+
+    outer()
+    ```
+
+    Lookup order inside `inner()`:
+
+    ```text
+    inner scope -> outer scope -> global scope
+    ```
+
+    **Deep Explanation:**
+
+    A lexical environment has two major parts:
+
+    ```text
+    1. Environment Record
+    2. Outer Lexical Environment Reference
+    ```
+
+    The environment record stores variables declared in that scope. The outer reference points to the parent lexical environment.
+
+    **Why this exists:**
+
+    Without lexical environments and outer references, closures would not work. A function would not remember where it was created.
+
+    **Real-world scenario:**
+
+    API client factory:
+
+    ```js
+    function createApiClient(token) {
+      return function request(url) {
+        return fetch(url, {
+          headers: {
+            Authorization: `Bearer ${token}`,
+          },
+        })
+      }
+    }
+
+    const request = createApiClient('abc123')
+    request('/api/profile')
+    ```
+
+    The returned `request` function still remembers `token` because of the lexical scope chain.
+
+    **Common mistake:**
+
+    Thinking scope is based on where a function is called. In JavaScript, lexical scope is based on where the function is written.
+
+    **Senior insight:**
+
+    Lexical scoping is why React hooks can accidentally capture stale values. The function remembers values from the render where it was created.
+
+    ---
+
+    # CHAPTER 5 - HOISTING
+
+    ---
+
+    ### Q5.1 `[Senior]` What is hoisting and how do `var`, `let`, `const`, and functions behave differently?
+
+    **Short Answer:**
+
+    Hoisting means declarations are processed before code execution, but different declarations are initialized differently.
+
+    **Behavior table:**
+
+    | Declaration | Hoisted | Initialized | Access before line |
+    |---|---|---|---|
+    | `var` | Yes | `undefined` | allowed, returns `undefined` |
+    | `let` | Yes | no | ReferenceError |
+    | `const` | Yes | no | ReferenceError |
+    | function declaration | Yes | full function | allowed |
+    | function expression | depends on variable | depends | depends |
+
+    **Example:**
+
+    ```js
+    console.log(a) // undefined
+    var a = 10
+
+    console.log(b) // ReferenceError
+    let b = 20
+    ```
+
+    **Function declaration:**
+
+    ```js
+    sayHello()
+
+    function sayHello() {
+      console.log('hello')
+    }
+    ```
+
+    Works because function declarations are fully hoisted.
+
+    **Function expression:**
+
+    ```js
+    sayHi() // TypeError: sayHi is not a function
+
+    var sayHi = function () {
+      console.log('hi')
+    }
+    ```
+
+    Here `sayHi` is hoisted as `undefined`, but the function assignment happens later.
+
+    **Why this matters:**
+
+    Hoisting explains many output-based interview questions. It also explains why `let` and `const` are safer than `var`.
+
+    **Senior insight:**
+
+    In modern code, prefer `const` by default and `let` when reassignment is needed. Avoid `var` because function scoping and hoisting create subtle bugs.
+
+    ---
+
+    # CHAPTER 6 - CLOSURES
+
+    ---
+
+    ### Q6.1 `[Senior]` What is a closure and why does it exist?
+
+    **Short Answer:**
+
+    A closure is a function that remembers variables from its outer scope even after the outer function has finished execution.
+
+    **Example:**
+
+    ```js
+    function createCounter() {
+      let count = 0
+
+      return function increment() {
+        count++
+        return count
+      }
+    }
+
+    const counter = createCounter()
+    console.log(counter()) // 1
+    console.log(counter()) // 2
+    console.log(counter()) // 3
+    ```
+
+    **Deep Explanation:**
+
+    When `createCounter()` finishes, normally its local variables should disappear. But because the returned `increment` function still references `count`, the engine keeps that lexical environment alive.
+
+    So `count` is not global, but it still persists.
+
+    **Why closures exist:**
+
+    Closures enable:
+    - private state
+    - function factories
+    - memoization
+    - callbacks
+    - event handlers
+    - module pattern
+    - React hook behavior
+
+    **Real-world scenario: bank account:**
+
+    ```js
+    function createAccount(initialBalance = 0) {
+      let balance = initialBalance
+
+      return {
+        deposit(amount) {
+          balance += amount
+        },
+        withdraw(amount) {
+          if (amount > balance) throw new Error('Insufficient funds')
+          balance -= amount
+        },
+        getBalance() {
+          return balance
+        },
+      }
+    }
+
+    const account = createAccount(1000)
+    account.deposit(500)
+    console.log(account.getBalance()) // 1500
+    console.log(account.balance) // undefined
+    ```
+
+    `balance` is private. No outside code can directly modify it.
+
+    **Common mistake:**
+
+    Closures can keep large objects in memory longer than expected:
+
+    ```js
+    function createHandler() {
+      const hugeData = new Array(1000000).fill('data')
+
+      return function handler() {
+        console.log('clicked')
+      }
+    }
+    ```
+
+    Depending on implementation and references, unnecessary captured data can increase memory pressure.
+
+    **Interview follow-ups:**
+
+    1. Can closures cause memory leaks?
+    2. How does closure relate to React hooks?
+    3. Why does a loop with `var` print the final value?
+    4. How would you create private state without classes?
+
+    **Senior insight:**
+
+    Closures are not just an interview concept. They are the foundation of modern JavaScript architecture and React behavior.
+
+    ---
+
+    # PART 1 - ADVANCED JAVASCRIPT
+
+    ---
+
+    # CHAPTER 7 - EVENT LOOP AND ASYNC MODEL
+
+    ---
+
+    ### Q7.1 `[Prerequisite]` If JavaScript is single-threaded, how does it handle async work?
+
+    **Short Answer:**
+
+    JavaScript executes code on a single call stack, but the runtime environment handles async operations and schedules callbacks through queues.
+
+    **Deep Explanation:**
+
+    The browser provides APIs such as:
+
+    - `setTimeout`
+    - `fetch`
+    - DOM events
+    - `requestAnimationFrame`
+    - Web Workers
+
+    When you call `setTimeout`, the JavaScript engine does not wait. The browser timer system tracks the delay. Once complete, the callback is placed into a task queue.
+
+    **Core pieces:**
+
+    ```text
+    Call Stack
+    Web APIs
+    Microtask Queue
+    Macrotask Queue
+    Event Loop
+    Render Pipeline
+    ```
+
+    **Microtasks:**
+
+    ```text
+    Promise.then
+    queueMicrotask
+    MutationObserver
+    ```
+
+    **Macrotasks:**
+
+    ```text
+    setTimeout
+    setInterval
+    DOM events
+    MessageChannel
+    I/O callbacks
+    ```
+
+    **Important rule:**
+
+    After synchronous code finishes, JavaScript drains all microtasks before running the next macrotask.
+
+    ---
+
+    ### Q7.2 `[Senior]` What is the output and why?
+
+    ```js
+    console.log('1')
+
+    setTimeout(() => console.log('2'), 0)
+
+    Promise.resolve().then(() => console.log('3'))
+
+    queueMicrotask(() => console.log('4'))
+
+    console.log('5')
+    ```
+
+    **Answer:**
+
+    ```text
+    1
+    5
+    3
+    4
+    2
+    ```
+
+    **Why:**
+
+    1. `1` runs synchronously.
+    2. `setTimeout` schedules a macrotask.
+    3. Promise callback schedules a microtask.
+    4. `queueMicrotask` schedules another microtask.
+    5. `5` runs synchronously.
+    6. Call stack becomes empty.
+    7. Microtasks run first: `3`, then `4`.
+    8. Macrotask runs next: `2`.
+
+    **Common mistake:**
+
+    Thinking `setTimeout(..., 0)` means immediate execution. It means run after current synchronous code and microtasks finish.
+
+    **Real-world scenario:**
+
+    A loading spinner does not show because heavy synchronous work blocks the main thread:
+
+    ```js
+    setLoading(true)
+    heavyCalculation()
+    setLoading(false)
+    ```
+
+    The browser may not get a chance to paint the loading state before the heavy work begins.
+
+    **Senior insight:**
+
+    Understanding the event loop helps debug UI freezes, delayed clicks, spinner issues, race conditions and async ordering bugs.
+
+    ---
+
+    # CHAPTER 8 - PROMISES IN PRODUCTION
+
+    ---
+
+    ### Q8.1 `[Staff+]` When should you use `Promise.all`, `Promise.allSettled`, `Promise.race`, and `Promise.any`?
+
+    **Short Answer:**
+
+    Use the method based on failure behavior and business requirement.
+
+    | Method | Success condition | Failure condition | Production use case |
+    |---|---|---|---|
+    | `Promise.all` | all resolve | any rejects | page needs all required data |
+    | `Promise.allSettled` | all finish | never rejects | dashboard widgets can fail independently |
+    | `Promise.race` | first settles | first rejects if first result rejects | timeout pattern |
+    | `Promise.any` | first successful resolve | all reject | CDN/API fallback |
+
+    **Real-world scenario:**
+
+    You are building an e-commerce product page. You need:
+
+    ```text
+    Product details - required
+    Inventory - required
+    Recommendations - optional
+    Reviews - optional
+    ```
+
+    A strong production solution may combine methods:
+
+    ```ts
+    const [product, inventory] = await Promise.all([
+      fetchProduct(productId),
+      fetchInventory(productId),
+    ])
+
+    const optionalSections = await Promise.allSettled([
+      fetchRecommendations(productId),
+      fetchReviews(productId),
+    ])
+    ```
+
+    If product or inventory fails, the page cannot work. If recommendations fail, the page can still render.
+
+    **Timeout with `Promise.race`:**
+
+    ```ts
+    async function fetchWithTimeout(url: string, ms: number) {
+      const controller = new AbortController()
+      const timer = setTimeout(() => controller.abort(), ms)
+
+      try {
+        const response = await fetch(url, { signal: controller.signal })
+        return response.json()
+      } finally {
+        clearTimeout(timer)
+      }
+    }
+    ```
+
+    **Important production improvement:**
+
+    `Promise.race` timeout rejects your wrapper promise, but it does not automatically cancel the original network request. Use `AbortController` to cancel actual fetch requests.
+
+    **Common mistakes:**
+
+    - Using `Promise.all` for optional widgets
+    - Using `Promise.allSettled` when failure should actually block the flow
+    - Creating promises sequentially when they can run in parallel
+    - Not cancelling stale requests
+
+    **Senior insight:**
+
+    Promise choice is not just technical. It reflects product behavior. Ask: "Can the UI still work if this request fails?"
+
+    ---
+
+    # CHAPTER 9 - DEEP COPY VS SHALLOW COPY
+
+    ---
+
+    ### Q9.1 `[Senior]` What is the difference between shallow copy and deep copy?
+
+    **Short Answer:**
+
+    A shallow copy copies only the first level. Nested objects are still shared by reference. A deep copy recursively copies nested values.
+
+    **Example:**
+
+    ```js
+    const user = {
+      name: 'Faizan',
+      address: {
+        city: 'Pune',
+      },
+    }
+
+    const copy = { ...user }
+    copy.address.city = 'Mumbai'
+
+    console.log(user.address.city) // Mumbai
+    ```
+
+    The top-level object is copied, but `address` is still the same nested object reference.
+
+    **Modern deep copy:**
+
+    ```js
+    const deepCopy = structuredClone(user)
+    deepCopy.address.city = 'Delhi'
+
+    console.log(user.address.city) // Pune or previous original value
+    ```
+
+    **Comparison:**
+
+    | Approach | Deep? | Handles Date/Map/Set | Handles functions | Notes |
+    |---|---|---|---|---|
+    | spread `{...obj}` | no | no | yes by reference | shallow only |
+    | `Object.assign` | no | no | yes by reference | shallow only |
+    | `JSON.parse(JSON.stringify())` | partially | no | no | loses Date, undefined, functions |
+    | `structuredClone` | yes | yes | no | modern native option |
+
+    **Real-world scenario:**
+
+    In React, shallow copy mistakes cause state mutation bugs:
+
+    ```js
+    const nextUser = { ...user }
+    nextUser.address.city = 'Mumbai'
+    setUser(nextUser)
+    ```
+
+    This mutates nested state. Correct approach:
+
+    ```js
+    setUser(prev => ({
+      ...prev,
+      address: {
+        ...prev.address,
+        city: 'Mumbai',
+      },
+    }))
+    ```
+
+    **Senior insight:**
+
+    Do not deep clone everything blindly. Deep cloning large structures can be expensive. Prefer normalized state, immutable update helpers, or targeted updates.
+
+    ---
+
+    # CHAPTER 10 - DEBOUNCING AND THROTTLING
+
+    ---
+
+    ### Q10.1 `[Senior]` What is debouncing and where do you use it?
+
+    **Short Answer:**
+
+    Debouncing delays function execution until the user stops triggering the event for a specified time.
+
+    **Real-world scenario:**
+
+    Search input:
+
+    ```text
+    User types: r e a c t
+    Without debounce: 5 API calls
+    With debounce: 1 API call after user stops typing
+    ```
+
+    **Implementation:**
+
+    ```js
+    function debounce(fn, delay) {
+      let timerId
+
+      return function (...args) {
+        clearTimeout(timerId)
+
+        timerId = setTimeout(() => {
+          fn.apply(this, args)
+        }, delay)
+      }
+    }
+
+    const search = debounce((query) => {
+      fetch(`/api/search?q=${query}`)
+    }, 400)
+    ```
+
+    **Deep explanation:**
+
+    Every time the returned function is called, the previous timer is cancelled. Only the final call survives.
+
+    **Real-world React usage:**
+
+    ```tsx
+    function SearchBox() {
+      const [query, setQuery] = useState('')
+
+      useEffect(() => {
+        if (!query) return
+
+        const controller = new AbortController()
+        const timer = setTimeout(() => {
+          fetch(`/api/search?q=${query}`, {
+            signal: controller.signal,
+          })
+        }, 400)
+
+        return () => {
+          clearTimeout(timer)
+          controller.abort()
+        }
+      }, [query])
+
+      return <input value={query} onChange={e => setQuery(e.target.value)} />
+    }
+    ```
+
+    **Common mistake:**
+
+    Debouncing without aborting old requests can still allow stale responses to overwrite newer results.
+
+    **Senior insight:**
+
+    For production search, combine:
+    - debounce
+    - `AbortController`
+    - loading state
+    - stale response protection
+    - caching
+    - minimum query length
+
+    ---
+
+    ### Q10.2 `[Senior]` What is throttling and how is it different from debouncing?
+
+    **Short Answer:**
+
+    Throttling ensures a function runs at most once in a fixed time interval.
+
+    **Use throttle for:**
+    - scroll tracking
+    - resize handling
+    - mouse move events
+    - drag events
+    - analytics events
+
+    **Implementation:**
+
+    ```js
+    function throttle(fn, limit) {
+      let inThrottle = false
+
+      return function (...args) {
+        if (!inThrottle) {
+          fn.apply(this, args)
+          inThrottle = true
+
+          setTimeout(() => {
+            inThrottle = false
+          }, limit)
+        }
+      }
+    }
+    ```
+
+    **Debounce vs throttle:**
+
+    | Technique | Runs when | Best for |
+    |---|---|---|
+    | Debounce | after events stop | search input, validation |
+    | Throttle | periodically during events | scroll, resize, drag |
+
+    **Real-world scenario:**
+
+    A scroll progress bar should update while the user scrolls, but not for every pixel. Throttle makes sense.
+
+    **Senior insight:**
+
+    If the user expects final output, use debounce. If the user expects continuous feedback, use throttle.
+
+    ---
+
+    # CHAPTER 11 - MEMOIZATION AND CURRYING
+
+    ---
+
+    ### Q11.1 `[Senior]` What is memoization and when should you avoid it?
+
+    **Short Answer:**
+
+    Memoization caches the result of expensive function calls so repeated calls with the same input return faster.
+
+    **Example:**
+
+    ```js
+    function memoize(fn) {
+      const cache = new Map()
+
+      return function (...args) {
+        const key = JSON.stringify(args)
+
+        if (cache.has(key)) {
+          return cache.get(key)
+        }
+
+        const result = fn.apply(this, args)
+        cache.set(key, result)
+        return result
+      }
+    }
+    ```
+
+    **Real-world scenario:**
+
+    Expensive product filtering:
+
+    ```js
+    const filteredProducts = useMemo(() => {
+      return products.filter(product => product.name.includes(search))
+    }, [products, search])
+    ```
+
+    **Common mistake:**
+
+    Using memoization everywhere. Memoization has overhead:
+    - memory cost
+    - cache invalidation complexity
+    - dependency management issues
+    - stale values if dependencies are wrong
+
+    **Senior insight:**
+
+    Memoization is useful when computation is expensive and repeated with same inputs. It is not a default performance fix.
+
+    ---
+
+    ### Q11.2 `[Senior]` What is currying?
+
+    **Short Answer:**
+
+    Currying transforms a function with multiple arguments into a sequence of functions that each take one argument.
+
+    **Example:**
+
+    ```js
+    function multiply(a) {
+      return function (b) {
+        return a * b
+      }
+    }
+
+    const double = multiply(2)
+    console.log(double(5)) // 10
+    ```
+
+    **Real-world scenario:**
+
+    Role-based permission checker:
+
+    ```js
+    const hasPermission = role => action => {
+      const permissions = {
+        admin: ['read', 'write', 'delete'],
+        editor: ['read', 'write'],
+        viewer: ['read'],
+      }
+
+      return permissions[role]?.includes(action)
+    }
+
+    const canAdmin = hasPermission('admin')
+    console.log(canAdmin('delete')) // true
+    ```
+
+    **Why it exists:**
+
+    Currying enables partial application, reusable specialized functions and functional composition.
+
+    **Senior insight:**
+
+    Currying is powerful but can reduce readability if overused. Use it when it simplifies repeated configuration.
+
+    ---
+
+    # CHAPTER 12 - PROTOTYPES, CLASSES AND THIS
+
+    ---
+
+    ### Q12.1 `[Senior]` What happens when you use the `new` keyword?
+
+    **Short Answer:**
+
+    `new` creates a new object, links its prototype, binds `this`, runs the constructor and returns the object.
+
+    **Step by step:**
+
+    ```text
+    1. Create empty object
+    2. Link object to constructor.prototype
+    3. Bind this to the new object
+    4. Execute constructor body
+    5. Return object unless constructor returns another object explicitly
+    ```
+
+    **Example:**
+
+    ```js
+    function User(name) {
+      this.name = name
+    }
+
+    User.prototype.sayHello = function () {
+      return `Hello ${this.name}`
+    }
+
+    const user = new User('Faizan')
+    console.log(user.sayHello())
+    ```
+
+    **Equivalent mental model:**
+
+    ```js
+    const user = {}
+    Object.setPrototypeOf(user, User.prototype)
+    User.call(user, 'Faizan')
+    ```
+
+    **Common mistake:**
+
+    Calling constructor without `new`:
+
+    ```js
+    const user = User('Faizan')
+    ```
+
+    In non-strict mode, `this` could point to global object. In strict mode, `this` is `undefined`.
+
+    **Senior insight:**
+
+    Classes in JavaScript are mostly syntax over prototypes. Understanding prototypes helps debug inheritance, `instanceof`, method sharing and memory behavior.
+
+    ---
+
+    ### Q12.2 `[Senior]` Explain the four `this` binding rules.
+
+    **Short Answer:**
+
+    `this` depends on how a function is called, not where it is written, except for arrow functions.
+
+    **Rules in priority order:**
+
+    ```text
+    1. new binding
+    2. explicit binding - call/apply/bind
+    3. implicit binding - obj.method()
+    4. default binding - plain function call
+    ```
+
+    **Example:**
+
+    ```js
+    const user = {
+      name: 'Faizan',
+      greet() {
+        console.log(this.name)
+      },
+    }
+
+    user.greet() // Faizan
+
+    const fn = user.greet
+    fn() // undefined in strict mode
+    ```
+
+    When assigned to `fn`, the method loses its object receiver.
+
+    **Arrow function difference:**
+
+    ```js
+    const user = {
+      name: 'Faizan',
+      greetLater() {
+        setTimeout(() => {
+          console.log(this.name)
+        }, 100)
+      },
+    }
+    ```
+
+    Arrow function captures `this` from its surrounding lexical scope.
+
+    **React legacy example:**
+
+    ```jsx
+    class Form extends React.Component {
+      handleClick() {
+        console.log(this.state)
+      }
+
+      render() {
+        return <button onClick={this.handleClick}>Click</button>
+      }
+    }
+    ```
+
+    `this` is lost unless bound. Functional components avoid this entire class of bug.
+
+    **Senior insight:**
+
+    Most modern frontend code avoids complex `this` behavior by using functions, hooks and lexical closures.
+
+    ---
+
+    # CHAPTER 13 - MEMORY MANAGEMENT, WEAKMAP AND WEAKSET
+
+    ---
+
+    ### Q13.1 `[Senior]` What causes memory leaks in frontend applications?
+
+    **Short Answer:**
+
+    A memory leak happens when objects are no longer needed but are still reachable, so garbage collection cannot remove them.
+
+    **Common leak sources:**
+
+    ```text
+    1. Forgotten event listeners
+    2. Timers not cleared
+    3. Detached DOM nodes
+    4. Large closures
+    5. Global caches
+    6. WebSocket subscriptions not closed
+    7. Observers not disconnected
+    ```
+
+    **Example: listener leak:**
+
+    ```js
+    function setup() {
+      const data = new Array(100000).fill('x')
+
+      window.addEventListener('resize', () => {
+        console.log(data.length)
+      })
+    }
+    ```
+
+    The listener remains forever unless removed.
+
+    **Fixed version:**
+
+    ```js
+    function setup() {
+      const data = new Array(100000).fill('x')
+
+      const handler = () => console.log(data.length)
+      window.addEventListener('resize', handler)
+
+      return () => window.removeEventListener('resize', handler)
+    }
+    ```
+
+    **React cleanup example:**
+
+    ```tsx
+    useEffect(() => {
+      const handler = () => console.log('resize')
+      window.addEventListener('resize', handler)
+
+      return () => {
+        window.removeEventListener('resize', handler)
+      }
+    }, [])
+    ```
+
+    **How to debug:**
+
+    - Chrome DevTools Memory tab
+    - Heap snapshots
+    - Allocation timeline
+    - Detached DOM inspection
+    - Performance monitor
+
+    **Senior insight:**
+
+    Leaks usually appear after navigation, repeated modal open/close, infinite scrolling, charts, maps, subscriptions or real-time features.
+
+    ---
+
+    ### Q13.2 `[Senior]` Why do WeakMap and WeakSet exist?
+
+    **Short Answer:**
+
+    They allow storing object-related data without preventing garbage collection.
+
+    **Problem with Map:**
+
+    ```js
+    const cache = new Map()
+    let element = document.querySelector('#card')
+
+    cache.set(element, { clicks: 0 })
+    element.remove()
+    element = null
+    ```
+
+    The DOM element may still be retained because `Map` strongly references it.
+
+    **WeakMap solution:**
+
+    ```js
+    const metadata = new WeakMap()
+    let element = document.querySelector('#card')
+
+    metadata.set(element, { clicks: 0 })
+    element.remove()
+    element = null
+    ```
+
+    If no other references exist, the element can be garbage collected.
+
+    **Use cases:**
+
+    - DOM metadata
+    - private object data
+    - caching derived data for objects
+    - framework internals
+
+    **Constraints:**
+
+    - keys must be objects
+    - not iterable
+    - no `size`
+    - cannot list entries
+
+    **Senior insight:**
+
+    WeakMap is for attaching metadata to object lifetimes. If you need enumeration, use Map. If you need GC-friendly association, use WeakMap.
+
+    ---
+
+    # CHAPTER 14 - MODULES, TREE SHAKING AND BUNDLING
+
+    ---
+
+    ### Q14.1 `[Senior]` Why does ESM help tree shaking better than CommonJS?
+
+    **Short Answer:**
+
+    ES modules are statically analyzable. CommonJS is dynamic and resolved at runtime.
+
+    **Example:**
+
+    ```js
+    import { formatDate } from './utils'
+    ```
+
+    The bundler can see exactly which export is used.
+
+    CommonJS:
+
+    ```js
+    const utils = require('./utils')
+    utils.formatDate()
+    ```
+
+    The bundler may need to include more code because usage is dynamic.
+
+    **Why tree shaking matters:**
+
+    Tree shaking removes unused exports from final bundles. Smaller bundles improve:
+
+    - download time
+    - parse time
+    - execution time
+    - Time to Interactive
+    ```
+
+    **Real-world scenario:**
+
+    A dashboard imports one chart helper from a large utility file. If exports are not tree-shakeable, the bundle may include unnecessary helpers.
+
+    **Common mistakes:**
+
+    - using barrel files incorrectly
+    - importing entire libraries
+    - side-effectful modules
+    - mixing CJS and ESM in libraries
+
+    **Senior insight:**
+
+    Bundle performance is architecture. How you structure modules affects the final application performance.
+
+    ---
+
+    # CHAPTER 15 - WEB WORKERS AND CPU-HEAVY WORK
+
+    ---
+
+    ### Q15.1 `[Senior]` When should you use Web Workers?
+
+    **Short Answer:**
+
+    Use Web Workers for CPU-heavy tasks that would otherwise block the main UI thread.
+
+    **Good use cases:**
+
+    - image processing
+    - CSV parsing
+    - large JSON transformation
+    - data visualization calculations
+    - compression
+    - encryption
+    - complex search indexing
+
+    **Bad use cases:**
+
+    - simple API calls
+    - DOM manipulation
+    - small calculations
+
+    Workers cannot directly access the DOM.
+
+    **Example:**
+
+    ```js
+    // main.js
+    const worker = new Worker('/worker.js')
+
+    worker.postMessage({ numbers: largeArray })
+
+    worker.onmessage = event => {
+      console.log('Result:', event.data)
+    }
+    ```
+
+    ```js
+    // worker.js
+    self.onmessage = event => {
+      const result = event.data.numbers.reduce((sum, n) => sum + n, 0)
+      self.postMessage(result)
+    }
+    ```
+
+    **Real-world scenario:**
+
+    A financial dashboard imports a 20MB CSV and calculates aggregates. Doing it on the main thread freezes the page. Moving parsing and aggregation to a worker keeps the UI responsive.
+
+    **Senior insight:**
+
+    The event loop helps with async I/O, but it does not solve CPU blocking. Workers are the correct tool when JavaScript computation itself is heavy.
+
+    ---
+
+    # PART 2 - BROWSER INTERNALS AND PERFORMANCE
+
+    ---
+
+    # CHAPTER 16 - CRITICAL RENDERING PATH
+
+    ---
+
+    ### Q16.1 `[Senior]` What is the Critical Rendering Path?
+
+    **Short Answer:**
+
+    The Critical Rendering Path is the sequence of steps the browser takes to convert HTML, CSS and JavaScript into pixels on the screen.
+
+    **Steps:**
+
+    ```text
+    HTML -> DOM
+    CSS -> CSSOM
+    DOM + CSSOM -> Render Tree
+    Render Tree -> Layout
+    Layout -> Paint
+    Paint -> Composite
+    ```
+
+    **Deep Explanation:**
+
+    The browser parses HTML into the DOM tree. It parses CSS into the CSSOM tree. These are combined into the render tree, which contains only visible nodes. Then the browser calculates geometry during layout, paints pixels, and composites layers to the screen.
+
+    **Why this matters:**
+
+    Any code that repeatedly forces layout or paint can create jank.
+
+    **Real-world scenario:**
+
+    ```js
+    for (const item of items) {
+      item.style.width = `${container.offsetWidth}px`
+    }
+    ```
+
+    Reading `offsetWidth` and writing styles repeatedly can force layout recalculation many times.
+
+    **Senior insight:**
+
+    Performance optimization starts by knowing which browser stage your code is stressing: network, parsing, JavaScript, layout, paint or composite.
+
+    ---
+
+    # CHAPTER 17 - REFLOW, REPAINT AND COMPOSITE
+
+    ---
+
+    ### Q17.1 `[Senior]` What is the difference between reflow, repaint and composite?
+
+    **Short Answer:**
+
+    Reflow recalculates layout. Repaint redraws pixels. Composite combines layers.
+
+    **Triggers layout/reflow:**
+
+    ```text
+    width
+    height
+    margin
+    padding
+    top/left
+    font-size
+    display
+    DOM insert/remove
+    reading layout properties after writes
+    ```
+
+    **Triggers paint:**
+
+    ```text
+    color
+    background
+    box-shadow
+    border-color
+    visibility
+    ```
+
+    **Composite-only properties:**
+
+    ```text
+    transform
+    opacity
+    filter - often composited depending on browser
+    ```
+
+    **Bad animation:**
+
+    ```css
+    .box {
+      transition: left 300ms;
+    }
+
+    .box.open {
+      left: 300px;
+    }
+    ```
+
+    `left` affects layout.
+
+    **Better animation:**
+
+    ```css
+    .box {
+      transition: transform 300ms;
+    }
+
+    .box.open {
+      transform: translateX(300px);
+    }
+    ```
+
+    `transform` is usually handled by the compositor.
+
+    **Senior insight:**
+
+    The best animation is not the one with the cleanest CSS. It is the one that avoids layout and paint on every frame.
+
+    ---
+
+    # CHAPTER 18 - WEB PERFORMANCE INVESTIGATION
+
+    ---
+
+    ### Q18.1 `[Staff+]` A React page loads slowly. How do you investigate?
+
+    **Short Answer:**
+
+    Investigate using data first: network, bundle size, rendering, JavaScript execution, layout and API latency.
+
+    **Step-by-step approach:**
+
+    ```text
+    1. Reproduce with throttling
+    2. Check Core Web Vitals
+    3. Inspect Network waterfall
+    4. Analyze JS bundle
+    5. Record Performance profile
+    6. Check React Profiler
+    7. Inspect image/font loading
+    8. Check API latency
+    9. Review caching strategy
+    10. Measure after each fix
+    ```
+
+    **Real-world scenario:**
+
+    Network tab shows:
+
+    ```text
+    main.js = 4MB
+    hero image = 3MB
+    API response = 2.5s
+    font loads late
+    ```
+
+    Possible fixes:
+
+    - route-level code splitting
+    - lazy-load non-critical features
+    - compress and resize images
+    - use modern image formats
+    - preload critical assets
+    - defer third-party scripts
+    - cache API responses
+    - server-side pagination
+    ```
+
+    **Common mistake:**
+
+    Blindly adding `React.memo` without measuring. If the real bottleneck is bundle size or API latency, memoization does not fix first load.
+
+    **Senior insight:**
+
+    Performance work must be measurement-driven. Every optimization should have before/after evidence.
+
+    ---
+
+    # CHAPTER 19 - BROWSER STORAGE
+
+    ---
+
+    ### Q19.1 `[Senior]` Compare cookies, localStorage, sessionStorage and IndexedDB.
+
+    **Short Answer:**
+
+    Use each storage option based on size, lifetime, security and access requirements.
+
+    | Storage | Size | Lifetime | Sent to server | Best for |
+    |---|---|---|---|---|
+    | Cookies | small | configurable | yes | auth/session metadata |
+    | localStorage | medium | persistent | no | simple preferences |
+    | sessionStorage | medium | tab session | no | temporary tab state |
+    | IndexedDB | large | persistent | no | offline data, large structured data |
+
+    **Security warning:**
+
+    Do not store sensitive tokens in `localStorage` if XSS risk exists. JavaScript can read it. HttpOnly cookies cannot be read by JavaScript.
+
+    **Real-world scenario:**
+
+    - theme preference: localStorage
+    - shopping cart draft: localStorage or IndexedDB
+    - large offline product catalog: IndexedDB
+    - secure session token: HttpOnly Secure cookie
+
+    **Senior insight:**
+
+    Storage choice is a security and architecture decision, not just convenience.
+
+    ---
+
+    # CHAPTER 20 - SERVICE WORKERS AND OFFLINE STRATEGY
+
+    ---
+
+    ### Q20.1 `[Staff+]` What is a Service Worker and when should you use it?
+
+    **Short Answer:**
+
+    A Service Worker is a background script that can intercept network requests, cache resources and enable offline behavior.
+
+    **Use cases:**
+
+    - offline support
+    - cache static assets
+    - background sync
+    - push notifications
+    - faster repeat visits
+
+    **Basic mental model:**
+
+    ```text
+    Page -> Service Worker -> Network / Cache
+    ```
+
+    **Caching strategies:**
+
+    ```text
+    Cache First - static assets
+    Network First - fresh API data
+    Stale While Revalidate - fast response plus background refresh
+    Network Only - sensitive data
+    Cache Only - pre-cached assets
+    ```
+
+    **Real-world scenario:**
+
+    A field-sales app must work when internet is unstable. Service Worker caches shell UI and IndexedDB stores pending operations. When network returns, background sync submits pending data.
+
+    **Common mistake:**
+
+    Caching API responses without invalidation. Users may see stale data for too long.
+
+    **Senior insight:**
+
+    Offline support is not only a technical feature. It requires product decisions around data freshness, conflict resolution and user feedback.
+
+    ---
+
+    # PART 3 - TYPESCRIPT
+
+    ---
+
+    # CHAPTER 21 - TYPE SYSTEM FUNDAMENTALS
+
+    ---
+
+    ### Q21.1 `[Senior]` What is the difference between `any`, `unknown` and `never`?
+
+    **Short Answer:**
+
+    `any` disables type safety. `unknown` forces safe narrowing. `never` represents impossible values.
+
+    **Example:**
+
+    ```ts
+    let a: any = 10
+    a.foo.bar() // no compile error, runtime crash possible
+
+    let b: unknown = 10
+    // b.toFixed() // error
+
+    if (typeof b === 'number') {
+      b.toFixed(2) // safe
+    }
+    ```
+
+    **`never` for exhaustive checks:**
+
+    ```ts
+    type Status = 'idle' | 'loading' | 'success' | 'error'
+
+    function render(status: Status) {
+      switch (status) {
+        case 'idle': return 'Idle'
+        case 'loading': return 'Loading'
+        case 'success': return 'Success'
+        case 'error': return 'Error'
+        default: {
+          const exhaustive: never = status
+          return exhaustive
+        }
+      }
+    }
+    ```
+
+    **Real-world scenario:**
+
+    API responses should often enter the app as `unknown`, then be validated.
+
+    ```ts
+    async function getData(): Promise<unknown> {
+      const res = await fetch('/api/user')
+      return res.json()
+    }
+    ```
+
+    **Senior insight:**
+
+    Use `unknown` at trust boundaries: network responses, localStorage, third-party scripts and user-generated data.
+
+    ---
+
+    # CHAPTER 22 - GENERICS AND CONDITIONAL TYPES
+
+    ---
+
+    ### Q22.1 `[Senior]` Why do generics exist?
+
+    **Short Answer:**
+
+    Generics allow reusable code while preserving type information.
+
+    **Without generics:**
+
+    ```ts
+    function identity(value: any): any {
       return value
-    },
-  })
-}
-
-// Usage
-const state = createReactive({ count: 0, user: { name: 'Alice' } }, (prop, value) => {
-  console.log(`Changed: ${prop} = ${value}`)
-})
-
-state.count = 5           // Logs: "Changed: count = 5"
-state.user.name = 'Bob'   // Logs: "Changed: name = Bob"
-```
-
-**Why `Reflect`?**
-`Reflect` provides the default behavior for each Proxy trap. Use `Reflect.set` instead of `obj[prop] = value` to ensure correct prototype chain behavior and to forward the `receiver` argument properly.
-
-**Production use cases:**
-- **Vue 3's reactivity system** — entire reactivity is built on Proxy
-- **Validation layers** — reject invalid property assignments at runtime
-- **API client SDK** — intercept property access to dynamically build API URLs:
-
-```typescript
-// Dynamic API client using Proxy
-const api = new Proxy({}, {
-  get(_, resource: string) {
-    return {
-      get: (id: string) => fetch(`/api/${resource}/${id}`).then(r => r.json()),
-      list: () => fetch(`/api/${resource}`).then(r => r.json()),
     }
-  },
-})
+    ```
 
-await api.users.get('123')     // GET /api/users/123
-await api.products.list()       // GET /api/products
-```
+    This loses type safety.
 
----
+    **With generics:**
 
----
-
-# CHAPTER 6 — MEMORY MANAGEMENT & PERFORMANCE
-
----
-
-### Q6.1 `[Senior]` What causes memory leaks in JavaScript? Give three real production examples and their fixes.
-
-**Answer:**
-
-JavaScript uses garbage collection (mark-and-sweep). A memory leak occurs when objects are no longer needed but are still reachable — the GC can't collect them.
-
-**Leak 1: Forgotten event listeners**
-```typescript
-// BUG: Listener never removed — element and handler stay in memory
-function setupScrollLogger() {
-  const data = new Array(10000).fill('x') // Large data captured in closure
-
-  window.addEventListener('scroll', () => {
-    console.log(data.length) // Closure keeps data alive forever
-  })
-}
-
-// FIX: Store reference and remove on cleanup
-function setupScrollLogger() {
-  const data = new Array(10000).fill('x')
-  const handler = () => console.log(data.length)
-
-  window.addEventListener('scroll', handler)
-  return () => window.removeEventListener('scroll', handler)
-}
-
-const cleanup = setupScrollLogger()
-// Later: cleanup()
-```
-
-**Leak 2: Detached DOM nodes**
-```typescript
-// BUG: Element removed from DOM but still referenced in JS
-let cachedElement = document.getElementById('tooltip')
-document.body.removeChild(cachedElement)
-// cachedElement still holds a reference — entire subtree stays in memory
-
-// FIX: Use WeakRef (ES2021)
-let cachedRef = new WeakRef(document.getElementById('tooltip'))
-// Later:
-const element = cachedRef.deref() // Returns element or undefined if GC'd
-```
-
-**Leak 3: Closures holding unneeded references**
-```typescript
-// BUG: Unused variable in closure prevents GC of large data
-function createHandler(hugeData: ArrayBuffer) {
-  const id = processData(hugeData)
-
-  return function handler() {
-    console.log(id) // Only uses id, but closure captures hugeData too
-  }
-}
-
-// FIX: Narrow the closure scope
-function createHandler(hugeData: ArrayBuffer) {
-  const id = processData(hugeData)
-  hugeData = null! // Release reference explicitly
-
-  return function handler() {
-    console.log(id)
-  }
-}
-```
-
-**Modern tools for detection:**
-- Chrome DevTools → Memory → Heap Snapshot → Compare snapshots
-- `FinalizationRegistry` (ES2021) — callback when object is GC'd
-- `WeakRef`, `WeakMap`, `WeakSet` — hold references without preventing GC
-
----
-
-### Q6.2 `[Senior]` Explain `WeakMap` and `WeakSet`. Why do they exist and when do you use them?
-
-**Answer:**
-
-`WeakMap` and `WeakSet` hold references to objects **without preventing garbage collection**. If the only reference to an object is inside a WeakMap/WeakSet, the object can be GC'd.
-
-```typescript
-// Regular Map — prevents GC
-const cache = new Map()
-let user = { name: 'Alice' }
-cache.set(user, computeExpensiveResult(user))
-user = null // Object still alive — cache.keys() holds a reference
-
-// WeakMap — allows GC
-const cache = new WeakMap()
-let user = { name: 'Alice' }
-cache.set(user, computeExpensiveResult(user))
-user = null // Object is eligible for GC — WeakMap releases it automatically
-```
-
-**Production use cases:**
-
-**1. Private data storage (pre-#private fields):**
-```typescript
-const privateData = new WeakMap<object, { password: string }>()
-
-class User {
-  constructor(name: string, password: string) {
-    this.name = name
-    privateData.set(this, { password }) // Truly private, GC-friendly
-  }
-
-  checkPassword(input: string): boolean {
-    return privateData.get(this)?.password === input
-  }
-}
-```
-
-**2. DOM metadata without memory leaks:**
-```typescript
-const elementMetadata = new WeakMap<HTMLElement, { clickCount: number }>()
-
-function trackClicks(element: HTMLElement) {
-  element.addEventListener('click', () => {
-    const meta = elementMetadata.get(element) ?? { clickCount: 0 }
-    meta.clickCount++
-    elementMetadata.set(element, meta)
-  })
-}
-// When element is removed from DOM and dereferenced, WeakMap entry is auto-cleaned
-```
-
-**Constraints:**
-- Keys must be objects (not primitives)
-- Not iterable — you can't enumerate entries (by design — you shouldn't depend on contents that may be GC'd)
-- No `.size` property
-
----
-
----
-
-# CHAPTER 7 — MODULE SYSTEM
-
----
-
-### Q7.1 `[Senior]` What is the difference between `import/export` (ESM) and `require/module.exports` (CJS)? Why does it matter?
-
-**Answer:**
-
-| Feature | ESM (`import/export`) | CJS (`require/module.exports`) |
-|---|---|---|
-| Parsing | Static (resolved at parse time) | Dynamic (resolved at runtime) |
-| Tree-shaking | Yes — bundler can eliminate unused exports | No — entire module included |
-| Top-level `await` | Supported | Not supported |
-| Default in | Browsers, modern Node | Node (legacy), bundlers |
-| Loading | Asynchronous | Synchronous |
-
-**Why static analysis matters:**
-
-```typescript
-// ESM — bundler KNOWS which exports are used
-import { formatDate } from './utils' // Only formatDate is included in bundle
-
-// CJS — bundler CANNOT know until runtime
-const utils = require('./utils') // Entire module included
-utils.formatDate()
-```
-
-**Production impact:** A large utility library with 200 functions as ESM exports only ships the 3 functions you actually import. The same library as CJS ships all 200 — potentially adding 50KB+ to your bundle.
-
-**Conditional imports — ESM vs CJS:**
-```typescript
-// CJS — dynamic require works
-if (process.env.NODE_ENV === 'test') {
-  const mock = require('./mock')
-}
-
-// ESM — use dynamic import()
-if (process.env.NODE_ENV === 'test') {
-  const mock = await import('./mock')
-}
-```
-
-**Interop headaches in Node.js:**
-```javascript
-// In ESM file, importing CJS module
-import cjsModule from './legacy.cjs' // Gets default export
-
-// In CJS file, importing ESM module
-const esmModule = await import('./modern.mjs') // Must use dynamic import
-```
-
----
-
----
-
-# CHAPTER 8 — MODERN API REPLACEMENTS (OLD → NEW)
-
-> **What interviewers are evaluating:** Whether you stay current and understand why modern APIs exist, not just that they do.
-
----
-
-### Q8.1 `[Mid]` What modern JavaScript features have replaced common utility library functions? Give five examples.
-
-**Answer:**
-
-**1. Lodash `_.cloneDeep` → `structuredClone` (2022)**
-```javascript
-// OLD
-import { cloneDeep } from 'lodash'
-const copy = cloneDeep(complexObject)
-
-// NEW — built into every runtime
-const copy = structuredClone(complexObject)
-// Handles: nested objects, Date, Map, Set, ArrayBuffer, circular references
-// Does NOT handle: functions, DOM nodes, Error objects
-```
-
-**2. Lodash `_.get` → Optional chaining `?.` (ES2020)**
-```javascript
-// OLD
-const city = _.get(user, 'address.city', 'Unknown')
-
-// NEW
-const city = user?.address?.city ?? 'Unknown'
-```
-
-**3. Lodash `_.flatten` / `_.flatMap` → `Array.prototype.flat/flatMap` (ES2019)**
-```javascript
-// OLD
-_.flatten([[1, 2], [3, [4]]]) // [1, 2, 3, [4]]
-_.flattenDeep([[1, [2, [3]]]]) // [1, 2, 3]
-
-// NEW
-[[1, 2], [3, [4]]].flat()       // [1, 2, 3, [4]]
-[[1, [2, [3]]]].flat(Infinity)  // [1, 2, 3]
-```
-
-**4. `String.prototype.replaceAll` (ES2021)**
-```javascript
-// OLD
-'hello-world-foo'.split('-').join(' ') // "hello world foo"
-'hello-world-foo'.replace(/-/g, ' ')   // "hello world foo"
-
-// NEW
-'hello-world-foo'.replaceAll('-', ' ') // "hello world foo"
-```
-
-**5. `Object.fromEntries` (ES2019)**
-```javascript
-// OLD
-const obj = {}
-entries.forEach(([key, value]) => { obj[key] = value })
-
-// NEW
-const obj = Object.fromEntries(entries)
-
-// Powerful composition: filter object keys
-const filtered = Object.fromEntries(
-  Object.entries(config).filter(([key]) => key.startsWith('NEXT_'))
-)
-```
-
-**6. `Array.prototype.at()` (ES2022)**
-```javascript
-// OLD
-const last = arr[arr.length - 1]
-
-// NEW
-const last = arr.at(-1)
-const secondToLast = arr.at(-2)
-```
-
-**7. `Object.hasOwn()` (ES2022)**
-```javascript
-// OLD — can break if object overrides hasOwnProperty
-obj.hasOwnProperty('key')
-Object.prototype.hasOwnProperty.call(obj, 'key')
-
-// NEW — safe, always works
-Object.hasOwn(obj, 'key')
-```
-
-**8. `Object.groupBy()` (ES2024)**
-```javascript
-// OLD
-const grouped = items.reduce((acc, item) => {
-  const key = item.category
-  ;(acc[key] ??= []).push(item)
-  return acc
-}, {})
-
-// NEW
-const grouped = Object.groupBy(items, item => item.category)
-```
-
----
-
----
-
-# PART 2 — TYPESCRIPT
-
----
-
-# CHAPTER 9 — TYPE SYSTEM FUNDAMENTALS
-
-> **What interviewers are evaluating:** Whether you use TypeScript as a safety net or truly leverage the type system to prevent bugs at compile time.
-
----
-
-### Q9.1 `[Mid]` What is the difference between `type` and `interface`? When do you use each?
-
-**Answer:**
-
-Both can describe object shapes, but they have different capabilities:
-
-```typescript
-// Interface — extendable, mergeable
-interface User {
-  id: string
-  name: string
-}
-
-interface User {
-  email: string // Declaration merging — extends the same interface
-}
-// User now has id, name, AND email
-
-// Type — unions, intersections, mapped types, primitives
-type Status = 'active' | 'inactive' | 'banned' // Union — interfaces can't do this
-type UserOrAdmin = User | Admin // Union type
-type ReadonlyUser = Readonly<User> // Mapped utility type
-```
-
-**When to use each:**
-
-| Use case | Choose |
-|---|---|
-| Object shapes (API responses, props) | `interface` — extendable, better error messages |
-| Union types | `type` — only option |
-| Intersection types | `type` — cleaner syntax |
-| Mapped/conditional types | `type` — only option |
-| Declaration merging (extending library types) | `interface` — only option |
-| Primitives/tuples | `type` — only option |
-
-**Production rule:** Use `interface` for things that represent a contract (props, API shape, class shape). Use `type` for everything else (unions, utility types, computed types).
-
----
-
-### Q9.2 `[Senior]` What is the difference between `any`, `unknown`, and `never`? This is a common mistake.
-
-**Answer:**
-
-```typescript
-// any — disables type checking entirely. Avoid.
-let x: any = 5
-x.foo.bar.baz() // No error at compile time — crashes at runtime
-
-// unknown — type-safe alternative to any. Must narrow before using.
-let y: unknown = 5
-y.toFixed(2) // ERROR: Object is of type 'unknown'
-
-if (typeof y === 'number') {
-  y.toFixed(2) // OK — narrowed to number
-}
-
-// never — represents values that should never occur
-function throwError(msg: string): never {
-  throw new Error(msg) // Function never returns
-}
-
-// never in exhaustive switch
-type Shape = 'circle' | 'square' | 'triangle'
-
-function getArea(shape: Shape): number {
-  switch (shape) {
-    case 'circle': return Math.PI * 10
-    case 'square': return 100
-    case 'triangle': return 50
-    default:
-      const _exhaustive: never = shape // Error if a case is missing
-      throw new Error(`Unhandled shape: ${_exhaustive}`)
-  }
-}
-```
-
-**Why `unknown` over `any` in production:**
-
-```typescript
-// API response — you don't know what the server sends
-async function fetchData(url: string): Promise<unknown> {
-  const response = await fetch(url)
-  return response.json()
-}
-
-// Consumer must validate before using
-const data = await fetchData('/api/user')
-
-// BAD: Cast to any and pray
-const name = (data as any).name
-
-// GOOD: Validate with type guard
-function isUser(data: unknown): data is User {
-  return (
-    typeof data === 'object' &&
-    data !== null &&
-    'name' in data &&
-    typeof (data as User).name === 'string'
-  )
-}
-
-if (isUser(data)) {
-  console.log(data.name) // Type-safe
-}
-```
-
----
-
-### Q9.3 `[Senior]` What is the difference between `==` and `===` in JavaScript, and how does TypeScript handle this?
-
-**Answer:**
-
-`==` performs type coercion before comparison. `===` does not — it checks value AND type.
-
-```javascript
-// Type coercion nightmares with ==
-0 == ''          // true (both coerce to 0)
-0 == '0'         // true
-'' == '0'        // false (inconsistent!)
-false == '0'     // true
-false == ''      // true
-null == undefined // true
-NaN == NaN       // false (nothing equals NaN)
-
-// === — no surprises
-0 === ''         // false
-0 === '0'        // false
-null === undefined // false
-```
-
-**TypeScript's role:**
-TypeScript's strict mode prevents comparing incompatible types:
-
-```typescript
-// TypeScript catches nonsensical comparisons
-if (someString === someNumber) {} // Error: This comparison appears to be unintentional
-
-// But allows legitimate narrowing
-if (typeof x === 'string') {} // OK — type guard pattern
-```
-
-**Production rule:** Always use `===`. The only legitimate `==` is `value == null` which checks for both `null` and `undefined` in one expression — and even that has a `===` alternative: `value === null || value === undefined`.
-
----
-
----
-
-# CHAPTER 10 — GENERICS & CONDITIONAL TYPES
-
-> **What interviewers are evaluating:** Whether you can write reusable, type-safe abstractions — not just consume them.
-
----
-
-### Q10.1 `[Senior]` Write a generic function that safely accesses a nested property by path.
-
-**Answer:**
-
-```typescript
-// Type-safe deep property access
-type PathValue<T, P extends string> =
-  P extends `${infer Key}.${infer Rest}`
-    ? Key extends keyof T
-      ? PathValue<T[Key], Rest>
-      : never
-    : P extends keyof T
-      ? T[P]
-      : never
-
-function get<T, P extends string>(
-  obj: T,
-  path: P,
-): PathValue<T, P> {
-  return path.split('.').reduce((current: any, key) => current?.[key], obj)
-}
-
-// Usage — fully type-safe
-interface Config {
-  database: {
-    host: string
-    port: number
-    credentials: {
-      username: string
-      password: string
+    ```ts
+    function identity<T>(value: T): T {
+      return value
     }
-  }
-}
 
-const config: Config = {
-  database: { host: 'localhost', port: 5432, credentials: { username: 'admin', password: 'secret' } }
-}
+    const name = identity('Faizan') // string
+    const age = identity(31) // number
+    ```
 
-const host = get(config, 'database.host')                   // type: string
-const port = get(config, 'database.port')                   // type: number
-const user = get(config, 'database.credentials.username')   // type: string
-const bad = get(config, 'database.nonexistent')             // type: never — compile error
-```
+    **Real-world example:**
 
----
-
-### Q10.2 `[Staff+]` Explain conditional types and `infer`. Write a utility that extracts the return type of an async function.
-
-**Answer:**
-
-Conditional types follow the pattern `T extends U ? X : Y` — if T is assignable to U, resolve to X, otherwise Y.
-
-`infer` declares a type variable inside a conditional type that TypeScript infers from the match:
-
-```typescript
-// Built-in ReturnType does this:
-type ReturnType<T extends (...args: any) => any> =
-  T extends (...args: any) => infer R ? R : any
-
-// But for async functions, ReturnType gives you Promise<User>, not User
-type AsyncReturnType<T extends (...args: any) => Promise<any>> =
-  T extends (...args: any) => Promise<infer R> ? R : never
-
-// Usage
-async function fetchUser(): Promise<User> { /* ... */ }
-
-type Result = AsyncReturnType<typeof fetchUser> // User (not Promise<User>)
-```
-
-**More practical conditional types:**
-
-```typescript
-// Extract event payload from an event map
-type EventMap = {
-  'user.created': { userId: string; email: string }
-  'user.deleted': { userId: string }
-  'order.placed': { orderId: string; amount: number }
-}
-
-type EventPayload<E extends keyof EventMap> = EventMap[E]
-
-function emit<E extends keyof EventMap>(event: E, payload: EventPayload<E>) {
-  // Type-safe event emission
-}
-
-emit('user.created', { userId: '1', email: 'a@b.com' }) // OK
-emit('user.created', { userId: '1' })                    // Error: missing email
-emit('order.placed', { userId: '1' })                    // Error: wrong shape
-```
-
----
-
----
-
-# CHAPTER 11 — UTILITY TYPES & MAPPED TYPES
-
----
-
-### Q11.1 `[Senior]` Explain `Partial`, `Required`, `Pick`, `Omit`, and `Record`. Show production use cases.
-
-**Answer:**
-
-```typescript
-interface User {
-  id: string
-  name: string
-  email: string
-  avatar?: string
-}
-
-// Partial<T> — all properties optional
-// Use: Update payloads where you only send changed fields
-type UserUpdate = Partial<User>
-// { id?: string; name?: string; email?: string; avatar?: string }
-function updateUser(id: string, patch: Partial<Omit<User, 'id'>>) {}
-updateUser('1', { name: 'Bob' }) // Only update name
-
-// Required<T> — all properties required
-// Use: Ensure all config options are explicitly set
-type StrictUser = Required<User>
-// { id: string; name: string; email: string; avatar: string }
-
-// Pick<T, K> — subset of properties
-// Use: API responses that only include certain fields
-type UserPreview = Pick<User, 'id' | 'name'>
-// { id: string; name: string }
-
-// Omit<T, K> — exclude specific properties
-// Use: Creating new entities (server assigns id)
-type CreateUserInput = Omit<User, 'id'>
-// { name: string; email: string; avatar?: string }
-
-// Record<K, V> — object with keys K and values V
-// Use: Lookup tables, dictionaries
-type UserRoles = Record<string, 'admin' | 'user' | 'guest'>
-const roles: UserRoles = { alice: 'admin', bob: 'user' }
-```
-
-**Composing utility types (production pattern):**
-```typescript
-// API mutation input — no id (server generates), all other fields required
-type CreateUserDTO = Required<Omit<User, 'id'>>
-
-// API patch input — id required, everything else optional
-type PatchUserDTO = Pick<User, 'id'> & Partial<Omit<User, 'id'>>
-```
-
----
-
-### Q11.2 `[Staff+]` Write a custom mapped type that makes all properties of an object deeply readonly.
-
-**Answer:**
-
-```typescript
-type DeepReadonly<T> = {
-  readonly [K in keyof T]: T[K] extends object
-    ? T[K] extends Function
-      ? T[K]                    // Don't freeze functions
-      : DeepReadonly<T[K]>      // Recurse into nested objects
-    : T[K]                      // Primitives are naturally readonly
-}
-
-// Usage
-interface AppState {
-  user: {
-    name: string
-    preferences: {
-      theme: 'light' | 'dark'
-      language: string
+    ```ts
+    interface ApiResponse<T> {
+      data: T
+      status: number
+      message: string
     }
-  }
-  items: string[]
-}
 
-type FrozenState = DeepReadonly<AppState>
-
-const state: FrozenState = {
-  user: { name: 'Alice', preferences: { theme: 'light', language: 'en' } },
-  items: ['a', 'b'],
-}
-
-state.user.name = 'Bob'                    // Error: Cannot assign to 'name'
-state.user.preferences.theme = 'dark'       // Error: Cannot assign to 'theme'
-state.items.push('c')                       // Error: Property 'push' does not exist
-```
-
-**Production use:** Redux/Zustand store types — state should never be mutated directly. `DeepReadonly` catches mutations at compile time rather than relying on runtime immutability checks like Immer.
-
----
-
----
-
-# CHAPTER 12 — TYPE GUARDS & NARROWING
-
----
-
-### Q12.1 `[Senior]` What are the different ways to narrow types in TypeScript? Rank them by reliability.
-
-**Answer:**
-
-```typescript
-// 1. typeof — works for primitives
-function process(value: string | number) {
-  if (typeof value === 'string') {
-    value.toUpperCase() // Narrowed to string
-  }
-}
-
-// 2. instanceof — works for class instances
-function handleError(err: Error | string) {
-  if (err instanceof TypeError) {
-    err.message // Narrowed to TypeError
-  }
-}
-
-// 3. 'in' operator — checks for property existence
-function render(shape: Circle | Rectangle) {
-  if ('radius' in shape) {
-    shape.radius // Narrowed to Circle
-  }
-}
-
-// 4. Discriminated union (BEST for complex types)
-type Result =
-  | { status: 'success'; data: User }
-  | { status: 'error'; error: string }
-
-function handle(result: Result) {
-  if (result.status === 'success') {
-    result.data // Narrowed — TypeScript knows this branch has data
-  } else {
-    result.error // Narrowed — TypeScript knows this branch has error
-  }
-}
-
-// 5. Custom type predicate (user-defined type guard)
-function isUser(value: unknown): value is User {
-  return (
-    typeof value === 'object' &&
-    value !== null &&
-    'id' in value &&
-    'name' in value
-  )
-}
-
-// 6. Assertion function (throws if wrong)
-function assertIsUser(value: unknown): asserts value is User {
-  if (typeof value !== 'object' || value === null || !('id' in value)) {
-    throw new Error('Not a User')
-  }
-}
-```
-
-**Reliability ranking:**
-1. **Discriminated unions** — best; TypeScript exhaustively narrows
-2. **`typeof`** — excellent for primitives; limited to `string | number | boolean | symbol | bigint | undefined | function | object`
-3. **`in` operator** — good for structural differentiation
-4. **Custom type predicates** — powerful but you must implement correctly; TypeScript trusts your implementation
-5. **`instanceof`** — works for classes; breaks across realms (iframe, worker)
-
-**Production best practice — discriminated unions:**
-```typescript
-// API response pattern used across entire application
-type ApiResponse<T> =
-  | { ok: true; data: T }
-  | { ok: false; error: { code: string; message: string } }
-
-// Narrowing is automatic and exhaustive
-async function fetchUser(id: string): Promise<ApiResponse<User>> {
-  const res = await fetch(`/api/users/${id}`)
-  if (!res.ok) {
-    return { ok: false, error: { code: 'FETCH_FAILED', message: res.statusText } }
-  }
-  return { ok: true, data: await res.json() }
-}
-
-const result = await fetchUser('1')
-if (result.ok) {
-  console.log(result.data.name) // Type-safe access
-} else {
-  console.log(result.error.code) // Type-safe error
-}
-```
-
----
-
----
-
-# CHAPTER 13 — DECLARATION FILES & MODULE AUGMENTATION
-
----
-
-### Q13.1 `[Senior]` How do you add types to a library that doesn't have them? How do you extend existing type declarations?
-
-**Answer:**
-
-**Adding types for an untyped library:**
-```typescript
-// src/types/legacy-analytics.d.ts
-declare module 'legacy-analytics' {
-  export function track(event: string, data?: Record<string, unknown>): void
-  export function identify(userId: string, traits?: Record<string, unknown>): void
-  export function page(name: string): void
-}
-
-// Now you can import with type safety
-import { track, identify } from 'legacy-analytics'
-track('button.click', { buttonId: 'cta' }) // Type-checked
-```
-
-**Extending existing library types (module augmentation):**
-```typescript
-// Extending Express Request with custom user property
-declare module 'express-serve-static-core' {
-  interface Request {
-    user?: {
+    interface User {
       id: string
-      role: 'admin' | 'user'
+      name: string
     }
-  }
-}
 
-// Now req.user is available everywhere
-app.get('/profile', (req, res) => {
-  if (req.user?.role === 'admin') { /* ... */ }
-})
-```
-
-**Extending Window:**
-```typescript
-// src/types/global.d.ts
-declare global {
-  interface Window {
-    analytics: {
-      track: (event: string) => void
+    const response: ApiResponse<User> = {
+      data: { id: '1', name: 'Faizan' },
+      status: 200,
+      message: 'OK',
     }
-    __APP_VERSION__: string
-  }
-}
+    ```
 
-export {} // Required to make this a module
+    **Senior insight:**
 
-// Now window.analytics is typed everywhere
-window.analytics.track('page.view')
-```
+    Generics are not about making types complex. They are about preserving relationships between inputs and outputs.
 
-**Extending ProcessEnv (Next.js pattern):**
-```typescript
-// src/types/env.d.ts
-declare namespace NodeJS {
-  interface ProcessEnv {
-    DATABASE_URL: string
-    NEXT_PUBLIC_APP_URL: string
-    NODE_ENV: 'development' | 'production' | 'test'
-  }
-}
+    ---
 
-// Now process.env.DATABASE_URL is typed as string (not string | undefined)
-```
+    ### Q22.2 `[Staff+]` Explain conditional types and `infer`.
 
----
+    **Short Answer:**
 
----
+    Conditional types choose one type or another based on a type relationship. `infer` extracts a type from another type.
 
-# CHAPTER 14 — ADVANCED TYPESCRIPT PATTERNS IN PRODUCTION
+    **Example:**
 
----
+    ```ts
+    type AsyncReturnType<T> = T extends (...args: any[]) => Promise<infer R>
+      ? R
+      : never
 
-### Q14.1 `[Staff+]` How do you create a type-safe event emitter in TypeScript?
-
-**Answer:**
-
-```typescript
-type EventMap = Record<string, any>
-
-class TypedEmitter<Events extends EventMap> {
-  private listeners = new Map<keyof Events, Set<Function>>()
-
-  on<E extends keyof Events>(event: E, listener: (payload: Events[E]) => void): () => void {
-    if (!this.listeners.has(event)) {
-      this.listeners.set(event, new Set())
+    async function fetchUser() {
+      return { id: '1', name: 'Faizan' }
     }
-    this.listeners.get(event)!.add(listener)
 
-    // Return unsubscribe function
-    return () => this.listeners.get(event)?.delete(listener)
-  }
+    type User = AsyncReturnType<typeof fetchUser>
+    ```
 
-  emit<E extends keyof Events>(event: E, payload: Events[E]): void {
-    this.listeners.get(event)?.forEach(fn => fn(payload))
-  }
-}
+    **Why this exists:**
 
-// Usage — all events and payloads are type-checked
-interface AppEvents {
-  'user:login': { userId: string; timestamp: number }
-  'user:logout': { userId: string }
-  'feed:new-item': { itemId: string; content: string }
-  'notification:show': { message: string; type: 'success' | 'error' }
-}
-
-const bus = new TypedEmitter<AppEvents>()
-
-bus.on('user:login', ({ userId, timestamp }) => {
-  // userId: string, timestamp: number — fully typed
-})
-
-bus.emit('user:login', { userId: '123', timestamp: Date.now() }) // OK
-bus.emit('user:login', { userId: 123 })  // Error: number not assignable to string
-bus.emit('unknown:event', {})             // Error: not a valid event
-```
-
----
-
-### Q14.2 `[Staff+]` What is the `satisfies` operator and why was it added?
-
-**Answer:**
-
-`satisfies` (TypeScript 4.9) validates that an expression matches a type WITHOUT widening it. It gives you type-checking AND preserves the narrow literal type.
-
-```typescript
-type Color = 'red' | 'green' | 'blue'
-type Theme = Record<string, Color | Color[]>
-
-// Problem with type annotation — widens the type
-const theme: Theme = {
-  primary: 'red',
-  secondary: 'blue',
-  accents: ['red', 'green'],
-}
-theme.primary.toUpperCase() // Error: string | string[] has no toUpperCase
-// TypeScript only knows it's Color | Color[] — lost the narrow 'red' type
-
-// Solution with satisfies — validates without widening
-const theme = {
-  primary: 'red',
-  secondary: 'blue',
-  accents: ['red', 'green'],
-} satisfies Theme
-theme.primary.toUpperCase()  // OK! TypeScript knows it's 'red' (string literal)
-theme.accents.map(c => c)    // OK! TypeScript knows it's string[] (not string | string[])
-
-// Catches errors too
-const badTheme = {
-  primary: 'red',
-  secondary: 'purple', // Error: 'purple' not assignable to Color
-} satisfies Theme
-```
-
-**Production use cases:**
-
-```typescript
-// Route configuration — validate shape but preserve literal types
-const routes = {
-  home: '/',
-  profile: '/profile/:id',
-  settings: '/settings',
-} satisfies Record<string, string>
-
-// TypeScript knows routes.home is '/' not just string
-type HomeRoute = typeof routes.home // '/' (literal type preserved)
-```
-
----
-
----
-
-# PART 3 — CSS
-
----
-
-# CHAPTER 15 — LAYOUT SYSTEMS
-
-> **What interviewers are evaluating:** Whether you reach for Flexbox/Grid instinctively or still use floats, clearfix, and absolute positioning for layouts.
-
----
-
-### Q15.1 `[Senior]` When do you use Flexbox vs. Grid? Give production examples where using the wrong one causes problems.
-
-**Answer:**
-
-**Flexbox = one-dimensional layout** (row OR column)
-**Grid = two-dimensional layout** (rows AND columns simultaneously)
-
-**Use Flexbox for:**
-```css
-/* Navigation bar — items in a row, flexible spacing */
-.navbar {
-  display: flex;
-  justify-content: space-between;
-  align-items: center;
-}
-
-/* Card content — stack items vertically, push footer to bottom */
-.card {
-  display: flex;
-  flex-direction: column;
-  height: 100%;
-}
-.card-footer {
-  margin-top: auto; /* Pushes footer to bottom regardless of content height */
-}
-
-/* Centering — the classic */
-.centered {
-  display: flex;
-  justify-content: center;
-  align-items: center;
-}
-```
-
-**Use Grid for:**
-```css
-/* Dashboard layout — rows and columns matter */
-.dashboard {
-  display: grid;
-  grid-template-columns: 250px 1fr 300px; /* Sidebar | Main | Panel */
-  grid-template-rows: 60px 1fr 40px;      /* Header | Content | Footer */
-  grid-template-areas:
-    "header  header  header"
-    "sidebar main   panel"
-    "footer  footer  footer";
-  min-height: 100vh;
-}
-
-/* Auto-fill responsive grid — no media queries needed */
-.card-grid {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-  gap: 1rem;
-}
-```
-
-**Where using the wrong one causes problems:**
-
-```css
-/* BAD: Flexbox for a 2D grid — items don't align across rows */
-.product-grid {
-  display: flex;
-  flex-wrap: wrap;
-}
-.product-card {
-  flex: 0 0 33.33%;
-  /* Problem: If one card is taller, the next row starts unevenly */
-  /* Problem: Last row with 2 items — they stretch to fill or leave a gap */
-}
-
-/* GOOD: Grid handles 2D alignment naturally */
-.product-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 1rem;
-  /* All cards align perfectly regardless of height */
-}
-```
-
----
-
-### Q15.2 `[Senior]` What are Container Queries and how do they replace media queries for component-based design?
-
-**Answer:**
-
-Container Queries (2023) let a component respond to its **container's** size rather than the **viewport** size. This is the single most important CSS feature for component-based architecture.
-
-**The problem with media queries:**
-```css
-/* This card changes layout based on VIEWPORT width */
-@media (max-width: 768px) {
-  .card { flex-direction: column; }
-}
-
-/* Problem: If this card is placed in a sidebar that's 300px wide,
-   it still renders as horizontal layout on a 1200px viewport.
-   The card doesn't know it's in a narrow container. */
-```
-
-**Container Queries fix this:**
-```css
-/* Define containment context on the parent */
-.card-container {
-  container-type: inline-size;
-  container-name: card-wrapper;
-}
-
-/* Card responds to its CONTAINER width, not viewport */
-.card {
-  display: grid;
-  grid-template-columns: 200px 1fr;
-  gap: 1rem;
-}
-
-@container card-wrapper (max-width: 400px) {
-  .card {
-    grid-template-columns: 1fr; /* Stack vertically in narrow containers */
-  }
-}
-
-@container card-wrapper (min-width: 600px) {
-  .card {
-    grid-template-columns: 300px 1fr auto; /* Add third column when wide */
-  }
-}
-```
-
-**Container Query Units:**
-```css
-/* Size relative to container, not viewport */
-.card-title {
-  font-size: clamp(1rem, 3cqi, 1.5rem); /* cqi = 1% of container inline size */
-}
-```
-
-**Old approach this replaces:**
-Previously required `ResizeObserver` in JavaScript to measure container width and apply classes dynamically. Container Queries do this purely in CSS with zero JavaScript.
-
----
-
----
-
-# CHAPTER 16 — SPECIFICITY, CASCADE & LAYERS
-
-> **What interviewers are evaluating:** Whether you can debug CSS conflicts without `!important` and understand the cascade at a deep level.
-
----
-
-### Q16.1 `[Senior]` Explain CSS specificity. What is the exact specificity of each selector below?
-
-```css
-#header .nav a:hover {}
-div.container > ul li.active {}
-[data-theme="dark"] .card::before {}
-:where(.nav) a {}
-:is(.nav, #sidebar) a {}
-```
-
-**Answer:**
-
-Specificity is calculated as three buckets: (ID — Class — Element)
-
-| Selector | IDs | Classes/Attrs/Pseudo-classes | Elements/Pseudo-elements | Score |
-|---|---|---|---|---|
-| `#header .nav a:hover` | 1 | 2 (.nav, :hover) | 1 (a) | 1-2-1 |
-| `div.container > ul li.active` | 0 | 2 (.container, .active) | 3 (div, ul, li) | 0-2-3 |
-| `[data-theme="dark"] .card::before` | 0 | 2 ([data-theme], .card) | 1 (::before) | 0-2-1 |
-| `:where(.nav) a` | 0 | 0 | 1 (a) | 0-0-1 |
-| `:is(.nav, #sidebar) a` | 1 | 0 | 1 (a) | 1-0-1 |
-
-**The tricky parts:**
-
-**`:where()` has ZERO specificity.** Everything inside `:where()` is ignored for specificity. This is crucial for CSS resets and utility libraries:
-```css
-/* Base styles that are easy to override */
-:where(h1, h2, h3) { margin-top: 0; } /* Specificity: 0-0-0 */
-
-/* Any class override works without specificity wars */
-.my-heading { margin-top: 2rem; } /* Specificity: 0-1-0 — wins */
-```
-
-**`:is()` uses the HIGHEST specificity of its arguments.** `:is(.nav, #sidebar)` has the specificity of `#sidebar` (1-0-0), even when matching `.nav`.
-
----
-
-### Q16.2 `[Staff+]` What are CSS Cascade Layers (`@layer`) and how do they solve the specificity war problem?
-
-**Answer:**
-
-Cascade Layers (2022) let you explicitly control the priority order of CSS rules, independent of specificity. Within a lower-priority layer, even `#id` selectors lose to a `.class` selector in a higher-priority layer.
-
-```css
-/* Define layer order — last layer has highest priority */
-@layer reset, base, components, utilities;
-
-/* Reset layer — lowest priority */
-@layer reset {
-  * { margin: 0; padding: 0; box-sizing: border-box; }
-  h1 { font-size: 2rem; } /* Even though this is specific, components layer overrides */
-}
-
-/* Base layer */
-@layer base {
-  body { font-family: system-ui; color: #333; }
-  a { color: blue; text-decoration: none; }
-}
-
-/* Components layer — higher priority than base */
-@layer components {
-  .card { padding: 1rem; border-radius: 8px; }
-  .card a { color: inherit; } /* Overrides base a style within cards */
-}
-
-/* Utilities layer — highest priority */
-@layer utilities {
-  .text-center { text-align: center; }
-  .hidden { display: none; }
-  .mt-4 { margin-top: 1rem; }
-}
-```
-
-**Why this matters for production:**
-
-Before layers, adding a third-party CSS library could break your styles if its selectors had higher specificity. With layers:
-
-```css
-/* Third-party CSS in a low-priority layer — your code always wins */
-@layer third-party {
-  @import url('some-library.css');
-}
-
-@layer app {
-  /* Your styles always override the library, regardless of specificity */
-  .button { background: blue; }
-}
-```
-
-**Old approach this replaces:**
-- `!important` wars
-- Artificially inflating specificity (`html body div.container .button`)
-- Careful source order management
-- BEM naming to keep specificity flat
-
----
-
----
-
-# CHAPTER 17 — MODERN CSS FEATURES REPLACING JS/LIBRARIES
-
----
-
-### Q17.1 `[Senior]` What CSS features have replaced the need for JavaScript or CSS-in-JS libraries? Give five examples with before/after.
-
-**Answer:**
-
-**1. CSS Custom Properties (Variables) replacing theme JS**
-```css
-/* OLD: JavaScript-based theming */
-/* document.body.style.setProperty('--color-primary', '#0066ff') */
-
-/* NEW: Pure CSS theming with custom properties */
-:root {
-  --color-primary: #0066ff;
-  --color-bg: #ffffff;
-  --spacing-unit: 8px;
-}
-
-[data-theme="dark"] {
-  --color-primary: #66b3ff;
-  --color-bg: #1a1a1a;
-}
-
-.button {
-  background: var(--color-primary);
-  padding: calc(var(--spacing-unit) * 2);
-}
-```
-
-**2. `clamp()` replacing JS-based responsive font sizing**
-```css
-/* OLD: JavaScript ResizeObserver or multiple media queries */
-h1 { font-size: 1.5rem; }
-@media (min-width: 768px) { h1 { font-size: 2rem; } }
-@media (min-width: 1200px) { h1 { font-size: 3rem; } }
-
-/* NEW: Single line, fluid scaling */
-h1 {
-  font-size: clamp(1.5rem, 2vw + 1rem, 3rem);
-  /* Minimum 1.5rem, scales with viewport, maximum 3rem */
-}
-```
-
-**3. `:has()` (parent selector) replacing JS class toggling**
-```css
-/* OLD: JavaScript adds class to parent when input is focused */
-/* input.addEventListener('focus', () => parent.classList.add('focused')) */
-
-/* NEW: Pure CSS parent selection */
-.form-group:has(input:focus) {
-  border-color: blue;
-  box-shadow: 0 0 0 2px rgba(0, 102, 255, 0.2);
-}
-
-.form-group:has(input:invalid) {
-  border-color: red;
-}
-
-/* Conditional layout based on child content */
-.card:has(img) {
-  grid-template-columns: 200px 1fr; /* Layout with image */
-}
-
-.card:not(:has(img)) {
-  grid-template-columns: 1fr; /* Layout without image */
-}
-```
-
-**4. CSS `@property` replacing JS-animated custom properties**
-```css
-/* Register a custom property with type — enables animation */
-@property --gradient-angle {
-  syntax: '<angle>';
-  initial-value: 0deg;
-  inherits: false;
-}
-
-.animated-border {
-  --gradient-angle: 0deg;
-  border-image: conic-gradient(from var(--gradient-angle), red, blue, red) 1;
-  animation: rotate 3s linear infinite;
-}
-
-@keyframes rotate {
-  to { --gradient-angle: 360deg; }
-}
-```
-
-**5. Scroll-driven animations replacing IntersectionObserver**
-```css
-/* OLD: JavaScript IntersectionObserver to animate on scroll */
-
-/* NEW: Pure CSS scroll-driven animation */
-.fade-in {
-  animation: fadeIn linear both;
-  animation-timeline: view();
-  animation-range: entry 0% entry 100%;
-}
-
-@keyframes fadeIn {
-  from { opacity: 0; transform: translateY(20px); }
-  to { opacity: 1; transform: translateY(0); }
-}
-```
-
-**6. CSS Nesting (2023) replacing Sass nesting**
-```css
-/* OLD: Required Sass/SCSS */
-.card {
-  padding: 1rem;
-  & .title { font-size: 1.5rem; }
-  &:hover { box-shadow: 0 2px 8px rgba(0,0,0,0.1); }
-  &.featured { border: 2px solid gold; }
-}
-
-/* NEW: Native CSS nesting — no preprocessor needed */
-.card {
-  padding: 1rem;
-
-  .title {
-    font-size: 1.5rem;
-  }
-
-  &:hover {
-    box-shadow: 0 2px 8px rgba(0,0,0,0.1);
-  }
-
-  &.featured {
-    border: 2px solid gold;
-  }
-}
-```
-
----
-
----
-
-# CHAPTER 18 — ANIMATION & PERFORMANCE
-
----
-
-### Q18.1 `[Senior]` Which CSS properties are safe to animate and which cause layout thrashing? Why?
-
-**Answer:**
-
-Browser rendering follows a pipeline:
-```
-Style → Layout → Paint → Composite
-```
-
-**Composite-only (cheapest — GPU accelerated):**
-```css
-/* GOOD: These skip Layout and Paint — animate on GPU */
-transform: translateX(100px);  /* Movement */
-transform: scale(1.2);         /* Sizing */
-transform: rotate(45deg);      /* Rotation */
-opacity: 0.5;                  /* Transparency */
-filter: blur(4px);             /* Visual effects */
-```
-
-**Paint-only (medium cost):**
-```css
-/* OK but triggers repaint — no layout shift */
-color: red;
-background-color: blue;
-box-shadow: 0 2px 4px rgba(0,0,0,0.2);
-border-color: green;
-```
-
-**Layout-triggering (most expensive — causes reflow):**
-```css
-/* BAD for animation — forces layout recalculation */
-width: 200px;          /* Triggers layout */
-height: 100px;         /* Triggers layout */
-margin: 10px;          /* Triggers layout */
-padding: 10px;         /* Triggers layout */
-top/left/right/bottom; /* Triggers layout */
-font-size: 16px;       /* Triggers layout */
-```
-
-**Production example — smooth accordion:**
-```css
-/* BAD: Animating height causes layout on every frame */
-.accordion-content {
-  transition: height 0.3s ease;
-  height: 0;
-  overflow: hidden;
-}
-.accordion-content.open {
-  height: 200px; /* Layout thrashing — 60fps impossible with complex content */
-}
-
-/* GOOD: Use grid trick for height animation without layout cost */
-.accordion-content {
-  display: grid;
-  grid-template-rows: 0fr;
-  transition: grid-template-rows 0.3s ease;
-  overflow: hidden;
-}
-.accordion-content.open {
-  grid-template-rows: 1fr; /* Smooth, no layout thrashing */
-}
-.accordion-content > div {
-  min-height: 0; /* Required for the grid trick to work */
-}
-```
-
-**The `will-change` hint:**
-```css
-/* Tell browser to pre-composite this element */
-.card {
-  will-change: transform; /* Browser creates a GPU layer ahead of time */
-  transition: transform 0.2s ease;
-}
-
-/* WARNING: Don't overuse — each will-change creates a GPU layer, consuming memory */
-/* Apply only to elements that will actually animate soon */
-```
-
----
-
-### Q18.2 `[Senior]` What is the `prefers-reduced-motion` media query? Why is it critical for production?
-
-**Answer:**
-
-Some users experience motion sickness, seizures, or discomfort from animations. `prefers-reduced-motion` respects their OS-level accessibility setting.
-
-```css
-/* Full animation by default */
-.card {
-  transition: transform 0.3s ease, opacity 0.3s ease;
-}
-
-.card:hover {
-  transform: translateY(-4px);
-}
-
-/* Reduce or remove motion for users who prefer it */
-@media (prefers-reduced-motion: reduce) {
-  .card {
-    transition: none;
-  }
-
-  .card:hover {
-    transform: none;
-  }
-
-  /* Alternative: keep transition but make it instant */
-  * {
-    animation-duration: 0.01ms !important;
-    animation-iteration-count: 1 !important;
-    transition-duration: 0.01ms !important;
-  }
-}
-```
-
-**In React:**
-```typescript
-function useReducedMotion(): boolean {
-  const [prefersReduced, setPrefersReduced] = useState(false)
-
-  useEffect(() => {
-    const mq = window.matchMedia('(prefers-reduced-motion: reduce)')
-    setPrefersReduced(mq.matches)
-
-    const handler = (e: MediaQueryListEvent) => setPrefersReduced(e.matches)
-    mq.addEventListener('change', handler)
-    return () => mq.removeEventListener('change', handler)
-  }, [])
-
-  return prefersReduced
-}
-```
-
-**Why it's critical:**
-- WCAG 2.1 Success Criterion 2.3.3 (AAA) requires motion can be disabled
-- Vestibular disorders affect ~35% of adults over 40
-- Auto-playing animations can trigger seizures (photosensitive epilepsy)
-- Legal compliance (ADA, EN 301 549)
-
----
-
----
-
-# CHAPTER 19 — RESPONSIVE DESIGN & ACCESSIBILITY
-
----
-
-### Q19.1 `[Senior]` What is the difference between `rem`, `em`, `px`, `vh/vw`, and when should you use each?
-
-**Answer:**
-
-| Unit | Relative to | Use for |
-|---|---|---|
-| `px` | Nothing — absolute | Borders, box-shadows, fine details |
-| `rem` | Root `<html>` font-size | Font sizes, spacing, layout dimensions |
-| `em` | Parent element's font-size | Component-local scaling (padding relative to font) |
-| `vh/vw` | Viewport height/width | Full-screen sections, hero areas |
-| `dvh/dvw` | Dynamic viewport (mobile) | Full-screen that accounts for mobile browser chrome |
-| `%` | Parent element | Fluid widths |
-| `ch` | Width of "0" character | Input/textarea widths for readability |
-| `lh` | Line height | Vertical rhythm |
-
-**Why `rem` is the default for production:**
-```css
-/* If user changes browser font size (accessibility),
-   rem-based layouts scale proportionally */
-html { font-size: 16px; } /* Default — don't hardcode this */
-
-h1 { font-size: 2rem; }     /* 32px — scales with user preference */
-.container { padding: 1.5rem; } /* 24px — scales proportionally */
-.sidebar { width: 16rem; }   /* 256px — scales proportionally */
-```
-
-**Why `vh` is broken on mobile and `dvh` fixes it:**
-```css
-/* BUG: 100vh on mobile includes the browser address bar height
-   Content is hidden behind the bar */
-.hero { height: 100vh; } /* Too tall on iOS Safari */
-
-/* FIX: Dynamic viewport height accounts for browser chrome */
-.hero { height: 100dvh; } /* Correct height on mobile */
-
-/* Fallback pattern */
-.hero {
-  height: 100vh; /* Fallback */
-  height: 100dvh; /* Modern browsers override */
-}
-```
-
-**When `em` is correct:**
-```css
-/* Button padding should scale with its font size */
-.button {
-  font-size: 1rem;
-  padding: 0.5em 1em; /* Padding scales if font-size changes */
-}
-
-.button.large {
-  font-size: 1.25rem;
-  /* Padding automatically scales — still 0.5em 1em but now bigger */
-}
-```
-
----
-
----
-
-# CHAPTER 20 — CSS ARCHITECTURE AT SCALE
-
----
-
-### Q20.1 `[Staff+]` How do you organize CSS in a large application? Compare BEM, CSS Modules, Tailwind, and CSS-in-JS.
-
-**Answer:**
-
-| Approach | Scoping | Bundle | Runtime cost | DX |
-|---|---|---|---|---|
-| BEM | Convention (human discipline) | One CSS file | None | Verbose class names |
-| CSS Modules | Compile-time hash | Per-component CSS | None | Best of both worlds |
-| Tailwind | Utility classes | Purged CSS | None | Fast prototyping, long class strings |
-| CSS-in-JS (styled-components) | Runtime generated | In JS bundle | Yes — generates at runtime | Co-located with components |
-| CSS-in-JS (vanilla-extract) | Compile-time generated | Extracted CSS | None | Type-safe, zero runtime |
-
-**Production recommendation by project type:**
-
-**Component library → CSS Modules or vanilla-extract**
-Consumers shouldn't need your styling library. CSS Modules produce plain CSS. No runtime dependency.
-
-**Marketing site → Tailwind**
-Fast iteration, designer-developer collaboration, excellent for one-off layouts.
-
-**Large app with design system → vanilla-extract or CSS Modules + CSS custom properties**
-Type-safe tokens, zero runtime cost, explicit contracts between design and engineering.
-
-**CSS Modules in practice:**
-```css
-/* Button.module.css */
-.root {
-  padding: 0.5rem 1rem;
-  border-radius: 4px;
-  font-weight: 600;
-}
-
-.primary {
-  composes: root;
-  background: var(--color-primary);
-  color: white;
-}
-```
-
-```typescript
-import styles from './Button.module.css'
-
-function Button({ variant = 'primary', children }) {
-  return <button className={styles[variant]}>{children}</button>
-}
-// Rendered: <button class="Button_primary_x7k2z">Click</button>
-// Hash ensures no naming conflicts across the entire app
-```
-
----
-
----
-
-# PART 4 — HTML
-
----
-
-# CHAPTER 21 — SEMANTIC HTML & DOCUMENT STRUCTURE
-
-> **What interviewers are evaluating:** Whether you use HTML as a meaningful structure or just as a div soup with CSS classes. Semantic HTML is the foundation of accessibility.
-
----
-
-### Q21.1 `[Senior]` Why does semantic HTML matter? Rewrite this div soup using proper semantics.
-
-**Before:**
-```html
-<div class="header">
-  <div class="logo">My App</div>
-  <div class="nav">
-    <div class="nav-item"><a href="/">Home</a></div>
-    <div class="nav-item"><a href="/about">About</a></div>
-  </div>
-</div>
-<div class="main">
-  <div class="article">
-    <div class="title">Blog Post Title</div>
-    <div class="date">January 15, 2024</div>
-    <div class="content">Article text...</div>
-  </div>
-  <div class="sidebar">
-    <div class="widget">Related posts</div>
-  </div>
-</div>
-<div class="footer">
-  <div>© 2024 My App</div>
-</div>
-```
-
-**After — semantic HTML:**
-```html
-<header>
-  <a href="/" aria-label="My App - Home">My App</a>
-  <nav aria-label="Main navigation">
-    <ul>
-      <li><a href="/">Home</a></li>
-      <li><a href="/about">About</a></li>
-    </ul>
-  </nav>
-</header>
-
-<main>
-  <article>
-    <h1>Blog Post Title</h1>
-    <time datetime="2024-01-15">January 15, 2024</time>
-    <p>Article text...</p>
-  </article>
-
-  <aside aria-label="Related content">
-    <h2>Related posts</h2>
-    <!-- Related post links -->
-  </aside>
-</main>
-
-<footer>
-  <p><small>© 2024 My App</small></p>
-</footer>
-```
-
-**Why this matters:**
-
-1. **Screen readers** use landmarks (`header`, `nav`, `main`, `aside`, `footer`) to let users jump between sections. Div soup provides no navigation structure.
-
-2. **SEO** — search engines understand `<article>`, `<time datetime>`, `<nav>` and weight content accordingly.
-
-3. **Browser features** — Reader Mode uses `<article>` to extract content. `<time datetime>` enables browser-native date features.
-
-4. **Accessibility tree** — the browser builds an accessibility tree from HTML semantics. `<div>` has no role. `<nav>` has role "navigation." This is what assistive technologies consume.
-
----
-
-### Q21.2 `[Senior]` What is the difference between `<section>`, `<article>`, `<aside>`, and `<div>`? When do you use each?
-
-**Answer:**
-
-| Element | Meaning | Appears in outline | Use when |
-|---|---|---|---|
-| `<article>` | Self-contained, independently distributable content | Yes | Blog post, comment, product card, social media post |
-| `<section>` | Thematic grouping of content, typically with a heading | Yes | Chapter of an article, tab panel, form section |
-| `<aside>` | Tangentially related to surrounding content | Yes | Sidebar, pull quote, related links, ads |
-| `<div>` | No semantic meaning — grouping only | No | Layout wrapper, styling hook, no meaningful semantics |
-
-**The test:**
-- "Would this make sense on its own, syndicated in an RSS feed?" → `<article>`
-- "Is this a distinct section with its own heading?" → `<section>`
-- "Is this related but not essential to the main content?" → `<aside>`
-- "Is this purely for layout/styling?" → `<div>`
-
-**Articles can nest sections, and sections can nest articles:**
-```html
-<!-- Article with sections -->
-<article>
-  <h1>CSS Layout Guide</h1>
-  <section>
-    <h2>Flexbox</h2>
-    <p>...</p>
-  </section>
-  <section>
-    <h2>Grid</h2>
-    <p>...</p>
-  </section>
-</article>
-
-<!-- Section containing multiple articles -->
-<section aria-labelledby="comments-heading">
-  <h2 id="comments-heading">Comments</h2>
-  <article>
-    <h3>Alice</h3>
-    <p>Great post!</p>
-  </article>
-  <article>
-    <h3>Bob</h3>
-    <p>Very helpful.</p>
-  </article>
-</section>
-```
-
----
-
----
-
-# CHAPTER 22 — FORMS & VALIDATION
-
----
-
-### Q22.1 `[Senior]` What HTML form features reduce the need for JavaScript validation? Show production examples.
-
-**Answer:**
-
-Modern HTML provides extensive built-in validation before JavaScript even runs:
-
-```html
-<form novalidate> <!-- novalidate if you handle validation in JS -->
-
-  <!-- Required field -->
-  <input type="text" required aria-required="true" />
-
-  <!-- Email validation (built-in regex) -->
-  <input type="email" required />
-
-  <!-- Custom pattern -->
-  <input
-    type="text"
-    pattern="[A-Z]{2,3}-\d{4}"
-    title="Format: XX-0000 or XXX-0000"
-    placeholder="AB-1234"
-  />
-
-  <!-- Number with range -->
-  <input type="number" min="1" max="100" step="1" />
-
-  <!-- Character length -->
-  <input type="text" minlength="3" maxlength="50" />
-
-  <!-- URL validation -->
-  <input type="url" placeholder="https://example.com" />
-
-  <!-- Date with range -->
-  <input type="date" min="2024-01-01" max="2025-12-31" />
-
-  <!-- Datalist — autocomplete suggestions -->
-  <input type="text" list="cities" />
-  <datalist id="cities">
-    <option value="New York" />
-    <option value="London" />
-    <option value="Tokyo" />
-  </datalist>
-
-  <button type="submit">Submit</button>
-</form>
-```
-
-**Styling validation states without JavaScript:**
-```css
-/* Style valid/invalid inputs */
-input:valid {
-  border-color: green;
-}
-
-input:invalid {
-  border-color: red;
-}
-
-/* Only show invalid styling after user interaction */
-input:invalid:not(:placeholder-shown):not(:focus) {
-  border-color: red;
-  background: #fff0f0;
-}
-
-/* Style the submit button based on form validity */
-form:invalid button[type="submit"] {
-  opacity: 0.5;
-  cursor: not-allowed;
-}
-```
-
-**The `<dialog>` element replacing custom modals:**
-```html
-<!-- Built-in modal with backdrop, focus trap, Escape key handling -->
-<dialog id="confirm-dialog">
-  <form method="dialog">
-    <h2>Confirm Action</h2>
-    <p>Are you sure?</p>
-    <button value="cancel">Cancel</button>
-    <button value="confirm">Confirm</button>
-  </form>
-</dialog>
-
-<script>
-  const dialog = document.getElementById('confirm-dialog')
-  dialog.showModal() // Opens as modal with backdrop
-  dialog.addEventListener('close', () => {
-    console.log(dialog.returnValue) // 'cancel' or 'confirm'
-  })
+    It lets TypeScript derive types from existing functions instead of duplicating them manually.
+
+    **Real-world scenario:**
+
+    In a large app, manually maintaining API result types becomes error-prone. Conditional types help extract and transform types from source definitions.
+
+    **Senior insight:**
+
+    Conditional types are powerful, but overusing them can create unreadable type code. Use them to reduce duplication, not to impress.
+
+    ---
+
+    # CHAPTER 23 - TYPE GUARDS AND RUNTIME VALIDATION
+
+    ---
+
+    ### Q23.1 `[Senior]` Why is TypeScript not enough for API validation?
+
+    **Short Answer:**
+
+    TypeScript checks code at compile time. API data arrives at runtime and may not match your TypeScript types.
+
+    **Problem:**
+
+    ```ts
+    interface User {
+      id: string
+      name: string
+    }
+
+    const user = await fetch('/api/user').then(res => res.json()) as User
+    console.log(user.name.toUpperCase())
+    ```
+
+    If the server sends `{ id: 1 }`, TypeScript will not protect you at runtime.
+
+    **Type guard:**
+
+    ```ts
+    function isUser(value: unknown): value is User {
+      return (
+        typeof value === 'object' &&
+        value !== null &&
+        'id' in value &&
+        'name' in value &&
+        typeof (value as any).id === 'string' &&
+        typeof (value as any).name === 'string'
+      )
+    }
+    ```
+
+    **Usage:**
+
+    ```ts
+    const data: unknown = await fetch('/api/user').then(res => res.json())
+
+    if (isUser(data)) {
+      console.log(data.name)
+    } else {
+      throw new Error('Invalid user response')
+    }
+    ```
+
+    **Runtime schema tools:**
+
+    In production, teams often use schema validation libraries such as Zod, Yup, Valibot or io-ts.
+
+    **Senior insight:**
+
+    Use TypeScript for compile-time safety and runtime validators at trust boundaries.
+
+    ---
+
+    # CHAPTER 24 - ADVANCED TYPESCRIPT PATTERNS
+
+    ---
+
+    ### Q24.1 `[Staff+]` What is the `satisfies` operator and why is it useful?
+
+    **Short Answer:**
+
+    `satisfies` checks that a value matches a type while preserving the narrow inferred type.
+
+    **Problem with annotation:**
+
+    ```ts
+    type Theme = Record<string, string | string[]>
+
+    const theme: Theme = {
+      primary: 'blue',
+      accents: ['red', 'green'],
+    }
+
+    theme.primary.toUpperCase() // error because type is string | string[]
+    ```
+
+    **Using satisfies:**
+
+    ```ts
+    const theme = {
+      primary: 'blue',
+      accents: ['red', 'green'],
+    } satisfies Record<string, string | string[]>
+
+    theme.primary.toUpperCase() // works
+    ```
+
+    **Real-world scenario:**
+
+    Route configuration:
+
+    ```ts
+    const routes = {
+      home: '/',
+      profile: '/profile/:id',
+      settings: '/settings',
+    } satisfies Record<string, string>
+    ```
+
+    TypeScript validates the object shape but preserves exact literal values.
+
+    **Senior insight:**
+
+    `satisfies` is excellent for config objects where you want validation without losing inference.
+
+    ---
+
+    # CHAPTER 25 - BRANDED TYPES AND TEMPLATE LITERAL TYPES
+
+    ---
+
+    ### Q25.1 `[Staff+]` What are branded types and why use them?
+
+    **Short Answer:**
+
+    Branded types create stronger semantic types from primitive values.
+
+    **Problem:**
+
+    ```ts
+    function getUser(userId: string) {}
+    function getOrder(orderId: string) {}
+
+    const orderId = 'ord_123'
+    getUser(orderId) // TypeScript allows this because both are string
+    ```
+
+    **Branded type solution:**
+
+    ```ts
+    type UserId = string & { readonly brand: unique symbol }
+    type OrderId = string & { readonly brand: unique symbol }
+
+    function getUser(userId: UserId) {}
+    function getOrder(orderId: OrderId) {}
+    ```
+
+    Now `UserId` and `OrderId` are not interchangeable.
+
+    **Template literal type example:**
+
+    ```ts
+    type ApiRoute = `/api/${string}`
+
+    const good: ApiRoute = '/api/users'
+    // const bad: ApiRoute = '/users' // error
+    ```
+
+    **Senior insight:**
+
+    Branded types prevent business-domain bugs that normal primitive types cannot catch.
+
+    ---
+
+    # PART 4 - REACT ADVANCED
+
+    ---
+
+    # CHAPTER 26 - REACT RENDERING LIFECYCLE
+
+    ---
+
+    ### Q26.1 `[Senior]` What triggers a React component re-render?
+
+    **Short Answer:**
+
+    A component re-renders when its state changes, its parent re-renders, its context value changes, or external store subscription updates.
+
+    **Common triggers:**
+
+    ```text
+    1. setState / useState update
+    2. parent component re-render
+    3. props change
+    4. context value change
+    5. external store update
+    6. key change causing remount
+    ```
+
+    **Important clarification:**
+
+    A parent re-render can cause child function components to execute again even if props look the same. React may later skip DOM updates if output is unchanged.
+
+    **Example:**
+
+    ```tsx
+    function Parent() {
+      const [count, setCount] = useState(0)
+
+      return (
+        <>
+          <button onClick={() => setCount(count + 1)}>+</button>
+          <Child />
+        </>
+      )
+    }
+
+    function Child() {
+      console.log('Child render')
+      return <div>Child</div>
+    }
+    ```
+
+    `Child` logs when parent state changes.
+
+    **Real-world scenario:**
+
+    A page has a search input and a heavy table. Typing in the search input causes the parent to re-render, and the heavy table also re-renders unnecessarily.
+
+    Possible fixes:
+
+    - split component boundaries
+    - move state closer to where it is used
+    - use `React.memo` when props are stable
+    - use virtualization for large lists
+    - use `useMemo` for expensive derived data
+
+    **Senior insight:**
+
+    Do not start with memoization. Start by understanding state ownership and render boundaries.
+
+    ---
+
+    # CHAPTER 27 - RECONCILIATION, FIBER AND KEYS
+
+    ---
+
+    ### Q27.1 `[Senior]` Why are keys important in React lists?
+
+    **Short Answer:**
+
+    Keys help React match old and new elements during reconciliation.
+
+    **Bad example:**
+
+    ```tsx
+    items.map((item, index) => (
+      <TodoItem key={index} item={item} />
+    ))
+    ```
+
+    Using index can break when items are inserted, removed or reordered.
+
+    **Problem scenario:**
+
+    ```text
+    Original:
+    0 - A
+    1 - B
+    2 - C
+
+    Insert X at top:
+    0 - X
+    1 - A
+    2 - B
+    3 - C
+    ```
+
+    React may reuse previous components incorrectly because the indexes changed.
+
+    **Good example:**
+
+    ```tsx
+    items.map(item => (
+      <TodoItem key={item.id} item={item} />
+    ))
+    ```
+
+    **What can go wrong with bad keys:**
+
+    - wrong input focus
+    - incorrect local state reuse
+    - animation bugs
+    - incorrect checkbox selection
+    - performance issues
+
+    **Senior insight:**
+
+    Keys are not only about performance. They preserve identity.
+
+    ---
+
+    # CHAPTER 28 - HOOKS INTERNALS AND RULES OF HOOKS
+
+    ---
+
+    ### Q28.1 `[Staff+]` Why must hooks be called at the top level?
+
+    **Short Answer:**
+
+    React tracks hooks by call order. Conditional hook calls break that order.
+
+    **Wrong:**
+
+    ```tsx
+    function Profile({ isLoggedIn }) {
+      if (isLoggedIn) {
+        const [user, setUser] = useState(null)
+      }
+
+      const [theme, setTheme] = useState('dark')
+    }
+    ```
+
+    If `isLoggedIn` changes, hook order changes between renders.
+
+    **Correct:**
+
+    ```tsx
+    function Profile({ isLoggedIn }) {
+      const [user, setUser] = useState(null)
+      const [theme, setTheme] = useState('dark')
+
+      if (!isLoggedIn) {
+        return null
+      }
+
+      return <div>{theme}</div>
+    }
+    ```
+
+    **Deep Explanation:**
+
+    React stores hook state in an internal list associated with the component fiber. It does not identify hooks by variable name. It identifies them by order.
+
+    **Senior insight:**
+
+    Rules of Hooks are not arbitrary style rules. They protect React's internal state matching mechanism.
+
+    ---
+
+    # CHAPTER 29 - STALE CLOSURES IN REACT
+
+    ---
+
+    ### Q29.1 `[Senior]` What is a stale closure in React?
+
+    **Short Answer:**
+
+    A stale closure happens when a function captures old state or props from a previous render.
+
+    **Example:**
+
+    ```tsx
+    function Counter() {
+      const [count, setCount] = useState(0)
+
+      useEffect(() => {
+        const id = setInterval(() => {
+          console.log(count)
+        }, 1000)
+
+        return () => clearInterval(id)
+      }, [])
+
+      return <button onClick={() => setCount(count + 1)}>+</button>
+    }
+    ```
+
+    The interval always logs the initial count because the effect closure captures the first render's `count`.
+
+    **Fix 1: add dependency:**
+
+    ```tsx
+    useEffect(() => {
+      const id = setInterval(() => {
+        console.log(count)
+      }, 1000)
+
+      return () => clearInterval(id)
+    }, [count])
+    ```
+
+    **Fix 2: use ref for latest value:**
+
+    ```tsx
+    const countRef = useRef(count)
+
+    useEffect(() => {
+      countRef.current = count
+    }, [count])
+
+    useEffect(() => {
+      const id = setInterval(() => {
+        console.log(countRef.current)
+      }, 1000)
+
+      return () => clearInterval(id)
+    }, [])
+    ```
+
+    **Real-world scenario:**
+
+    Stale closures often appear in:
+    - intervals
+    - event listeners
+    - WebSocket handlers
+    - async callbacks
+    - debounced functions
+    - subscriptions
+
+    **Senior insight:**
+
+    Every render creates new values and functions. A closure belongs to the render where it was created.
+
+    ---
+
+    # CHAPTER 30 - REACT PERFORMANCE OPTIMIZATION
+
+    ---
+
+    ### Q30.1 `[Senior]` How do you optimize a slow React component?
+
+    **Short Answer:**
+
+    Measure first, then optimize the actual bottleneck.
+
+    **Checklist:**
+
+    ```text
+    1. Use React Profiler
+    2. Identify expensive components
+    3. Check unnecessary parent re-renders
+    4. Move state down
+    5. Split components
+    6. Memoize expensive calculations
+    7. Stabilize props if using React.memo
+    8. Virtualize large lists
+    9. Code split heavy routes
+    10. Avoid expensive work during render
+    ```
+
+    **Common tools:**
+
+    ```tsx
+    const visibleItems = useMemo(() => {
+      return expensiveFilter(items, query)
+    }, [items, query])
+    ```
+
+    ```tsx
+    const Row = React.memo(function Row({ item }) {
+      return <div>{item.name}</div>
+    })
+    ```
+
+    **But memo can fail:**
+
+    ```tsx
+    <Row onClick={() => selectItem(item.id)} />
+    ```
+
+    This creates a new function every render, so memoization may not help.
+
+    **Real-world scenario:**
+
+    A table with 10,000 rows should usually use virtualization instead of rendering all rows.
+
+    **Senior insight:**
+
+    The biggest React performance wins usually come from architecture: state placement, component boundaries, list virtualization and data loading strategy.
+
+    ---
+
+    # CHAPTER 31 - CONCURRENT REACT, SUSPENSE AND TRANSITIONS
+
+    ---
+
+    ### Q31.1 `[Staff+]` What does `startTransition` solve?
+
+    **Short Answer:**
+
+    `startTransition` marks updates as non-urgent so React can keep urgent interactions responsive.
+
+    **Example:**
+
+    ```tsx
+    const [input, setInput] = useState('')
+    const [query, setQuery] = useState('')
+
+    function handleChange(e) {
+      const value = e.target.value
+      setInput(value) // urgent
+
+      startTransition(() => {
+        setQuery(value) // non-urgent expensive update
+      })
+    }
+    ```
+
+    **Real-world scenario:**
+
+    Typing in a search box updates the input immediately while filtering a huge list is marked as less urgent.
+
+    **What it does not do:**
+
+    It does not make expensive JavaScript magically faster. If computation blocks the thread badly, you may still need memoization, virtualization or Web Workers.
+
+    **Senior insight:**
+
+    Concurrent React improves scheduling. It does not replace good data structures, component design or performance measurement.
+
+    ---
+
+    # CHAPTER 32 - SSR, CSR, SSG, ISR AND HYDRATION
+
+    ---
+
+    ### Q32.1 `[Senior]` Compare CSR, SSR, SSG and ISR.
+
+    **Short Answer:**
+
+    They differ in where and when HTML is generated.
+
+    | Rendering model | HTML generated | Best for |
+    |---|---|---|
+    | CSR | browser | dashboards, authenticated apps |
+    | SSR | server per request | dynamic SEO pages |
+    | SSG | build time | blogs, docs, marketing pages |
+    | ISR | build time plus regeneration | large content sites with periodic updates |
+
+    **Hydration:**
+
+    Hydration is when client-side JavaScript attaches event handlers and React behavior to server-rendered HTML.
+
+    **Common hydration mismatch:**
+
+    ```tsx
+    function Clock() {
+      return <div>{Date.now()}</div>
+    }
+    ```
+
+    Server and client render different values.
+
+    **Fix idea:**
+
+    ```tsx
+    function Clock() {
+      const [now, setNow] = useState<number | null>(null)
+
+      useEffect(() => {
+        setNow(Date.now())
+      }, [])
+
+      return <div>{now ?? 'Loading...'}</div>
+    }
+    ```
+
+    **Senior insight:**
+
+    Rendering strategy is a product decision. Choose based on SEO, freshness, personalization, performance and infrastructure cost.
+
+    ---
+
+    # PART 5 - NETWORKING AND SECURITY
+
+    ---
+
+    # CHAPTER 33 - HTTP, HTTPS AND REQUEST LIFECYCLE
+
+    ---
+
+    ### Q33.1 `[Prerequisite]` What happens when you enter a URL in the browser?
+
+    **Short Answer:**
+
+    The browser resolves DNS, establishes a connection, negotiates TLS for HTTPS, sends an HTTP request, receives a response, then parses and renders it.
+
+    **High-level flow:**
+
+    ```text
+    URL entered
+    ↓
+    DNS lookup
+    ↓
+    TCP connection
+    ↓
+    TLS handshake for HTTPS
+    ↓
+    HTTP request
+    ↓
+    Server response
+    ↓
+    HTML parsing
+    ↓
+    Subresource loading
+    ↓
+    Rendering
+    ```
+
+    **Why this matters:**
+
+    Frontend performance is strongly affected by network:
+
+    - DNS latency
+    - TLS handshake
+    - server response time
+    - CDN distance
+    - cache headers
+    - number of requests
+    - resource priority
+    ```
+
+    **Senior insight:**
+
+    A frontend engineer should understand the full request lifecycle because many frontend performance problems are network problems.
+
+    ---
+
+    # CHAPTER 34 - CORS AND PREFLIGHT REQUESTS
+
+    ---
+
+    ### Q34.1 `[Senior]` What is CORS?
+
+    **Short Answer:**
+
+    CORS is a browser security mechanism that controls whether a web page from one origin can access resources from another origin.
+
+    **Origin means:**
+
+    ```text
+    scheme + host + port
+    ```
+
+    Example:
+
+    ```text
+    https://app.example.com
+    https://api.example.com
+    ```
+
+    These are different origins because hosts differ.
+
+    **Simple request:**
+
+    Some requests are allowed without preflight if they use simple methods and simple headers.
+
+    **Preflight request:**
+
+    For non-simple requests, the browser first sends an `OPTIONS` request asking the server for permission.
+
+    ```text
+    Browser -> OPTIONS /api/users
+    Server -> Access-Control-Allow-Origin
+    Server -> Access-Control-Allow-Methods
+    Server -> Access-Control-Allow-Headers
+    ```
+
+    **Common mistake:**
+
+    Trying to fix CORS from frontend code. CORS is enforced by the browser and must usually be configured on the server.
+
+    **Real-world scenario:**
+
+    Your React app at `localhost:3000` calls API at `localhost:8080`. Browser blocks the response because API has not allowed that origin.
+
+    **Senior insight:**
+
+    CORS is not an authentication mechanism. It is a browser access-control mechanism.
+
+    ---
+
+    # CHAPTER 35 - COOKIES, SESSIONS AND JWT
+
+    ---
+
+    ### Q35.1 `[Senior]` Compare cookies, sessions and JWT.
+
+    **Short Answer:**
+
+    Cookies are a browser storage and transport mechanism. Sessions store auth state on the server. JWTs are signed tokens that carry claims.
+
+    **Cookie attributes:**
+
+    ```text
+    HttpOnly - not readable by JavaScript
+    Secure - sent only over HTTPS
+    SameSite - controls cross-site sending
+    Expires/Max-Age - lifetime
+    Path/Domain - scope
+    ```
+
+    **Session-based auth:**
+
+    ```text
+    Browser stores session id cookie
+    Server stores session data
+    Each request sends cookie
+    Server looks up session
+    ```
+
+    **JWT-based auth:**
+
+    ```text
+    Client stores token
+    Token contains signed claims
+    Server verifies signature
+    ```
+
+    **Security tradeoff:**
+
+    - HttpOnly cookies protect against token theft via XSS
+    - SameSite helps reduce CSRF risk
+    - JWTs are stateless but harder to revoke before expiry
+    ```
+
+    **Senior insight:**
+
+    Do not choose JWT just because it is popular. Choose based on revocation needs, infrastructure, security model and client type.
+
+    ---
+
+    # CHAPTER 36 - CACHING, ETAG, CDN AND CACHE-CONTROL
+
+    ---
+
+    ### Q36.1 `[Senior]` How does HTTP caching work?
+
+    **Short Answer:**
+
+    HTTP caching lets browsers and CDNs reuse previous responses based on cache headers.
+
+    **Important headers:**
+
+    ```text
+    Cache-Control
+    ETag
+    Last-Modified
+    Expires
+    Vary
+    ```
+
+    **Cache-Control examples:**
+
+    ```http
+    Cache-Control: max-age=31536000, immutable
+    ```
+
+    Good for fingerprinted static assets.
+
+    ```http
+    Cache-Control: no-cache
+    ```
+
+    Means the browser must revalidate before using cached response.
+
+    **ETag flow:**
+
+    ```text
+    1. Server sends ETag: "abc123"
+    2. Browser caches response
+    3. Browser later sends If-None-Match: "abc123"
+    4. Server returns 304 Not Modified if unchanged
+    ```
+
+    **Real-world scenario:**
+
+    Static assets named with content hash:
+
+    ```text
+    app.8d91f3.js
+    styles.a72fc1.css
+    ```
+
+    Can be cached for a long time because changing content changes filename.
+
+    **Senior insight:**
+
+    Caching is one of the highest ROI performance tools. But wrong caching can serve stale or broken experiences.
+
+    ---
+
+    # CHAPTER 37 - FRONTEND SECURITY
+
+    ---
+
+    ### Q37.1 `[Senior]` What are the most important frontend security concerns?
+
+    **Short Answer:**
+
+    The most common concerns are XSS, CSRF, clickjacking, insecure dependencies, token leakage and unsafe third-party scripts.
+
+    **XSS example:**
+
+    ```js
+    element.innerHTML = userInput
+    ```
+
+    If `userInput` contains script-like content, this can be dangerous.
+
+    **Safer text rendering:**
+
+    ```js
+    element.textContent = userInput
+    ```
+
+    **React note:**
+
+    React escapes text by default, but `dangerouslySetInnerHTML` must be treated carefully.
+
+    **Important protections:**
+
+    ```text
+    Content Security Policy
+    HttpOnly cookies
+    SameSite cookies
+    Input sanitization
+    Output encoding
+    Dependency scanning
+    SRI for CDN scripts
+    iframe sandboxing
+    ```
+
+    **Senior insight:**
+
+    Frontend security is defense in depth. Do not rely on one protection.
+
+    ---
+
+    # PART 6 - CSS AND HTML ADVANCED
+
+    ---
+
+    # CHAPTER 38 - FLEXBOX, GRID AND CONTAINER QUERIES
+
+    ---
+
+    ### Q38.1 `[Senior]` When do you use Flexbox vs Grid?
+
+    **Short Answer:**
+
+    Use Flexbox for one-dimensional layout. Use Grid for two-dimensional layout.
+
+    **Flexbox examples:**
+
+    ```css
+    .navbar {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+    ```
+
+    Great for rows or columns where one axis is primary.
+
+    **Grid example:**
+
+    ```css
+    .dashboard {
+      display: grid;
+      grid-template-columns: 240px 1fr 320px;
+      grid-template-rows: auto 1fr;
+      grid-template-areas:
+        "header header header"
+        "sidebar main panel";
+    }
+    ```
+
+    Great when rows and columns both matter.
+
+    **Container query scenario:**
+
+    A card appears in both a wide page and a narrow sidebar. Media queries respond to viewport, but the card needs to respond to its container.
+
+    ```css
+    .card-wrapper {
+      container-type: inline-size;
+    }
+
+    .card {
+      display: grid;
+      grid-template-columns: 160px 1fr;
+    }
+
+    @container (max-width: 420px) {
+      .card {
+        grid-template-columns: 1fr;
+      }
+    }
+    ```
+
+    **Senior insight:**
+
+    Container queries are a major shift for component-based UI because components become layout-aware without JavaScript.
+
+    ---
+
+    # CHAPTER 39 - CASCADE, SPECIFICITY AND LAYERS
+
+    ---
+
+    ### Q39.1 `[Senior]` How do you avoid CSS specificity wars?
+
+    **Short Answer:**
+
+    Keep specificity low, use consistent architecture, and use cascade layers for priority control.
+
+    **Specificity order:**
+
+    ```text
+    Inline styles
+    IDs
+    Classes / attributes / pseudo-classes
+    Elements / pseudo-elements
+    ```
+
+    **Modern tools:**
+
+    ```css
+    @layer reset, base, components, utilities;
+
+    @layer reset {
+      :where(h1, h2, h3, p) {
+        margin: 0;
+      }
+    }
+
+    @layer components {
+      .button {
+        background: blue;
+      }
+    }
+
+    @layer utilities {
+      .bg-red {
+        background: red;
+      }
+    }
+    ```
+
+    **Why `:where()` matters:**
+
+    `:where()` has zero specificity. It is excellent for resets and base styles that should be easy to override.
+
+    **Senior insight:**
+
+    CSS architecture is about predictability. The goal is not to write clever selectors. The goal is to make future changes safe.
+
+    ---
+
+    # CHAPTER 40 - CSS PERFORMANCE AND ANIMATION
+
+    ---
+
+    ### Q40.1 `[Senior]` Which CSS properties are best for animation?
+
+    **Short Answer:**
+
+    Prefer `transform` and `opacity` because they can usually be handled by the compositor.
+
+    **Good:**
+
+    ```css
+    .card {
+      transition: transform 200ms ease, opacity 200ms ease;
+    }
+
+    .card:hover {
+      transform: translateY(-4px);
+      opacity: 0.95;
+    }
+    ```
+
+    **Avoid for frequent animation:**
+
+    ```css
+    width
+    height
+    top
+    left
+    margin
+    padding
+    font-size
+    ```
+
+    These can trigger layout.
+
+    **Accessibility:**
+
+    ```css
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        animation-duration: 0.01ms !important;
+        animation-iteration-count: 1 !important;
+        transition-duration: 0.01ms !important;
+      }
+    }
+    ```
+
+    **Senior insight:**
+
+    A beautiful animation that causes jank is a bad animation. Smoothness and accessibility are part of quality.
+
+    ---
+
+    # CHAPTER 41 - SEMANTIC HTML AND ACCESSIBILITY
+
+    ---
+
+    ### Q41.1 `[Senior]` Why does semantic HTML matter?
+
+    **Short Answer:**
+
+    Semantic HTML gives meaning to content, improves accessibility, helps SEO and enables browser features.
+
+    **Bad:**
+
+    ```html
+    <div class="button" onclick="submitForm()">Submit</div>
+    ```
+
+    **Good:**
+
+    ```html
+    <button type="submit">Submit</button>
+    ```
+
+    The native button provides:
+
+    - keyboard support
+    - focus behavior
+    - accessibility role
+    - disabled behavior
+    - form integration
+    ```
+
+    **Landmark example:**
+
+    ```html
+    <header>...</header>
+    <nav aria-label="Main navigation">...</nav>
+    <main>...</main>
+    <aside>...</aside>
+    <footer>...</footer>
+    ```
+
+    Screen reader users can jump between landmarks.
+
+    **Senior insight:**
+
+    Accessibility is not an addon. Good HTML gives you a large part of accessibility for free.
+
+    ---
+
+    # CHAPTER 42 - FORMS, VALIDATION AND NATIVE BROWSER FEATURES
+
+    ---
+
+    ### Q42.1 `[Senior]` What native form features reduce JavaScript?
+
+    **Short Answer:**
+
+    HTML has built-in input types, validation attributes and browser behavior that reduce custom JavaScript.
+
+    **Examples:**
+
+    ```html
+    <input type="email" required />
+    <input type="number" min="1" max="100" />
+    <input type="text" minlength="3" maxlength="50" />
+    <input type="url" />
+    <input type="date" min="2026-01-01" />
+    ```
+
+    **Custom pattern:**
+
+    ```html
+    <input
+      type="text"
+      pattern="[A-Z]{2}-\d{4}"
+      title="Format should be AB-1234"
+    />
+    ```
+
+    **Dialog element:**
+
+    ```html
+    <dialog id="confirmDialog">
+      <form method="dialog">
+        <h2>Confirm action</h2>
+        <button value="cancel">Cancel</button>
+        <button value="confirm">Confirm</button>
+      </form>
+    </dialog>
+    ```
+
+    **Senior insight:**
+
+    Before building custom UI behavior, check whether the browser already provides it with better accessibility.
+
+    ---
+
+    # PART 7 - SENIOR / STAFF ENGINEERING
+
+    ---
+
+    # CHAPTER 43 - FRONTEND SYSTEM DESIGN
+
+    ---
+
+    ### Q43.1 `[Staff+]` How would you design a large-scale frontend for an e-commerce platform?
+
+    **Short Answer:**
+
+    Design around performance, scalability, modularity, reliability, observability and team ownership.
+
+    **Areas to cover:**
+
+    ```text
+    Routing
+    Rendering strategy
+    State management
+    Data fetching
+    Caching
+    Design system
+    Authentication
+    Error handling
+    Monitoring
+    Testing
+    Code splitting
+    Deployment
+    Feature flags
+    ```
+
+    **High-level architecture:**
+
+    ```text
+    App Shell
+    ↓
+    Routes / Pages
+    ↓
+    Feature Modules
+    ↓
+    Shared UI Components
+    ↓
+    Design Tokens
+    ↓
+    API Client / Data Layer
+    ↓
+    Observability Layer
+    ```
+
+    **Real-world scenario:**
+
+    Product detail page needs:
+
+    - SEO-friendly product data
+    - fast loading hero image
+    - inventory updates
+    - recommendation widgets
+    - reviews
+    - add-to-cart flow
+    - analytics
+    - error fallback
+
+    A senior answer should discuss both user experience and engineering tradeoffs.
+
+    **Senior insight:**
+
+    Frontend system design is not only component structure. It includes data flow, performance budgets, team boundaries and operational reliability.
+
+    ---
+
+    # CHAPTER 44 - DESIGN SYSTEMS
+
+    ---
+
+    ### Q44.1 `[Staff+]` What makes a design system successful?
+
+    **Short Answer:**
+
+    A successful design system provides reusable components, design tokens, accessibility standards, documentation and governance.
+
+    **Core parts:**
+
+    ```text
+    Design tokens
+    Component library
+    Usage guidelines
+    Accessibility rules
+    Theming
+    Versioning
+    Contribution process
+    Documentation
+    Testing strategy
+    ```
+
+    **Token example:**
+
+    ```css
+    :root {
+      --color-primary: #2563eb;
+      --space-2: 0.5rem;
+      --radius-md: 0.5rem;
+    }
+    ```
+
+    **Component expectation:**
+
+    A good Button component should handle:
+
+    - variants
+    - sizes
+    - disabled state
+    - loading state
+    - keyboard behavior
+    - focus style
+    - accessible name
+    - icon placement
+
+    **Senior insight:**
+
+    A design system is a product. Adoption, documentation and governance matter as much as code quality.
+
+    ---
+
+    # CHAPTER 45 - OBSERVABILITY AND MONITORING
+
+    ---
+
+    ### Q45.1 `[Staff+]` What should frontend teams monitor in production?
+
+    **Short Answer:**
+
+    Frontend teams should monitor user experience, errors, performance, availability and business-critical flows.
+
+    **Metrics:**
+
+    ```text
+    Core Web Vitals
+    JavaScript errors
+    API failures
+    Unhandled promise rejections
+    Route load time
+    Conversion flow errors
+    Session replay signals
+    Resource loading failures
+    Long tasks
+    Memory usage trends
+    ```
+
+    **Example instrumentation:**
+
+    ```ts
+    window.addEventListener('error', event => {
+      reportError({
+        message: event.message,
+        filename: event.filename,
+        line: event.lineno,
+      })
+    })
+
+    window.addEventListener('unhandledrejection', event => {
+      reportError({
+        message: String(event.reason),
+      })
+    })
+    ```
+
+    **Real-world scenario:**
+
+    Users report checkout failures, but QA cannot reproduce. Observability helps identify:
+
+    - browser version
+    - API error
+    - JavaScript stack trace
+    - network failure
+    - feature flag state
+    - affected release
+
+    **Senior insight:**
+
+    If you cannot observe it, you cannot reliably operate it.
+
+    ---
+
+    # CHAPTER 46 - CODE REVIEW AND TECHNICAL LEADERSHIP
+
+    ---
+
+    ### Q46.1 `[Staff+]` What does a senior engineer look for in code review?
+
+    **Short Answer:**
+
+    A senior engineer reviews correctness, readability, maintainability, performance, accessibility, security, testability and architectural fit.
+
+    **Review checklist:**
+
+    ```text
+    Does this solve the right problem?
+    Is the code easy to understand?
+    Are edge cases handled?
+    Is the UI accessible?
+    Are errors handled?
+    Is state placed correctly?
+    Are types accurate?
+    Are tests meaningful?
+    Does this introduce performance risk?
+    Does this fit existing architecture?
+    ```
+
+    **Good review comment:**
+
+    ```text
+    Can we move this state closer to the component that uses it?
+    Right now every keystroke re-renders the whole page, including the table.
+    Moving the state down should reduce unnecessary renders and make the data flow easier to follow.
+    ```
+
+    **Bad review comment:**
+
+    ```text
+    This is wrong. Change it.
+    ```
+
+    **Senior insight:**
+
+    Technical leadership is not only knowing the right answer. It is helping the team reach better answers consistently.
+
+    ---
+
+    ## Quick Real-World Scenario Bank
+
+    ### Scenario 1 - Search API is called too many times
+
+    **Question:** User types quickly and your search API fires 20 requests. What do you do?
+
+    **Answer:** Use debounce, minimum query length, request cancellation with `AbortController`, stale response protection and caching.
+
+    ---
+
+    ### Scenario 2 - Page freezes while importing CSV
+
+    **Answer:** Move parsing to Web Worker, stream if possible, show progress, avoid blocking main thread, process data in chunks.
+
+    ---
+
+    ### Scenario 3 - React table is slow
+
+    **Answer:** Measure with React Profiler, virtualize rows, memoize expensive derived data, stabilize props, move state down and avoid rendering all rows.
+
+    ---
+
+    ### Scenario 4 - Memory increases after route changes
+
+    **Answer:** Check event listeners, timers, subscriptions, observers, detached DOM nodes and caches. Use heap snapshots to compare before and after navigation.
+
+    ---
+
+    ### Scenario 5 - Hydration error in Next.js
+
+    **Answer:** Look for server/client output mismatch caused by date, random values, browser-only APIs, locale differences or conditional rendering. Move client-only values into `useEffect` or render stable placeholders.
+
+    ---
+
+    ### Scenario 6 - CDN script risk
+
+    **Answer:** Use Subresource Integrity, CSP, trusted sources, dependency scanning and avoid unnecessary third-party scripts.
+
+    ---
+
+    ### Scenario 7 - CSS changes break other pages
+
+    **Answer:** Improve CSS architecture using CSS Modules, cascade layers, low specificity selectors, design tokens and component ownership.
+
+    ---
+
+    ### Scenario 8 - Optional dashboard widgets fail
+
+    **Answer:** Use `Promise.allSettled`, render successful widgets, show fallback for failed widgets, log errors and avoid blocking the whole page.
+
+    ---
+
+    ### Scenario 9 - Users with motion sensitivity complain
+
+    **Answer:** Respect `prefers-reduced-motion`, reduce or remove animations and avoid auto-playing motion-heavy effects.
+
+    ---
+
+    ### Scenario 10 - API data shape changes unexpectedly
+
+    **Answer:** Treat response as `unknown`, validate at runtime, fail gracefully, log schema mismatch and avoid blindly casting with `as`.
+
+    ---
+
+    ## Final Senior Interview Mindset
+
+    For senior-level interviews, avoid answering only with definitions.
+
+    A strong answer should explain:
+
+    ```text
+    What it is
+    Why it exists
+    What problem it solves
+    How it works internally
+    Where it is used in production
+    What can go wrong
+    How to debug it
+    What tradeoff you would choose
+    ```
+
+    If you answer this way, your responses sound like real production experience instead of memorized theory.
+
+    ---
+
+    *End of Expanded Senior Frontend Engineering Interview Q&A Bible.*
 </script>
-```
-
-```css
-dialog::backdrop {
-  background: rgba(0, 0, 0, 0.5);
-  backdrop-filter: blur(4px);
-}
-```
-
-**Old approach replaced:** Custom modal divs with manual focus trapping, Escape key listeners, scroll locking, and backdrop click handling — all built into `<dialog>` natively.
-
----
-
----
-
-# CHAPTER 23 — WEB APIs & BROWSER FEATURES
-
----
-
-### Q23.1 `[Senior]` What modern Web APIs have replaced common JavaScript patterns? Give five examples.
-
-**Answer:**
-
-**1. `IntersectionObserver` replacing scroll event listeners**
-```javascript
-// OLD: Scroll handler — fires on every pixel, blocks main thread
-window.addEventListener('scroll', () => {
-  elements.forEach(el => {
-    const rect = el.getBoundingClientRect() // Forces layout recalculation
-    if (rect.top < window.innerHeight) {
-      el.classList.add('visible')
-    }
-  })
-})
-
-// NEW: IntersectionObserver — no scroll handler, no layout thrashing
-const observer = new IntersectionObserver((entries) => {
-  entries.forEach(entry => {
-    if (entry.isIntersecting) {
-      entry.target.classList.add('visible')
-      observer.unobserve(entry.target) // Stop observing after triggered
-    }
-  })
-}, { threshold: 0.1 })
-
-document.querySelectorAll('.animate-on-scroll').forEach(el => observer.observe(el))
-```
-
-**2. `AbortController` replacing manual cancellation flags**
-```javascript
-// OLD: Boolean flag to track cancellation
-let cancelled = false
-fetch(url).then(data => {
-  if (!cancelled) processData(data) // Race condition possible
-})
-function cancel() { cancelled = true }
-
-// NEW: AbortController — cancels the actual HTTP request
-const controller = new AbortController()
-fetch(url, { signal: controller.signal })
-  .then(processData)
-  .catch(err => {
-    if (err.name === 'AbortError') console.log('Cancelled')
-  })
-
-controller.abort() // Cancels the actual network request
-```
-
-**3. `navigator.clipboard` replacing `document.execCommand('copy')`**
-```javascript
-// OLD: Hacky text selection and execCommand
-const textarea = document.createElement('textarea')
-textarea.value = text
-document.body.appendChild(textarea)
-textarea.select()
-document.execCommand('copy') // Deprecated
-document.body.removeChild(textarea)
-
-// NEW: Clipboard API — async, permission-based, clean
-await navigator.clipboard.writeText('Copied text')
-const text = await navigator.clipboard.readText()
-```
-
-**4. `URL` and `URLSearchParams` replacing manual string manipulation**
-```javascript
-// OLD: Manual query string parsing
-const params = window.location.search
-  .substring(1)
-  .split('&')
-  .reduce((acc, pair) => {
-    const [key, value] = pair.split('=')
-    acc[decodeURIComponent(key)] = decodeURIComponent(value)
-    return acc
-  }, {})
-
-// NEW: Built-in URL API
-const url = new URL('https://example.com/search?q=hello&page=2')
-url.searchParams.get('q')      // 'hello'
-url.searchParams.set('page', '3')
-url.searchParams.append('filter', 'new')
-url.toString() // 'https://example.com/search?q=hello&page=3&filter=new'
-```
-
-**5. `navigator.sendBeacon` replacing `fetch` in `beforeunload`**
-```javascript
-// OLD: fetch in beforeunload — unreliable, browser may cancel it
-window.addEventListener('beforeunload', () => {
-  fetch('/api/analytics', {
-    method: 'POST',
-    body: JSON.stringify(analyticsData),
-    keepalive: true, // Needed but not always reliable
-  })
-})
-
-// NEW: sendBeacon — guaranteed delivery, non-blocking
-window.addEventListener('beforeunload', () => {
-  navigator.sendBeacon('/api/analytics', JSON.stringify(analyticsData))
-})
-```
-
----
-
----
-
-# CHAPTER 24 — HTML PERFORMANCE & LOADING
-
----
-
-### Q24.1 `[Senior]` How do `loading="lazy"`, `fetchpriority`, `<link rel="preload">`, and `<link rel="preconnect">` affect page performance?
-
-**Answer:**
-
-**`loading="lazy"` — defer offscreen images**
-```html
-<!-- Images below the fold load only when scrolled into view -->
-<img src="photo.webp" loading="lazy" alt="..." width="400" height="300" />
-
-<!-- NEVER lazy-load the LCP image (hero/banner) -->
-<img src="hero.webp" loading="eager" fetchpriority="high" alt="..." />
-```
-
-**`fetchpriority` — tell the browser what matters most**
-```html
-<!-- High priority — LCP image -->
-<img src="hero.webp" fetchpriority="high" alt="Hero image" />
-
-<!-- Low priority — below-fold or decorative -->
-<img src="decoration.svg" fetchpriority="low" alt="" />
-
-<!-- High priority fetch -->
-<script src="critical.js" fetchpriority="high"></script>
-```
-
-**`<link rel="preload">` — start downloading before parser discovers it**
-```html
-<head>
-  <!-- Preload LCP image — browser starts downloading immediately -->
-  <link rel="preload" as="image" href="/hero.webp" />
-
-  <!-- Preload critical font -->
-  <link rel="preload" as="font" href="/fonts/Inter.woff2" type="font/woff2" crossorigin />
-
-  <!-- Preload critical CSS -->
-  <link rel="preload" as="style" href="/critical.css" />
-</head>
-```
-
-**`<link rel="preconnect">` — establish connection to third-party origin early**
-```html
-<head>
-  <!-- DNS lookup + TCP + TLS handshake — done before any requests -->
-  <link rel="preconnect" href="https://fonts.googleapis.com" />
-  <link rel="preconnect" href="https://cdn.example.com" crossorigin />
-
-  <!-- dns-prefetch — lighter version, just DNS lookup -->
-  <link rel="dns-prefetch" href="https://analytics.example.com" />
-</head>
-```
-
-**`<script>` loading strategies:**
-```html
-<!-- Blocks rendering — avoid unless critical -->
-<script src="critical.js"></script>
-
-<!-- async — downloads in parallel, executes as soon as ready (order not guaranteed) -->
-<script async src="analytics.js"></script>
-
-<!-- defer — downloads in parallel, executes after HTML parsing, in order -->
-<script defer src="app.js"></script>
-
-<!-- module — deferred by default, strict mode, supports import/export -->
-<script type="module" src="app.mjs"></script>
-```
-
-**Production loading strategy:**
-```html
-<head>
-  <!-- 1. Preconnect to critical origins -->
-  <link rel="preconnect" href="https://api.example.com" />
-
-  <!-- 2. Preload critical resources -->
-  <link rel="preload" as="image" href="/hero.webp" />
-  <link rel="preload" as="font" href="/font.woff2" type="font/woff2" crossorigin />
-
-  <!-- 3. Critical CSS inline -->
-  <style>/* Above-fold styles */</style>
-
-  <!-- 4. Non-critical CSS deferred -->
-  <link rel="stylesheet" href="/styles.css" media="print" onload="this.media='all'" />
-
-  <!-- 5. Scripts deferred -->
-  <script defer src="/app.js"></script>
-  <script async src="/analytics.js"></script>
-</head>
-```
-
----
-
----
-
-# CHAPTER 25 — HTML SECURITY
-
----
-
-### Q25.1 `[Senior]` What HTML security attributes and headers should every production application set?
-
-**Answer:**
-
-**1. Content Security Policy (CSP)**
-```html
-// <meta http-equiv="Content-Security-Policy"
-//   content="default-src 'self'; script-src 'self' 'nonce-abc123'; style-src 'self' 'unsafe-inline'; img-src 'self' https://cdn.example.com; connect-src 'self' https://api.example.com">
-```
-Prevents XSS by controlling which resources the browser can load. `script-src 'self'` blocks inline scripts and scripts from other origins.
-
-**2. Referrer Policy**
-```html
-// <meta name="referrer" content="strict-origin-when-cross-origin" />
-```
-Controls what URL information is sent in the Referer header. Prevents leaking internal URLs to third parties.
-
-**3. `rel="noopener noreferrer"` on external links**
-```html
-<!-- OLD: target="_blank" leaks window.opener reference -->
-<a href="https://external.com" target="_blank">External</a>
-
-<!-- SECURE: Prevents the opened page from accessing window.opener -->
-<a href="https://external.com" target="_blank" rel="noopener noreferrer">External</a>
-
-<!-- Note: Modern browsers default to noopener for target="_blank" since 2021,
-     but explicit is safer for older browser support -->
-```
-
-**4. `<iframe>` sandboxing**
-```html
-<!-- Restrict iframe capabilities -->
-<iframe
-  src="https://widget.example.com"
-  sandbox="allow-scripts allow-same-origin"
-  loading="lazy"
-  title="Payment widget"
-></iframe>
-
-<!-- sandbox with no value = maximum restriction -->
-<iframe src="untrusted.html" sandbox title="Untrusted content"></iframe>
-```
-
-**5. Subresource Integrity (SRI)**
-```html
-<!-- Verify CDN-hosted scripts haven't been tampered with -->
-<script
-  src="https://cdn.example.com/library.js"
-  integrity="sha384-oqVuAfXRKap7fdgcCY5uykM6+R9GqQ8K/uxy9rx7HNQlGYl1kPzQho1wx4JwY8wC"
-  crossorigin="anonymous"
-></script>
-```
-
-**6. Input sanitization for `innerHTML`**
-```javascript
-// DANGEROUS — XSS vulnerability
-element.innerHTML = userInput
-
-// SAFE — use textContent for text
-element.textContent = userInput
-
-// SAFE — use DOMPurify for HTML
-import DOMPurify from 'dompurify'
-element.innerHTML = DOMPurify.sanitize(userInput)
-
-// React handles this by default — dangerouslySetInnerHTML is explicitly marked
-<div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(htmlContent) }} />
-```
-
----
-
----
-
-## Quick Reference — Question Index by Topic and Level
-
-| Topic | Mid | Senior | Staff+ |
-|---|---|---|---|
-| **JS: Event Loop** | — | Output order questions | Promise.all vs allSettled vs race vs any |
-| **JS: Closures** | — | once() implementation; hoisting rules | — |
-| **JS: this & Prototypes** | — | Four binding rules; prototype chain | #private fields vs TS private |
-| **JS: Iterators** | — | Custom iterable | Async generator pagination |
-| **JS: Proxy** | — | — | Reactive state; dynamic API client |
-| **JS: Memory** | — | Three leak patterns; WeakMap/WeakSet | — |
-| **JS: Modules** | — | ESM vs CJS; tree-shaking impact | — |
-| **JS: Modern APIs** | Old → New replacements | — | — |
-| **TS: Fundamentals** | type vs interface | any vs unknown vs never; === vs == | — |
-| **TS: Generics** | — | Type-safe deep access | Conditional types; infer |
-| **TS: Utility Types** | — | Partial/Pick/Omit/Record | DeepReadonly mapped type |
-| **TS: Narrowing** | — | Six narrowing techniques | — |
-| **TS: Declarations** | — | Module augmentation; .d.ts | — |
-| **TS: Advanced** | — | — | Type-safe event emitter; satisfies |
-| **CSS: Layout** | — | Flexbox vs Grid; Container Queries | — |
-| **CSS: Specificity** | — | Specificity calculation; :where vs :is | @layer cascade layers |
-| **CSS: Modern** | — | :has(), clamp(), nesting, scroll animations | — |
-| **CSS: Animation** | — | Composite vs layout properties; reduced-motion | — |
-| **CSS: Units** | — | rem vs em vs px vs dvh | — |
-| **CSS: Architecture** | — | — | BEM vs Modules vs Tailwind vs CSS-in-JS |
-| **HTML: Semantics** | — | Div soup → semantic rewrite; section vs article | — |
-| **HTML: Forms** | — | Native validation; `<dialog>` | — |
-| **HTML: Web APIs** | — | IntersectionObserver, AbortController, Clipboard | — |
-| **HTML: Performance** | — | loading, fetchpriority, preload, preconnect | — |
-| **HTML: Security** | — | CSP, SRI, sanitization, iframe sandbox | — |
-
----
-
-## Old → New Cheat Sheet
-
-| Old Pattern | Modern Replacement | Since |
-|---|---|---|
-| `var` | `let` / `const` | ES2015 |
-| `_.cloneDeep()` | `structuredClone()` | 2022 |
-| `_.get(obj, 'a.b.c')` | `obj?.a?.b?.c ?? fallback` | ES2020 |
-| `obj.hasOwnProperty(k)` | `Object.hasOwn(obj, k)` | ES2022 |
-| `arr[arr.length - 1]` | `arr.at(-1)` | ES2022 |
-| `str.replace(/x/g, 'y')` | `str.replaceAll('x', 'y')` | ES2021 |
-| `reduce` for grouping | `Object.groupBy()` | ES2024 |
-| Callback pyramids | `async/await` | ES2017 |
-| `Promise.all` + `.catch` per item | `Promise.allSettled` | ES2020 |
-| `document.execCommand('copy')` | `navigator.clipboard.writeText()` | 2018 |
-| `scroll` event + `getBoundingClientRect` | `IntersectionObserver` | 2016 |
-| Boolean cancellation flags | `AbortController` | 2017 |
-| Custom modal divs | `<dialog>` element | 2022 |
-| Media queries for components | Container Queries `@container` | 2023 |
-| `!important` wars | `@layer` cascade layers | 2022 |
-| Sass nesting | Native CSS nesting | 2023 |
-| JS theme switching | `:has()` + CSS custom properties | 2023 |
-| JS scroll animations | Scroll-driven animations CSS | 2024 |
-| `100vh` on mobile | `100dvh` | 2022 |
-| TypeScript `private` | `#private` class fields | ES2022 |
-| Manual type assertion | `satisfies` operator | TS 4.9 |
-| `_.flatten` | `Array.prototype.flat()` | ES2019 |
-| `fetch` in `beforeunload` | `navigator.sendBeacon()` | 2014 |
-
----
-
-*End of Core Web Technologies Interview Q&A Guide*
-*Topics covered: JavaScript (event loop, closures, prototypes, iterators, proxy, memory, modules, modern APIs), TypeScript (type system, generics, conditional types, utility types, narrowing, declarations, advanced patterns), CSS (layout, specificity, layers, modern features, animation, responsive, architecture), HTML (semantics, forms, web APIs, performance, security).*
-
-
-  </template>
 
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/prism.min.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/prismjs@1.29.0/components/prism-typescript.min.js"></script>
@@ -3584,7 +3999,7 @@ element.innerHTML = DOMPurify.sanitize(userInput)
   <script>
     const source = document
       .getElementById("guide-source")
-      .innerHTML
+      .textContent
       .trim()
       .replace(/\\#/g, "#")
       .replace(/\\`/g, "`")
