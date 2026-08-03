@@ -1,0 +1,2351 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Critical Rendering Path — Deep Guide</title>
+    <style>
+        /* ── Reset & Tokens ──────────────────────────────────────────── */
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface2: #22263a;
+            --border: #2e3350;
+            --accent: #6c8ef7;
+            --accent2: #a78bfa;
+            --accent3: #34d399;
+            --accent4: #f59e0b;
+            --accent5: #f87171;
+            --text: #e2e8f0;
+            --muted: #8892b0;
+            --code-bg: #0d1117;
+            --r: 12px;
+            --font-mono: "Fira Code", "Cascadia Code", Consolas, monospace;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.7;
+            font-size: 15px;
+        }
+
+        /* ── Layout ──────────────────────────────────────────────────── */
+        .page-wrap {
+            display: grid;
+            grid-template-columns: 260px 1fr;
+            min-height: 100vh;
+        }
+
+        /* ── Sidebar ─────────────────────────────────────────────────── */
+        nav {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 28px 0;
+        }
+
+        nav .nav-logo {
+            padding: 0 22px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        nav .nav-logo h2 {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        nav .nav-logo p {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        nav ul {
+            list-style: none;
+        }
+
+        nav ul li a {
+            display: block;
+            padding: 7px 22px;
+            text-decoration: none;
+            color: var(--muted);
+            font-size: 13px;
+            border-left: 2px solid transparent;
+            transition: color .2s, border-color .2s, background .2s;
+        }
+
+        nav ul li a:hover,
+        nav ul li a.active {
+            color: var(--accent);
+            border-left-color: var(--accent);
+            background: rgba(108, 142, 247, .07);
+        }
+
+        nav ul li.section-label {
+            padding: 14px 22px 4px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        /* ── Main content ────────────────────────────────────────────── */
+        main {
+            padding: 48px 56px 80px;
+            max-width: 900px;
+        }
+
+        section {
+            padding-top: 16px;
+            margin-bottom: 64px;
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 16px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent2);
+            margin: 24px 0 10px;
+        }
+
+        h4 {
+            font-size: .95rem;
+            font-weight: 600;
+            color: var(--accent3);
+            margin: 20px 0 8px;
+        }
+
+        p {
+            margin-bottom: 14px;
+            color: var(--text);
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        strong {
+            color: #fff;
+        }
+
+        /* ── Hero ────────────────────────────────────────────────────── */
+        .hero {
+            background: linear-gradient(135deg, rgba(108, 142, 247, .12) 0%, rgba(167, 139, 250, .08) 100%);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 32px 36px;
+            margin-bottom: 40px;
+        }
+
+        .hero .subtitle {
+            font-size: 1.05rem;
+            color: var(--muted);
+            margin-top: 10px;
+        }
+
+        .hero .tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 16px;
+        }
+
+        .tag {
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .05em;
+            background: rgba(108, 142, 247, .15);
+            color: var(--accent);
+            border: 1px solid rgba(108, 142, 247, .3);
+        }
+
+        /* ── Code blocks ─────────────────────────────────────────────── */
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 20px 24px;
+            overflow-x: auto;
+            margin: 16px 0 24px;
+            position: relative;
+        }
+
+        pre .lang-label {
+            position: absolute;
+            top: 8px;
+            right: 14px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        code {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.8;
+        }
+
+        p code,
+        li code {
+            background: rgba(108, 142, 247, .12);
+            color: var(--accent);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 12.5px;
+        }
+
+        /* Syntax highlighting (manual) */
+        .kw {
+            color: #c678dd;
+        }
+
+        .str {
+            color: #98c379;
+        }
+
+        .com {
+            color: #5c6370;
+            font-style: italic;
+        }
+
+        .tag-c {
+            color: #e06c75;
+        }
+
+        .attr {
+            color: #d19a66;
+        }
+
+        .val {
+            color: #98c379;
+        }
+
+        .fn {
+            color: #61afef;
+        }
+
+        .num {
+            color: #d19a66;
+        }
+
+        .sel {
+            color: #e06c75;
+        }
+
+        .prop {
+            color: #61afef;
+        }
+
+        /* ── Callout boxes ───────────────────────────────────────────── */
+        .callout {
+            border-radius: var(--r);
+            padding: 16px 20px;
+            margin: 20px 0;
+            border-left: 4px solid;
+            display: flex;
+            gap: 12px;
+        }
+
+        .callout .icon {
+            font-size: 18px;
+            flex-shrink: 0;
+            line-height: 1.7;
+        }
+
+        .callout.info {
+            background: rgba(108, 142, 247, .08);
+            border-color: var(--accent);
+        }
+
+        .callout.tip {
+            background: rgba(52, 211, 153, .08);
+            border-color: var(--accent3);
+        }
+
+        .callout.warn {
+            background: rgba(245, 158, 11, .08);
+            border-color: var(--accent4);
+        }
+
+        .callout.danger {
+            background: rgba(248, 113, 113, .08);
+            border-color: var(--accent5);
+        }
+
+        .callout .callout-body p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ── Diagrams (SVG-based, rendered in-page) ──────────────────── */
+        .diagram-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 28px;
+            margin: 24px 0;
+            overflow-x: auto;
+        }
+
+        .diagram-wrap figcaption {
+            text-align: center;
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 12px;
+        }
+
+        svg text {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        /* ── Tables ──────────────────────────────────────────────────── */
+        .table-wrap {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+        }
+
+        th {
+            background: var(--surface2);
+            color: var(--accent);
+            font-weight: 700;
+            padding: 10px 14px;
+            text-align: left;
+            border: 1px solid var(--border);
+            font-size: 12px;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 9px 14px;
+            border: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        tr:nth-child(even) td {
+            background: rgba(255, 255, 255, .02);
+        }
+
+        /* ── Step cards ──────────────────────────────────────────────── */
+        .steps {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+        }
+
+        .step {
+            display: grid;
+            grid-template-columns: 48px 1fr;
+            gap: 0 20px;
+            position: relative;
+        }
+
+        .step-num {
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 15px;
+            color: #fff;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+            margin-top: 2px;
+        }
+
+        .step-line {
+            position: absolute;
+            left: 20px;
+            top: 44px;
+            bottom: 0;
+            width: 1px;
+            background: var(--border);
+        }
+
+        .step-body {
+            padding-bottom: 36px;
+        }
+
+        .step-body h3 {
+            margin-top: 4px;
+        }
+
+        /* ── Timeline ────────────────────────────────────────────────── */
+        .timeline {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 20px 24px;
+            margin: 20px 0;
+        }
+
+        .tl-row {
+            display: grid;
+            grid-template-columns: 140px 1fr;
+            gap: 12px;
+            align-items: start;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--border);
+        }
+
+        .tl-row:last-child {
+            border-bottom: none;
+        }
+
+        .tl-label {
+            font-size: 12px;
+            font-weight: 700;
+            color: var(--muted);
+            text-transform: uppercase;
+            letter-spacing: .06em;
+            padding-top: 3px;
+        }
+
+        .tl-bar-wrap {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+        }
+
+        .tl-bar {
+            height: 20px;
+            border-radius: 4px;
+            display: flex;
+            align-items: center;
+            padding: 0 8px;
+            font-size: 11px;
+            font-weight: 600;
+            color: #fff;
+            white-space: nowrap;
+        }
+
+        /* ── Performance metrics panel ───────────────────────────────── */
+        .metrics-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+            gap: 14px;
+            margin: 20px 0;
+        }
+
+        .metric-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 18px;
+        }
+
+        .metric-card .m-val {
+            font-size: 1.8rem;
+            font-weight: 800;
+            color: var(--accent3);
+            line-height: 1;
+            margin-bottom: 6px;
+        }
+
+        .metric-card .m-label {
+            font-size: 12px;
+            color: var(--muted);
+            font-weight: 600;
+        }
+
+        .metric-card .m-desc {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 6px;
+        }
+
+        /* ── Resource type badges ────────────────────────────────────── */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+        .badge-block {
+            background: rgba(248, 113, 113, .15);
+            color: var(--accent5);
+            border: 1px solid rgba(248, 113, 113, .3);
+        }
+
+        .badge-async {
+            background: rgba(52, 211, 153, .15);
+            color: var(--accent3);
+            border: 1px solid rgba(52, 211, 153, .3);
+        }
+
+        .badge-defer {
+            background: rgba(108, 142, 247, .15);
+            color: var(--accent);
+            border: 1px solid rgba(108, 142, 247, .3);
+        }
+
+        .badge-module {
+            background: rgba(167, 139, 250, .15);
+            color: var(--accent2);
+            border: 1px solid rgba(167, 139, 250, .3);
+        }
+
+        /* ── Lists ───────────────────────────────────────────────────── */
+        ul,
+        ol {
+            margin: 12px 0 16px 24px;
+        }
+
+        ul li,
+        ol li {
+            margin-bottom: 6px;
+        }
+
+        /* ── Two-column comparison ───────────────────────────────────── */
+        .compare {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .compare-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 18px 20px;
+        }
+
+        .compare-card h4 {
+            margin-top: 0;
+        }
+
+        /* ── Scroll progress ─────────────────────────────────────────── */
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            z-index: 999;
+            transition: width .1s linear;
+            width: 0%;
+        }
+
+        /* ── Responsive ──────────────────────────────────────────────── */
+        @media (max-width: 860px) {
+            .page-wrap {
+                grid-template-columns: 1fr;
+            }
+
+            nav {
+                position: static;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            main {
+                padding: 28px 20px 60px;
+            }
+
+            .compare {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="progress-bar"></div>
+
+    <div class="page-wrap">
+
+        <!-- ══════════════════════════════════════════════════════════════
+       SIDEBAR NAV
+  ════════════════════════════════════════════════════════════════ -->
+        <nav id="sidebar">
+            <div class="nav-logo">
+                <h2>CRP Guide</h2>
+                <p>Critical Rendering Path</p>
+            </div>
+            <ul>
+                <li class="section-label">Foundations</li>
+                <li><a href="#overview">Overview</a></li>
+                <li><a href="#lifecycle">Browser Lifecycle</a></li>
+                <li><a href="#dom">DOM Construction</a></li>
+                <li><a href="#cssom">CSSOM Construction</a></li>
+                <li><a href="#render-tree">Render Tree</a></li>
+
+                <li class="section-label">Layout & Paint</li>
+                <li><a href="#layout">Layout (Reflow)</a></li>
+                <li><a href="#paint">Paint</a></li>
+                <li><a href="#composite">Composite</a></li>
+
+                <li class="section-label">Blocking & Loading</li>
+                <li><a href="#render-blocking">Render-Blocking</a></li>
+                <li><a href="#parser-blocking">Parser-Blocking</a></li>
+                <li><a href="#script-loading">Script Loading</a></li>
+                <li><a href="#preload">Preload & Resource Hints</a></li>
+
+                <li class="section-label">Optimization</li>
+                <li><a href="#metrics">Core Web Vitals</a></li>
+                <li><a href="#optimization">Optimization Techniques</a></li>
+                <li><a href="#real-world">Real-World Examples</a></li>
+                <li><a href="#devtools">DevTools Workflow</a></li>
+            </ul>
+        </nav>
+
+        <!-- ══════════════════════════════════════════════════════════════
+       MAIN
+  ════════════════════════════════════════════════════════════════ -->
+        <main>
+
+            <!-- HERO ─────────────────────────────────────────────────────── -->
+            <div class="hero">
+                <h1>Critical Rendering Path</h1>
+                <p class="subtitle">
+                    A comprehensive deep-dive into how browsers turn bytes of HTML, CSS,
+                    and JavaScript into pixels on screen — and how to make it blazing fast.
+                </p>
+                <div class="tags">
+                    <span class="tag">Browser Internals</span>
+                    <span class="tag">Performance</span>
+                    <span class="tag">DOM</span>
+                    <span class="tag">CSSOM</span>
+                    <span class="tag">Render Tree</span>
+                    <span class="tag">Core Web Vitals</span>
+                </div>
+            </div>
+
+            <!-- ══════════════════════════════════════════════════════════
+         1. OVERVIEW
+    ══════════════════════════════════════════════════════════════ -->
+            <section id="overview">
+                <h2>What Is the Critical Rendering Path?</h2>
+
+                <p>
+                    The <strong>Critical Rendering Path (CRP)</strong> is the ordered sequence
+                    of steps a browser must complete before it can display even a single pixel
+                    of a web page. Every frame the user sees — and every millisecond of
+                    perceived load time — flows through this pipeline.
+                </p>
+
+                <p>
+                    Understanding it lets you eliminate wasted work, reduce latency, and hit
+                    the 60 fps threshold (16.6 ms per frame) required for smooth animations
+                    and interactions.
+                </p>
+
+                <!-- High-level pipeline diagram -->
+                <div class="diagram-wrap">
+                    <figure>
+                        <svg viewBox="0 0 820 100" xmlns="http://www.w3.org/2000/svg" width="100%" height="100">
+                            <defs>
+                                <marker id="arrow" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                                    <path d="M0,0 L0,6 L8,3 z" fill="#6c8ef7" />
+                                </marker>
+                            </defs>
+
+                            <!-- Boxes -->
+                            <g>
+                                <!-- HTML -->
+                                <rect x="10" y="25" width="100" height="50" rx="8" fill="#1a1d27" stroke="#6c8ef7"
+                                    stroke-width="1.5" />
+                                <text x="60" y="47" text-anchor="middle" fill="#6c8ef7" font-size="11"
+                                    font-weight="700">HTML</text>
+                                <text x="60" y="62" text-anchor="middle" fill="#8892b0" font-size="9">Bytes →
+                                    Tokens</text>
+
+                                <!-- Arrow -->
+                                <line x1="110" y1="50" x2="132" y2="50" stroke="#6c8ef7" stroke-width="1.5"
+                                    marker-end="url(#arrow)" />
+
+                                <!-- DOM -->
+                                <rect x="133" y="25" width="100" height="50" rx="8" fill="#1a1d27" stroke="#a78bfa"
+                                    stroke-width="1.5" />
+                                <text x="183" y="47" text-anchor="middle" fill="#a78bfa" font-size="11"
+                                    font-weight="700">DOM</text>
+                                <text x="183" y="62" text-anchor="middle" fill="#8892b0" font-size="9">Tree
+                                    Structure</text>
+
+                                <!-- Arrow -->
+                                <line x1="233" y1="50" x2="255" y2="50" stroke="#6c8ef7" stroke-width="1.5"
+                                    marker-end="url(#arrow)" />
+
+                                <!-- CSSOM -->
+                                <rect x="256" y="25" width="100" height="50" rx="8" fill="#1a1d27" stroke="#34d399"
+                                    stroke-width="1.5" />
+                                <text x="306" y="47" text-anchor="middle" fill="#34d399" font-size="11"
+                                    font-weight="700">CSSOM</text>
+                                <text x="306" y="62" text-anchor="middle" fill="#8892b0" font-size="9">Style
+                                    Rules</text>
+
+                                <!-- Arrow -->
+                                <line x1="356" y1="50" x2="378" y2="50" stroke="#6c8ef7" stroke-width="1.5"
+                                    marker-end="url(#arrow)" />
+
+                                <!-- Render Tree -->
+                                <rect x="379" y="25" width="110" height="50" rx="8" fill="#1a1d27" stroke="#f59e0b"
+                                    stroke-width="1.5" />
+                                <text x="434" y="47" text-anchor="middle" fill="#f59e0b" font-size="11"
+                                    font-weight="700">Render Tree</text>
+                                <text x="434" y="62" text-anchor="middle" fill="#8892b0" font-size="9">Visible
+                                    Nodes</text>
+
+                                <!-- Arrow -->
+                                <line x1="489" y1="50" x2="511" y2="50" stroke="#6c8ef7" stroke-width="1.5"
+                                    marker-end="url(#arrow)" />
+
+                                <!-- Layout -->
+                                <rect x="512" y="25" width="90" height="50" rx="8" fill="#1a1d27" stroke="#f87171"
+                                    stroke-width="1.5" />
+                                <text x="557" y="47" text-anchor="middle" fill="#f87171" font-size="11"
+                                    font-weight="700">Layout</text>
+                                <text x="557" y="62" text-anchor="middle" fill="#8892b0" font-size="9">Geometry</text>
+
+                                <!-- Arrow -->
+                                <line x1="602" y1="50" x2="624" y2="50" stroke="#6c8ef7" stroke-width="1.5"
+                                    marker-end="url(#arrow)" />
+
+                                <!-- Paint -->
+                                <rect x="625" y="25" width="85" height="50" rx="8" fill="#1a1d27" stroke="#f87171"
+                                    stroke-width="1.5" />
+                                <text x="667" y="47" text-anchor="middle" fill="#f87171" font-size="11"
+                                    font-weight="700">Paint</text>
+                                <text x="667" y="62" text-anchor="middle" fill="#8892b0" font-size="9">Draw Calls</text>
+
+                                <!-- Arrow -->
+                                <line x1="710" y1="50" x2="730" y2="50" stroke="#6c8ef7" stroke-width="1.5"
+                                    marker-end="url(#arrow)" />
+
+                                <!-- Composite -->
+                                <rect x="731" y="25" width="80" height="50" rx="8" fill="#1a1d27" stroke="#6c8ef7"
+                                    stroke-width="1.5" />
+                                <text x="771" y="44" text-anchor="middle" fill="#6c8ef7" font-size="11"
+                                    font-weight="700">Composite</text>
+                                <text x="771" y="62" text-anchor="middle" fill="#8892b0" font-size="9">GPU Layers</text>
+                            </g>
+                        </svg>
+                        <figcaption>Fig 1 — The six stages of the Critical Rendering Path</figcaption>
+                    </figure>
+                </div>
+
+                <div class="callout info">
+                    <span class="icon">💡</span>
+                    <div class="callout-body">
+                        <p>
+                            <strong>Key insight:</strong> The browser cannot show anything until
+                            <em>both</em> the DOM and CSSOM are ready. CSS is a
+                            <strong>render-blocking resource</strong> by default.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════════════════════
+         2. BROWSER LIFECYCLE
+    ══════════════════════════════════════════════════════════════ -->
+            <section id="lifecycle">
+                <h2>Browser Lifecycle: From URL to Pixels</h2>
+
+                <p>
+                    Before the CRP even begins, a lot happens at the network layer. Here is
+                    the full sequence from typing a URL to the first painted frame.
+                </p>
+
+                <div class="steps">
+
+                    <div class="step">
+                        <div>
+                            <div class="step-num">1</div>
+                            <div class="step-line"></div>
+                        </div>
+                        <div class="step-body">
+                            <h3>DNS Lookup</h3>
+                            <p>
+                                The browser resolves the hostname to an IP address. A cold lookup
+                                can take <strong>20–120 ms</strong>. Results are cached at the OS
+                                and browser level (TTL-controlled).
+                            </p>
+                            <pre><code><span class="com">// Browser sends UDP packet to DNS resolver</span>
+www.example.com  →  <span class="num">93.184.216.34</span>   <span class="com">// A record</span>
+www.example.com  →  <span class="num">2606:2800:220:1::</span>  <span class="com">// AAAA record</span></code></pre>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div>
+                            <div class="step-num">2</div>
+                            <div class="step-line"></div>
+                        </div>
+                        <div class="step-body">
+                            <h3>TCP Handshake + TLS Negotiation</h3>
+                            <p>
+                                Establishing a TCP connection costs <strong>1 RTT</strong>.
+                                TLS 1.3 adds another <strong>1 RTT</strong> (down from 2 in TLS 1.2).
+                                HTTP/2 and HTTP/3 (QUIC) reduce this overhead significantly for
+                                subsequent requests.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div>
+                            <div class="step-num">3</div>
+                            <div class="step-line"></div>
+                        </div>
+                        <div class="step-body">
+                            <h3>HTTP Request / Response</h3>
+                            <p>
+                                The browser sends an HTTP GET. The server responds with the HTML
+                                document. The first chunk is typically
+                                <strong>14 KB</strong> (one TCP congestion-window). This is why
+                                the goal is to fit critical HTML in 14 KB — it avoids extra round
+                                trips before the browser can start parsing.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div>
+                            <div class="step-num">4</div>
+                            <div class="step-line"></div>
+                        </div>
+                        <div class="step-body">
+                            <h3>HTML Parsing begins (CRP starts here)</h3>
+                            <p>
+                                As bytes stream in, the browser's <strong>HTML parser</strong>
+                                tokenises them and begins building the DOM. It does not wait for the
+                                full document.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div>
+                            <div class="step-num">5</div>
+                            <div class="step-line"></div>
+                        </div>
+                        <div class="step-body">
+                            <h3>Preload Scanner runs in parallel</h3>
+                            <p>
+                                A secondary thread scans ahead in the raw HTML bytes for
+                                <code>&lt;link&gt;</code>, <code>&lt;script&gt;</code>, and
+                                <code>&lt;img&gt;</code> tags, issuing network requests early
+                                — even while the main parser is blocked.
+                            </p>
+                        </div>
+                    </div>
+
+                    <div class="step">
+                        <div>
+                            <div class="step-num">6</div>
+                        </div>
+                        <div class="step-body">
+                            <h3>Render pipeline executes → First Frame</h3>
+                            <p>
+                                Once DOM + CSSOM are ready, the browser builds the Render Tree,
+                                runs Layout, paints, composites — and the user sees content.
+                            </p>
+                        </div>
+                    </div>
+
+                </div>
+
+                <!-- Network timeline bar chart -->
+                <div class="timeline">
+                    <div class="tl-row">
+                        <div class="tl-label">DNS</div>
+                        <div class="tl-bar-wrap">
+                            <div class="tl-bar" style="width:60px;background:#6c8ef7;">~50ms</div>
+                        </div>
+                    </div>
+                    <div class="tl-row">
+                        <div class="tl-label">TCP+TLS</div>
+                        <div class="tl-bar-wrap">
+                            <div class="tl-bar" style="width:90px;background:#a78bfa;">1–2 RTT</div>
+                        </div>
+                    </div>
+                    <div class="tl-row">
+                        <div class="tl-label">First Byte (TTFB)</div>
+                        <div class="tl-bar-wrap">
+                            <div class="tl-bar" style="width:130px;background:#34d399;">Server processing</div>
+                        </div>
+                    </div>
+                    <div class="tl-row">
+                        <div class="tl-label">HTML Download</div>
+                        <div class="tl-bar-wrap">
+                            <div class="tl-bar" style="width:160px;background:#f59e0b;">Streamed in chunks</div>
+                        </div>
+                    </div>
+                    <div class="tl-row">
+                        <div class="tl-label">CRP (DOM+CSSOM)</div>
+                        <div class="tl-bar-wrap">
+                            <div class="tl-bar" style="width:200px;background:linear-gradient(90deg,#f87171,#f59e0b);">
+                                Blocking work</div>
+                        </div>
+                    </div>
+                    <div class="tl-row">
+                        <div class="tl-label">First Paint</div>
+                        <div class="tl-bar-wrap">
+                            <div class="tl-bar" style="width:30px;background:#6c8ef7;">▶</div>
+                            <span style="font-size:12px;color:#8892b0;">Layout → Paint → Composite</span>
+                        </div>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════════════════════
+         3. DOM CONSTRUCTION
+    ══════════════════════════════════════════════════════════════ -->
+            <section id="dom">
+                <h2>DOM Construction</h2>
+
+                <p>
+                    The <strong>Document Object Model (DOM)</strong> is an in-memory tree
+                    representation of the HTML document. Each HTML element becomes a
+                    <code>Node</code> object. The browser builds it incrementally as bytes
+                    arrive over the network.
+                </p>
+
+                <h3>Tokenisation Pipeline</h3>
+
+                <!-- Tokenisation stages -->
+                <div class="diagram-wrap">
+                    <figure>
+                        <svg viewBox="0 0 760 80" xmlns="http://www.w3.org/2000/svg" width="100%" height="80">
+                            <defs>
+                                <marker id="arr2" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+                                    <path d="M0,0 L0,6 L7,3 z" fill="#8892b0" />
+                                </marker>
+                            </defs>
+                            <!-- stages -->
+                            <g font-size="10" text-anchor="middle" font-weight="600">
+                                <rect x="10" y="20" width="100" height="40" rx="7" fill="#22263a" stroke="#2e3350"
+                                    stroke-width="1" />
+                                <text x="60" y="38" fill="#6c8ef7">Bytes</text>
+                                <text x="60" y="52" fill="#8892b0">Raw HTML</text>
+
+                                <line x1="110" y1="40" x2="128" y2="40" stroke="#8892b0" stroke-width="1.5"
+                                    marker-end="url(#arr2)" />
+
+                                <rect x="129" y="20" width="110" height="40" rx="7" fill="#22263a" stroke="#2e3350"
+                                    stroke-width="1" />
+                                <text x="184" y="38" fill="#a78bfa">Characters</text>
+                                <text x="184" y="52" fill="#8892b0">UTF-8 decode</text>
+
+                                <line x1="239" y1="40" x2="257" y2="40" stroke="#8892b0" stroke-width="1.5"
+                                    marker-end="url(#arr2)" />
+
+                                <rect x="258" y="20" width="100" height="40" rx="7" fill="#22263a" stroke="#2e3350"
+                                    stroke-width="1" />
+                                <text x="308" y="38" fill="#34d399">Tokens</text>
+                                <text x="308" y="52" fill="#8892b0">StartTag, etc.</text>
+
+                                <line x1="358" y1="40" x2="376" y2="40" stroke="#8892b0" stroke-width="1.5"
+                                    marker-end="url(#arr2)" />
+
+                                <rect x="377" y="20" width="100" height="40" rx="7" fill="#22263a" stroke="#2e3350"
+                                    stroke-width="1" />
+                                <text x="427" y="38" fill="#f59e0b">Nodes</text>
+                                <text x="427" y="52" fill="#8892b0">JS Objects</text>
+
+                                <line x1="477" y1="40" x2="495" y2="40" stroke="#8892b0" stroke-width="1.5"
+                                    marker-end="url(#arr2)" />
+
+                                <rect x="496" y="20" width="100" height="40" rx="7" fill="#22263a" stroke="#2e3350"
+                                    stroke-width="1" />
+                                <text x="546" y="38" fill="#f87171">DOM Tree</text>
+                                <text x="546" y="52" fill="#8892b0">Parent/child</text>
+
+                                <line x1="596" y1="40" x2="614" y2="40" stroke="#8892b0" stroke-width="1.5"
+                                    marker-end="url(#arr2)" />
+
+                                <rect x="615" y="20" width="130" height="40" rx="7" fill="#22263a" stroke="#6c8ef7"
+                                    stroke-width="1.5" />
+                                <text x="680" y="38" fill="#6c8ef7">document</text>
+                                <text x="680" y="52" fill="#8892b0">JS-accessible</text>
+                            </g>
+                        </svg>
+                        <figcaption>Fig 2 — HTML bytes → DOM</figcaption>
+                    </figure>
+                </div>
+
+                <h3>Real HTML → DOM Example</h3>
+                <pre><span class="lang-label">HTML</span><code><span class="com">&lt;!-- Source HTML --&gt;</span>
+<span class="tag-c">&lt;html&gt;</span>
+  <span class="tag-c">&lt;head&gt;</span>
+    <span class="tag-c">&lt;title&gt;</span>My App<span class="tag-c">&lt;/title&gt;</span>
+    <span class="tag-c">&lt;link</span> <span class="attr">rel</span>=<span class="val">"stylesheet"</span> <span class="attr">href</span>=<span class="val">"styles.css"</span><span class="tag-c">&gt;</span>
+  <span class="tag-c">&lt;/head&gt;</span>
+  <span class="tag-c">&lt;body&gt;</span>
+    <span class="tag-c">&lt;h1&gt;</span>Hello<span class="tag-c">&lt;/h1&gt;</span>
+    <span class="tag-c">&lt;p</span> <span class="attr">class</span>=<span class="val">"intro"</span><span class="tag-c">&gt;</span>World<span class="tag-c">&lt;/p&gt;</span>
+  <span class="tag-c">&lt;/body&gt;</span>
+<span class="tag-c">&lt;/html&gt;</span></code></pre>
+
+                <!-- DOM Tree SVG -->
+                <div class="diagram-wrap">
+                    <figure>
+                        <svg viewBox="0 0 580 220" xmlns="http://www.w3.org/2000/svg" width="100%" height="220">
+                            <style>
+                                .dn rect {
+                                    fill: #22263a;
+                                    stroke: #2e3350;
+                                    stroke-width: 1.5;
+                                    rx: 6;
+                                }
+
+                                .dn text {
+                                    fill: #e2e8f0;
+                                    font-size: 12px;
+                                    font-weight: 600;
+                                    text-anchor: middle;
+                                }
+
+                                .edge {
+                                    stroke: #2e3350;
+                                    stroke-width: 1.5;
+                                    fill: none;
+                                }
+                            </style>
+
+                            <!-- document -->
+                            <g class="dn">
+                                <rect x="225" y="8" width="110" height="32" rx="6" fill="#1a1d27" stroke="#6c8ef7"
+                                    stroke-width="2" />
+                                <text x="280" y="29" fill="#6c8ef7">document</text>
+                            </g>
+
+                            <!-- html -->
+                            <line class="edge" x1="280" y1="40" x2="280" y2="58" />
+                            <g class="dn">
+                                <rect x="225" y="58" width="110" height="32" rx="6" />
+                                <text x="280" y="79">&lt;html&gt;</text>
+                            </g>
+
+                            <!-- head + body -->
+                            <line class="edge" x1="280" y1="90" x2="140" y2="108" />
+                            <line class="edge" x1="280" y1="90" x2="420" y2="108" />
+
+                            <g class="dn">
+                                <rect x="85" y="108" width="110" height="32" rx="6" />
+                                <text x="140" y="129">&lt;head&gt;</text>
+                            </g>
+                            <g class="dn">
+                                <rect x="365" y="108" width="110" height="32" rx="6" />
+                                <text x="420" y="129">&lt;body&gt;</text>
+                            </g>
+
+                            <!-- head children -->
+                            <line class="edge" x1="140" y1="140" x2="60" y2="158" />
+                            <line class="edge" x1="140" y1="140" x2="160" y2="158" />
+
+                            <g class="dn">
+                                <rect x="10" y="158" width="90" height="32" rx="6" />
+                                <text x="55" y="179">&lt;title&gt;</text>
+                            </g>
+                            <g class="dn">
+                                <rect x="110" y="158" width="100" height="32" rx="6" />
+                                <text x="160" y="179">&lt;link&gt;</text>
+                            </g>
+
+                            <!-- body children -->
+                            <line class="edge" x1="420" y1="140" x2="360" y2="158" />
+                            <line class="edge" x1="420" y1="140" x2="480" y2="158" />
+
+                            <g class="dn">
+                                <rect x="310" y="158" width="90" height="32" rx="6" />
+                                <text x="355" y="179">&lt;h1&gt;</text>
+                            </g>
+                            <g class="dn">
+                                <rect x="420" y="158" width="120" height="32" rx="6" />
+                                <text x="480" y="179">&lt;p.intro&gt;</text>
+                            </g>
+
+                            <!-- text nodes -->
+                            <line class="edge" x1="55" y1="190" x2="55" y2="200" />
+                            <rect x="20" y="200" width="70" height="18" rx="4" fill="#0d1117" stroke="#2e3350" />
+                            <text x="55" y="213" fill="#8892b0" font-size="10">"My App"</text>
+
+                            <line class="edge" x1="355" y1="190" x2="355" y2="200" />
+                            <rect x="320" y="200" width="70" height="18" rx="4" fill="#0d1117" stroke="#2e3350" />
+                            <text x="355" y="213" fill="#8892b0" font-size="10">"Hello"</text>
+
+                            <line class="edge" x1="480" y1="190" x2="480" y2="200" />
+                            <rect x="445" y="200" width="70" height="18" rx="4" fill="#0d1117" stroke="#2e3350" />
+                            <text x="480" y="213" fill="#8892b0" font-size="10">"World"</text>
+                        </svg>
+                        <figcaption>Fig 3 — DOM tree produced from the HTML above</figcaption>
+                    </figure>
+                </div>
+
+                <div class="callout warn">
+                    <span class="icon">⚠️</span>
+                    <div class="callout-body">
+                        <p>
+                            <strong>Parser-blocking scripts halt DOM construction.</strong>
+                            When the HTML parser encounters a <code>&lt;script&gt;</code> without
+                            <code>async</code> or <code>defer</code>, it must pause, download,
+                            and execute the script before continuing. Scripts placed in
+                            <code>&lt;head&gt;</code> delay the entire page.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════════════════════
+         4. CSSOM
+    ══════════════════════════════════════════════════════════════ -->
+            <section id="cssom">
+                <h2>CSSOM Construction</h2>
+
+                <p>
+                    Simultaneously with DOM construction, the browser parses every CSS
+                    resource it encounters and builds the
+                    <strong>CSS Object Model (CSSOM)</strong> — a tree of style rules that
+                    mirrors the document hierarchy and allows cascading inheritance to be
+                    computed efficiently.
+                </p>
+
+                <h3>Cascade Order</h3>
+                <p>
+                    The browser resolves property values for every node through the cascade:
+                </p>
+                <ol>
+                    <li><strong>Origin</strong>: user-agent → author → user (inline beats all)</li>
+                    <li><strong>Specificity</strong>: inline > ID > class/attr > element</li>
+                    <li><strong>Order</strong>: later declarations win at equal specificity</li>
+                </ol>
+
+                <pre><span class="lang-label">CSS</span><code><span class="com">/* stylesheet.css */</span>
+<span class="sel">body</span>  { <span class="prop">font-size</span>: <span class="num">16px</span>; }          <span class="com">/* specificity 0,0,0,1 */</span>
+<span class="sel">h1</span>    { <span class="prop">font-size</span>: <span class="num">2em</span>; <span class="prop">color</span>: <span class="val">navy</span>; } <span class="com">/* 0,0,0,1 — inherits 16px base */</span>
+<span class="sel">.intro</span>{ <span class="prop">font-size</span>: <span class="num">1.1em</span>; }           <span class="com">/* 0,0,1,0 — wins over element */</span></code></pre>
+
+                <!-- CSSOM tree -->
+                <div class="diagram-wrap">
+                    <figure>
+                        <svg viewBox="0 0 540 180" xmlns="http://www.w3.org/2000/svg" width="100%" height="180">
+                            <!-- root -->
+                            <rect x="205" y="10" width="130" height="36" rx="7" fill="#22263a" stroke="#34d399"
+                                stroke-width="2" />
+                            <text x="270" y="29" text-anchor="middle" fill="#34d399" font-size="12"
+                                font-weight="700">StyleSheetList</text>
+                            <text x="270" y="43" text-anchor="middle" fill="#8892b0" font-size="10">UA + author
+                                sheets</text>
+
+                            <line x1="270" y1="46" x2="270" y2="64" stroke="#2e3350" stroke-width="1.5" />
+
+                            <!-- body rule -->
+                            <rect x="80" y="64" width="180" height="44" rx="7" fill="#22263a" stroke="#2e3350"
+                                stroke-width="1.5" />
+                            <text x="170" y="82" text-anchor="middle" fill="#e2e8f0" font-size="12"
+                                font-weight="600">body</text>
+                            <text x="170" y="100" text-anchor="middle" fill="#8892b0" font-size="10">font-size:
+                                16px</text>
+
+                            <line x1="270" y1="64" x2="170" y2="64" stroke="#2e3350" stroke-width="1.5" />
+                            <line x1="270" y1="64" x2="370" y2="64" stroke="#2e3350" stroke-width="1.5" />
+
+                            <!-- h1 rule -->
+                            <rect x="265" y="64" width="210" height="44" rx="7" fill="#22263a" stroke="#2e3350"
+                                stroke-width="1.5" />
+                            <text x="370" y="82" text-anchor="middle" fill="#e2e8f0" font-size="12"
+                                font-weight="600">h1</text>
+                            <text x="370" y="100" text-anchor="middle" fill="#8892b0" font-size="10">font-size:2em
+                                color:navy</text>
+
+                            <!-- .intro rule -->
+                            <line x1="170" y1="108" x2="170" y2="128" stroke="#2e3350" stroke-width="1.5" />
+                            <rect x="80" y="128" width="180" height="44" rx="7" fill="#22263a" stroke="#a78bfa"
+                                stroke-width="1.5" />
+                            <text x="170" y="146" text-anchor="middle" fill="#a78bfa" font-size="12"
+                                font-weight="600">.intro (inherits body)</text>
+                            <text x="170" y="163" text-anchor="middle" fill="#8892b0" font-size="10">font-size: 1.1em
+                                (17.6px)</text>
+                        </svg>
+                        <figcaption>Fig 4 — CSSOM rule tree with inherited values</figcaption>
+                    </figure>
+                </div>
+
+                <div class="callout danger">
+                    <span class="icon">🚫</span>
+                    <div class="callout-body">
+                        <p>
+                            <strong>CSSOM blocks rendering entirely.</strong> The browser will
+                            not construct the Render Tree — and therefore won't paint anything —
+                            until the CSSOM is complete. A large or slow-loading CSS file delays
+                            <em>every single pixel</em> on the page.
+                        </p>
+                    </div>
+                </div>
+
+                <h3>Media Queries as an Escape Hatch</h3>
+                <p>
+                    Stylesheets with a non-matching <code>media</code> attribute are still
+                    downloaded but <strong>do not block rendering</strong>:
+                </p>
+                <pre><span class="lang-label">HTML</span><code><span class="com">&lt;!-- Blocks rendering — no media query --&gt;</span>
+<span class="tag-c">&lt;link</span> <span class="attr">rel</span>=<span class="val">"stylesheet"</span> <span class="attr">href</span>=<span class="val">"main.css"</span><span class="tag-c">&gt;</span>
+
+<span class="com">&lt;!-- Does NOT block rendering on small screens --&gt;</span>
+<span class="tag-c">&lt;link</span> <span class="attr">rel</span>=<span class="val">"stylesheet"</span> <span class="attr">href</span>=<span class="val">"print.css"</span> <span class="attr">media</span>=<span class="val">"print"</span><span class="tag-c">&gt;</span>
+<span class="tag-c">&lt;link</span> <span class="attr">rel</span>=<span class="val">"stylesheet"</span> <span class="attr">href</span>=<span class="val">"desktop.css"</span> <span class="attr">media</span>=<span class="val">"(min-width:1024px)"</span><span class="tag-c">&gt;</span></code></pre>
+            </section>
+
+            <!-- ══════════════════════════════════════════════════════════
+         5. RENDER TREE
+    ══════════════════════════════════════════════════════════════ -->
+            <section id="render-tree">
+                <h2>Render Tree Construction</h2>
+
+                <p>
+                    The <strong>Render Tree</strong> is built by combining the DOM and CSSOM.
+                    It contains <em>only the nodes that will be visually rendered</em>.
+                </p>
+
+                <h3>Rules for inclusion</h3>
+                <ul>
+                    <li>Nodes with <code>display: none</code> are <strong>excluded</strong> entirely</li>
+                    <li><code>&lt;script&gt;</code>, <code>&lt;meta&gt;</code>, <code>&lt;head&gt;</code> are excluded
+                    </li>
+                    <li>Pseudo-elements (<code>::before</code>, <code>::after</code>) <strong>are included</strong></li>
+                    <li><code>visibility: hidden</code> <strong>is included</strong> (it affects layout)</li>
+                </ul>
+
+                <!-- Render Tree merge diagram -->
+                <div class="diagram-wrap">
+                    <figure>
+                        <svg viewBox="0 0 720 200" xmlns="http://www.w3.org/2000/svg" width="100%" height="200">
+                            <defs>
+                                <marker id="arr3" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                                    <path d="M0,0 L0,6 L8,3 z" fill="#6c8ef7" />
+                                </marker>
+                            </defs>
+
+                            <!-- DOM side -->
+                            <text x="120" y="20" text-anchor="middle" fill="#6c8ef7" font-size="13"
+                                font-weight="700">DOM</text>
+                            <rect x="60" y="30" width="120" height="28" rx="6" fill="#22263a" stroke="#2e3350" />
+                            <text x="120" y="49" text-anchor="middle" fill="#e2e8f0" font-size="11">&lt;body&gt;</text>
+                            <rect x="30" y="76" width="80" height="28" rx="6" fill="#22263a" stroke="#2e3350" />
+                            <text x="70" y="95" text-anchor="middle" fill="#e2e8f0" font-size="11">&lt;h1&gt;</text>
+                            <rect x="130" y="76" width="80" height="28" rx="6" fill="#22263a" stroke="#2e3350" />
+                            <text x="170" y="95" text-anchor="middle" fill="#e2e8f0" font-size="11">&lt;p&gt;</text>
+                            <rect x="10" y="122" width="120" height="28" rx="6" fill="#22263a" stroke="#f87171"
+                                stroke-width="1.5" />
+                            <text x="70" y="141" text-anchor="middle" fill="#f87171" font-size="11">display:none
+                                ✗</text>
+
+                            <line x1="120" y1="58" x2="70" y2="76" stroke="#2e3350" stroke-width="1" />
+                            <line x1="120" y1="58" x2="170" y2="76" stroke="#2e3350" stroke-width="1" />
+                            <line x1="70" y1="104" x2="70" y2="122" stroke="#2e3350" stroke-width="1" />
+
+                            <!-- CSSOM side -->
+                            <text x="580" y="20" text-anchor="middle" fill="#34d399" font-size="13"
+                                font-weight="700">CSSOM</text>
+                            <rect x="520" y="30" width="120" height="28" rx="6" fill="#22263a" stroke="#2e3350" />
+                            <text x="580" y="49" text-anchor="middle" fill="#e2e8f0" font-size="11">body styles</text>
+                            <rect x="490" y="76" width="80" height="28" rx="6" fill="#22263a" stroke="#2e3350" />
+                            <text x="530" y="95" text-anchor="middle" fill="#e2e8f0" font-size="11">h1 styles</text>
+                            <rect x="590" y="76" width="80" height="28" rx="6" fill="#22263a" stroke="#2e3350" />
+                            <text x="630" y="95" text-anchor="middle" fill="#e2e8f0" font-size="11">p styles</text>
+
+                            <line x1="580" y1="58" x2="530" y2="76" stroke="#2e3350" stroke-width="1" />
+                            <line x1="580" y1="58" x2="630" y2="76" stroke="#2e3350" stroke-width="1" />
+
+                            <!-- Arrows to Render Tree -->
+                            <line x1="220" y1="80" x2="290" y2="100" stroke="#6c8ef7" stroke-width="2"
+                                marker-end="url(#arr3)" />
+                            <line x1="500" y1="80" x2="430" y2="100" stroke="#34d399" stroke-width="2"
+                                marker-end="url(#arr3)" />
+
+                            <!-- Render Tree box -->
+                            <rect x="280" y="88" width="160" height="100" rx="8" fill="#1a1d27" stroke="#f59e0b"
+                                stroke-width="2" />
+                            <text x="360" y="108" text-anchor="middle" fill="#f59e0b" font-size="13"
+                                font-weight="700">Render Tree</text>
+                            <text x="360" y="130" text-anchor="middle" fill="#e2e8f0" font-size="11">RenderBody</text>
+                            <text x="360" y="148" text-anchor="middle" fill="#e2e8f0" font-size="11">RenderH1</text>
+                            <text x="360" y="166" text-anchor="middle" fill="#e2e8f0" font-size="11">RenderP</text>
+                            <text x="360" y="182" text-anchor="middle" fill="#8892b0" font-size="9">(display:none
+                                excluded)</text>
+                        </svg>
+                        <figcaption>Fig 5 — DOM + CSSOM merge into the Render Tree (invisible nodes excluded)
+                        </figcaption>
+                    </figure>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════════════════════
+         6. LAYOUT
+    ══════════════════════════════════════════════════════════════ -->
+            <section id="layout">
+                <h2>Layout (Reflow)</h2>
+
+                <p>
+                    <strong>Layout</strong> (also called <em>reflow</em>) is the process by
+                    which the browser calculates the exact position and size of every Render
+                    Tree node. It produces a "box model" for each element — origin, width,
+                    height, margins, and padding — expressed in absolute device pixels.
+                </p>
+
+                <h3>Box Model Recap</h3>
+                <!-- Box model diagram -->
+                <div class="diagram-wrap">
+                    <figure>
+                        <svg viewBox="0 0 480 260" xmlns="http://www.w3.org/2000/svg" width="100%" height="260">
+                            <!-- Margin -->
+                            <rect x="20" y="20" width="440" height="220" rx="6" fill="rgba(245,158,11,.08)"
+                                stroke="#f59e0b" stroke-width="1.5" stroke-dasharray="6,4" />
+                            <text x="34" y="36" fill="#f59e0b" font-size="11" font-weight="600">margin</text>
+
+                            <!-- Border -->
+                            <rect x="50" y="48" width="380" height="164" rx="6" fill="rgba(248,113,113,.1)"
+                                stroke="#f87171" stroke-width="2" />
+                            <text x="62" y="63" fill="#f87171" font-size="11" font-weight="600">border</text>
+
+                            <!-- Padding -->
+                            <rect x="78" y="72" width="324" height="116" rx="5" fill="rgba(52,211,153,.08)"
+                                stroke="#34d399" stroke-width="1.5" />
+                            <text x="90" y="86" fill="#34d399" font-size="11" font-weight="600">padding</text>
+
+                            <!-- Content -->
+                            <rect x="108" y="98" width="264" height="64" rx="4" fill="rgba(108,142,247,.15)"
+                                stroke="#6c8ef7" stroke-width="2" />
+                            <text x="240" y="127" text-anchor="middle" fill="#6c8ef7" font-size="13"
+                                font-weight="700">content</text>
+                            <text x="240" y="147" text-anchor="middle" fill="#8892b0" font-size="10">width ×
+                                height</text>
+                        </svg>
+                        <figcaption>Fig 6 — CSS Box Model components</figcaption>
+                    </figure>
+                </div>
+
+                <h3>What Triggers Layout?</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Trigger</th>
+                                <th>Example</th>
+                                <th>Scope</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>DOM insertion / removal</td>
+                                <td><code>appendChild()</code>, <code>removeChild()</code></td>
+                                <td>Full reflow</td>
+                            </tr>
+                            <tr>
+                                <td>CSS geometry change</td>
+                                <td><code>width</code>, <code>height</code>, <code>padding</code></td>
+                                <td>Full reflow</td>
+                            </tr>
+                            <tr>
+                                <td>Font size change</td>
+                                <td><code>font-size: 18px</code></td>
+                                <td>Full reflow</td>
+                            </tr>
+                            <tr>
+                                <td>Viewport resize</td>
+                                <td>Window resize event</td>
+                                <td>Full reflow</td>
+                            </tr>
+                            <tr>
+                                <td>Reading layout properties</td>
+                                <td><code>.offsetWidth</code>, <code>.getBoundingClientRect()</code></td>
+                                <td>Forces sync flush</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="callout danger">
+                    <span class="icon">⚡</span>
+                    <div class="callout-body">
+                        <p>
+                            <strong>Layout Thrashing:</strong> Reading a layout property
+                            (<code>offsetWidth</code>) after a write (<code>style.width = …</code>)
+                            forces the browser to flush pending layout <em>synchronously</em>.
+                            Doing this in a loop is the #1 cause of jank.
+                        </p>
+                    </div>
+                </div>
+
+                <pre><span class="lang-label">JS — BAD</span><code><span class="com">// Forces layout on every iteration (thrashing)</span>
+<span class="kw">for</span> (<span class="kw">const</span> el <span class="kw">of</span> elements) {
+  el.style.width = el.<span class="fn">offsetWidth</span> + <span class="num">10</span> + <span class="str">'px'</span>; <span class="com">// read → write → read → write …</span>
+}</code></pre>
+
+                <pre><span class="lang-label">JS — GOOD</span><code><span class="com">// Batch reads first, then writes</span>
+<span class="kw">const</span> widths = elements.<span class="fn">map</span>(el =&gt; el.<span class="fn">offsetWidth</span>); <span class="com">// all reads</span>
+elements.<span class="fn">forEach</span>((el, i) =&gt; {
+  el.style.width = widths[i] + <span class="num">10</span> + <span class="str">'px'</span>;             <span class="com">// all writes</span>
+});</code></pre>
+            </section>
+
+            <!-- ══════════════════════════════════════════════════════════
+         7. PAINT
+    ══════════════════════════════════════════════════════════════ -->
+            <section id="paint">
+                <h2>Paint</h2>
+
+                <p>
+                    After Layout produces geometry, the <strong>Paint</strong> phase converts
+                    each Render Tree node into actual draw instructions — fill rectangles,
+                    stroke borders, draw text glyphs, and render images. These instructions
+                    are recorded into <strong>display lists</strong>, not immediately rasterised.
+                </p>
+
+                <h3>Paint Order (Stacking Contexts)</h3>
+                <ol>
+                    <li>Background colour</li>
+                    <li>Background image</li>
+                    <li>Border</li>
+                    <li>Children (in tree order, depth-first)</li>
+                    <li>Outline</li>
+                </ol>
+
+                <h3>What Triggers Paint?</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Property</th>
+                                <th>Triggers Layout?</th>
+                                <th>Triggers Paint?</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>width</code> / <code>height</code></td>
+                                <td>Yes</td>
+                                <td>Yes</td>
+                            </tr>
+                            <tr>
+                                <td><code>background-color</code></td>
+                                <td>No</td>
+                                <td>Yes</td>
+                            </tr>
+                            <tr>
+                                <td><code>color</code></td>
+                                <td>No</td>
+                                <td>Yes</td>
+                            </tr>
+                            <tr>
+                                <td><code>box-shadow</code></td>
+                                <td>No</td>
+                                <td>Yes</td>
+                            </tr>
+                            <tr>
+                                <td><code>transform</code></td>
+                                <td>No</td>
+                                <td>No — compositor only</td>
+                            </tr>
+                            <tr>
+                                <td><code>opacity</code></td>
+                                <td>No</td>
+                                <td>No — compositor only</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <div class="callout tip">
+                    <span class="icon">✅</span>
+                    <div class="callout-body">
+                        <p>
+                            <strong>Animate with <code>transform</code> and <code>opacity</code>.</strong>
+                            These properties bypass both Layout and Paint entirely — they are
+                            handled by the GPU compositor thread and run at 60 fps even if the
+                            main thread is busy.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════════════════════
+         8. COMPOSITE
+    ══════════════════════════════════════════════════════════════ -->
+            <section id="composite">
+                <h2>Compositing</h2>
+
+                <p>
+                    The browser splits the page into <strong>compositor layers</strong> and
+                    uploads each as a GPU texture. The compositor thread then combines
+                    (composites) these layers to produce the final frame — entirely on the
+                    GPU, independently of the main thread.
+                </p>
+
+                <h3>When Does a New Layer Get Created?</h3>
+                <ul>
+                    <li>Element has a CSS <code>transform</code> or <code>will-change: transform</code></li>
+                    <li>Element has <code>position: fixed</code> or <code>sticky</code></li>
+                    <li><code>&lt;video&gt;</code>, <code>&lt;canvas&gt;</code>, <code>&lt;iframe&gt;</code></li>
+                    <li>CSS <code>opacity</code> animation</li>
+                    <li>CSS filters (<code>filter: blur()</code>)</li>
+                </ul>
+
+                <div class="callout warn">
+                    <span class="icon">⚠️</span>
+                    <div class="callout-body">
+                        <p>
+                            <strong>Layer explosion:</strong> Promoting too many elements to
+                            compositor layers consumes GPU memory. Use
+                            <code>will-change</code> sparingly and only on elements that
+                            actually animate.
+                        </p>
+                    </div>
+                </div>
+
+                <pre><span class="lang-label">CSS</span><code><span class="com">/* Promote to its own layer (before animation starts) */</span>
+<span class="sel">.card</span> {
+  <span class="prop">will-change</span>: transform;  <span class="com">/* browser allocates layer proactively */</span>
+}
+
+<span class="com">/* Remove after animation to free GPU memory */</span>
+<span class="sel">.card.idle</span> {
+  <span class="prop">will-change</span>: auto;
+}</code></pre>
+            </section>
+
+            <!-- ══════════════════════════════════════════════════════════
+         9. RENDER-BLOCKING
+    ══════════════════════════════════════════════════════════════ -->
+            <section id="render-blocking">
+                <h2>Render-Blocking Resources</h2>
+
+                <p>
+                    A <strong>render-blocking resource</strong> prevents the browser from
+                    displaying <em>any</em> content until it has been downloaded and processed.
+                </p>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Resource</th>
+                                <th>Blocks Render?</th>
+                                <th>Blocks Parser?</th>
+                                <th>Notes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>&lt;link rel="stylesheet"&gt;</code></td>
+                                <td>Yes</td>
+                                <td>No</td>
+                                <td>Unless <code>media</code> doesn't match</td>
+                            </tr>
+                            <tr>
+                                <td><code>&lt;script&gt;</code> (sync)</td>
+                                <td>Yes</td>
+                                <td>Yes</td>
+                                <td>Blocks both DOM & render</td>
+                            </tr>
+                            <tr>
+                                <td><code>&lt;script async&gt;</code></td>
+                                <td>No</td>
+                                <td>No</td>
+                                <td>Executes ASAP after download</td>
+                            </tr>
+                            <tr>
+                                <td><code>&lt;script defer&gt;</code></td>
+                                <td>No</td>
+                                <td>No</td>
+                                <td>Executes after DOM ready, in order</td>
+                            </tr>
+                            <tr>
+                                <td><code>&lt;script type="module"&gt;</code></td>
+                                <td>No</td>
+                                <td>No</td>
+                                <td>Deferred by default</td>
+                            </tr>
+                            <tr>
+                                <td><code>&lt;img&gt;</code></td>
+                                <td>No</td>
+                                <td>No</td>
+                                <td>May trigger reflow when loaded</td>
+                            </tr>
+                            <tr>
+                                <td><code>@font-face</code></td>
+                                <td>No</td>
+                                <td>No</td>
+                                <td>May cause FOIT/FOUT</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════════════════════
+         10. PARSER-BLOCKING & SCRIPT LOADING
+    ══════════════════════════════════════════════════════════════ -->
+            <section id="parser-blocking">
+                <h2>Parser-Blocking Scripts</h2>
+
+                <p>
+                    When the HTML parser encounters a synchronous script tag, it must:
+                </p>
+                <ol>
+                    <li>Pause parsing</li>
+                    <li>Wait for any pending CSS (CSSOM must be ready for scripts to query styles)</li>
+                    <li>Download the script</li>
+                    <li>Execute it in the JS engine</li>
+                    <li>Resume parsing</li>
+                </ol>
+
+                <div class="callout info">
+                    <span class="icon">💡</span>
+                    <div class="callout-body">
+                        <p>
+                            Scripts can query CSSOM (<code>getComputedStyle</code>), so a pending
+                            stylesheet will <strong>also block script execution</strong> —
+                            meaning a slow CSS file cascades into blocking JS too.
+                        </p>
+                    </div>
+                </div>
+            </section>
+
+            <section id="script-loading">
+                <h2>Script Loading Strategies</h2>
+
+                <!-- Timeline comparison diagram -->
+                <div class="diagram-wrap">
+                    <figure>
+                        <svg viewBox="0 0 700 260" xmlns="http://www.w3.org/2000/svg" width="100%" height="260">
+                            <defs>
+                                <marker id="arr4" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+                                    <path d="M0,0 L0,6 L7,3 z" fill="#8892b0" />
+                                </marker>
+                            </defs>
+
+                            <!-- Labels col -->
+                            <text x="5" y="38" fill="#8892b0" font-size="11" font-weight="600">&lt;script&gt;</text>
+                            <text x="5" y="98" fill="#8892b0" font-size="11" font-weight="600">async</text>
+                            <text x="5" y="158" fill="#8892b0" font-size="11" font-weight="600">defer</text>
+                            <text x="5" y="218" fill="#8892b0" font-size="11" font-weight="600">module</text>
+
+                            <!-- Row 1: sync script -->
+                            <!-- parse → pause → download → exec → parse -->
+                            <rect x="120" y="20" width="120" height="28" rx="5" fill="rgba(108,142,247,.25)"
+                                stroke="#6c8ef7" stroke-width="1" />
+                            <text x="180" y="38" text-anchor="middle" fill="#6c8ef7" font-size="10">Parse HTML</text>
+
+                            <rect x="240" y="20" width="120" height="28" rx="5" fill="rgba(245,158,11,.25)"
+                                stroke="#f59e0b" stroke-width="1" />
+                            <text x="300" y="38" text-anchor="middle" fill="#f59e0b" font-size="10">Download JS</text>
+
+                            <rect x="360" y="20" width="80" height="28" rx="5" fill="rgba(248,113,113,.3)"
+                                stroke="#f87171" stroke-width="1.5" />
+                            <text x="400" y="38" text-anchor="middle" fill="#f87171" font-size="10">Execute</text>
+
+                            <rect x="440" y="20" width="130" height="28" rx="5" fill="rgba(108,142,247,.25)"
+                                stroke="#6c8ef7" stroke-width="1" />
+                            <text x="505" y="38" text-anchor="middle" fill="#6c8ef7" font-size="10">Parse HTML</text>
+
+                            <!-- Row 2: async -->
+                            <rect x="120" y="80" width="180" height="28" rx="5" fill="rgba(108,142,247,.25)"
+                                stroke="#6c8ef7" stroke-width="1" />
+                            <text x="210" y="98" text-anchor="middle" fill="#6c8ef7" font-size="10">Parse HTML
+                                ────────</text>
+
+                            <rect x="240" y="60" width="120" height="14" rx="4" fill="rgba(245,158,11,.25)"
+                                stroke="#f59e0b" stroke-width="1" />
+                            <text x="300" y="71" text-anchor="middle" fill="#f59e0b" font-size="9">DL (parallel)</text>
+
+                            <rect x="360" y="80" width="80" height="28" rx="5" fill="rgba(248,113,113,.3)"
+                                stroke="#f87171" stroke-width="1.5" />
+                            <text x="400" y="98" text-anchor="middle" fill="#f87171" font-size="10">Execute</text>
+
+                            <rect x="440" y="80" width="130" height="28" rx="5" fill="rgba(108,142,247,.25)"
+                                stroke="#6c8ef7" stroke-width="1" />
+                            <text x="505" y="98" text-anchor="middle" fill="#6c8ef7" font-size="10">Parse HTML</text>
+
+                            <!-- Row 3: defer -->
+                            <rect x="120" y="140" width="340" height="28" rx="5" fill="rgba(108,142,247,.25)"
+                                stroke="#6c8ef7" stroke-width="1" />
+                            <text x="290" y="158" text-anchor="middle" fill="#6c8ef7" font-size="10">Parse HTML
+                                ──────────────────</text>
+
+                            <rect x="240" y="120" width="120" height="14" rx="4" fill="rgba(245,158,11,.25)"
+                                stroke="#f59e0b" stroke-width="1" />
+                            <text x="300" y="131" text-anchor="middle" fill="#f59e0b" font-size="9">DL (parallel)</text>
+
+                            <rect x="460" y="140" width="80" height="28" rx="5" fill="rgba(52,211,153,.3)"
+                                stroke="#34d399" stroke-width="1.5" />
+                            <text x="500" y="158" text-anchor="middle" fill="#34d399" font-size="10">Execute</text>
+                            <text x="500" y="174" text-anchor="middle" fill="#8892b0" font-size="9">after
+                                DOMContentLoaded</text>
+
+                            <!-- Row 4: module -->
+                            <rect x="120" y="200" width="340" height="28" rx="5" fill="rgba(108,142,247,.25)"
+                                stroke="#6c8ef7" stroke-width="1" />
+                            <text x="290" y="218" text-anchor="middle" fill="#6c8ef7" font-size="10">Parse HTML
+                                ──────────────────</text>
+
+                            <rect x="240" y="182" width="120" height="14" rx="4" fill="rgba(167,139,250,.25)"
+                                stroke="#a78bfa" stroke-width="1" />
+                            <text x="300" y="193" text-anchor="middle" fill="#a78bfa" font-size="9">DL module
+                                graph</text>
+
+                            <rect x="460" y="200" width="80" height="28" rx="5" fill="rgba(167,139,250,.3)"
+                                stroke="#a78bfa" stroke-width="1.5" />
+                            <text x="500" y="218" text-anchor="middle" fill="#a78bfa" font-size="10">Execute</text>
+
+                            <!-- Time axis -->
+                            <line x1="120" y1="245" x2="660" y2="245" stroke="#2e3350" stroke-width="1.5"
+                                marker-end="url(#arr4)" />
+                            <text x="660" y="258" fill="#8892b0" font-size="10">time →</text>
+                        </svg>
+                        <figcaption>Fig 7 — Script loading strategies and their effect on HTML parsing</figcaption>
+                    </figure>
+                </div>
+
+                <div class="compare">
+                    <div class="compare-card">
+                        <h4><span class="badge badge-block">sync</span> Default &lt;script&gt;</h4>
+                        <ul>
+                            <li>Blocks parser AND render</li>
+                            <li>Executes in document order</li>
+                            <li>Avoid for render-critical paths</li>
+                        </ul>
+                    </div>
+                    <div class="compare-card">
+                        <h4><span class="badge badge-async">async</span> async</h4>
+                        <ul>
+                            <li>Downloads in parallel</li>
+                            <li>Executes as soon as loaded</li>
+                            <li>Order not guaranteed</li>
+                            <li>Good for: analytics, ads</li>
+                        </ul>
+                    </div>
+                    <div class="compare-card">
+                        <h4><span class="badge badge-defer">defer</span> defer</h4>
+                        <ul>
+                            <li>Downloads in parallel</li>
+                            <li>Executes after DOM is ready</li>
+                            <li>Order is preserved</li>
+                            <li>Best for: app bundles</li>
+                        </ul>
+                    </div>
+                    <div class="compare-card">
+                        <h4><span class="badge badge-module">module</span> type="module"</h4>
+                        <ul>
+                            <li>Deferred by default</li>
+                            <li>Supports <code>import/export</code></li>
+                            <li>Strict mode always on</li>
+                            <li>Good for: modern apps</li>
+                        </ul>
+                    </div>
+                </div>
+
+                <pre><span class="lang-label">HTML</span><code><span class="tag-c">&lt;head&gt;</span>
+  <span class="com">&lt;!-- ✅ Preload critical JS early --&gt;</span>
+  <span class="tag-c">&lt;link</span> <span class="attr">rel</span>=<span class="val">"preload"</span> <span class="attr">href</span>=<span class="val">"app.js"</span> <span class="attr">as</span>=<span class="val">"script"</span><span class="tag-c">&gt;</span>
+<span class="tag-c">&lt;/head&gt;</span>
+<span class="tag-c">&lt;body&gt;</span>
+  <span class="com">&lt;!-- ✅ Defer app bundle — best of both worlds --&gt;</span>
+  <span class="tag-c">&lt;script</span> <span class="attr">src</span>=<span class="val">"app.js"</span> <span class="attr">defer</span><span class="tag-c">&gt;&lt;/script&gt;</span>
+
+  <span class="com">&lt;!-- ✅ Async for non-critical third-party --&gt;</span>
+  <span class="tag-c">&lt;script</span> <span class="attr">src</span>=<span class="val">"analytics.js"</span> <span class="attr">async</span><span class="tag-c">&gt;&lt;/script&gt;</span>
+<span class="tag-c">&lt;/body&gt;</span></code></pre>
+            </section>
+
+            <!-- ══════════════════════════════════════════════════════════
+         11. PRELOAD & RESOURCE HINTS
+    ══════════════════════════════════════════════════════════════ -->
+            <section id="preload">
+                <h2>Preload &amp; Resource Hints</h2>
+
+                <p>
+                    The browser discovers sub-resources (fonts, images, scripts) only after
+                    parsing the relevant HTML or CSS. Resource hints let you declaratively
+                    tell the browser about them earlier.
+                </p>
+
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Hint</th>
+                                <th>Effect</th>
+                                <th>Use Case</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td><code>&lt;link rel="preload"&gt;</code></td>
+                                <td>Fetches resource ASAP, high priority</td>
+                                <td>LCP hero image, critical fonts, above-fold CSS</td>
+                            </tr>
+                            <tr>
+                                <td><code>&lt;link rel="prefetch"&gt;</code></td>
+                                <td>Fetches during idle time, low priority</td>
+                                <td>Next-page resources, lazy routes</td>
+                            </tr>
+                            <tr>
+                                <td><code>&lt;link rel="preconnect"&gt;</code></td>
+                                <td>Opens TCP+TLS to origin early</td>
+                                <td>CDN, Google Fonts, analytics</td>
+                            </tr>
+                            <tr>
+                                <td><code>&lt;link rel="dns-prefetch"&gt;</code></td>
+                                <td>Resolves DNS only (cheaper)</td>
+                                <td>Third-party origins</td>
+                            </tr>
+                            <tr>
+                                <td><code>fetchpriority="high"</code></td>
+                                <td>Boosts resource priority</td>
+                                <td>LCP image</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <pre><span class="lang-label">HTML</span><code><span class="tag-c">&lt;head&gt;</span>
+  <span class="com">&lt;!-- Warm up CDN connection early --&gt;</span>
+  <span class="tag-c">&lt;link</span> <span class="attr">rel</span>=<span class="val">"preconnect"</span> <span class="attr">href</span>=<span class="val">"https://fonts.googleapis.com"</span><span class="tag-c">&gt;</span>
+  <span class="tag-c">&lt;link</span> <span class="attr">rel</span>=<span class="val">"preconnect"</span> <span class="attr">href</span>=<span class="val">"https://fonts.gstatic.com"</span> <span class="attr">crossorigin</span><span class="tag-c">&gt;</span>
+
+  <span class="com">&lt;!-- Preload LCP hero image --&gt;</span>
+  <span class="tag-c">&lt;link</span> <span class="attr">rel</span>=<span class="val">"preload"</span> <span class="attr">as</span>=<span class="val">"image"</span>
+        <span class="attr">href</span>=<span class="val">"hero.avif"</span>
+        <span class="attr">imagesrcset</span>=<span class="val">"hero-480.avif 480w, hero-960.avif 960w"</span>
+        <span class="attr">imagesizes</span>=<span class="val">"100vw"</span>
+        <span class="attr">fetchpriority</span>=<span class="val">"high"</span><span class="tag-c">&gt;</span>
+
+  <span class="com">&lt;!-- Preload critical web font --&gt;</span>
+  <span class="tag-c">&lt;link</span> <span class="attr">rel</span>=<span class="val">"preload"</span> <span class="attr">as</span>=<span class="val">"font"</span> <span class="attr">type</span>=<span class="val">"font/woff2"</span>
+        <span class="attr">href</span>=<span class="val">"inter-var.woff2"</span> <span class="attr">crossorigin</span><span class="tag-c">&gt;</span>
+
+  <span class="com">&lt;!-- Prefetch next page (idle) --&gt;</span>
+  <span class="tag-c">&lt;link</span> <span class="attr">rel</span>=<span class="val">"prefetch"</span> <span class="attr">href</span>=<span class="val">"dashboard.html"</span><span class="tag-c">&gt;</span>
+<span class="tag-c">&lt;/head&gt;</span></code></pre>
+            </section>
+
+            <!-- ══════════════════════════════════════════════════════════
+         12. CORE WEB VITALS
+    ══════════════════════════════════════════════════════════════ -->
+            <section id="metrics">
+                <h2>Core Web Vitals &amp; CRP Metrics</h2>
+
+                <div class="metrics-grid">
+                    <div class="metric-card">
+                        <div class="m-val">&lt;2.5s</div>
+                        <div class="m-label">LCP (Good)</div>
+                        <div class="m-desc">Largest Contentful Paint — when the largest visible element loads</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="m-val">&lt;100ms</div>
+                        <div class="m-label">INP (Good)</div>
+                        <div class="m-desc">Interaction to Next Paint — response to user input</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="m-val">&lt;0.1</div>
+                        <div class="m-label">CLS (Good)</div>
+                        <div class="m-desc">Cumulative Layout Shift — visual stability score</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="m-val">&lt;800ms</div>
+                        <div class="m-label">FCP (Good)</div>
+                        <div class="m-desc">First Contentful Paint — first text or image</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="m-val">&lt;200ms</div>
+                        <div class="m-label">TTFB (Good)</div>
+                        <div class="m-desc">Time to First Byte — server response speed</div>
+                    </div>
+                    <div class="metric-card">
+                        <div class="m-val">16.6ms</div>
+                        <div class="m-label">Frame Budget</div>
+                        <div class="m-desc">Time available per frame at 60 fps</div>
+                    </div>
+                </div>
+
+                <h3>How CRP Steps Map to Metrics</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Metric</th>
+                                <th>Bottleneck Stage</th>
+                                <th>Primary Fix</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>TTFB</td>
+                                <td>Server / network</td>
+                                <td>CDN, server-side caching, HTTP/3</td>
+                            </tr>
+                            <tr>
+                                <td>FCP</td>
+                                <td>Render-blocking CSS/JS</td>
+                                <td>Inline critical CSS, defer scripts</td>
+                            </tr>
+                            <tr>
+                                <td>LCP</td>
+                                <td>Resource discovery, image load</td>
+                                <td>Preload LCP image, fetchpriority, AVIF</td>
+                            </tr>
+                            <tr>
+                                <td>CLS</td>
+                                <td>Late layout shifts</td>
+                                <td>Size attributes on media, no injected content above fold</td>
+                            </tr>
+                            <tr>
+                                <td>INP</td>
+                                <td>Long JS tasks on main thread</td>
+                                <td>Code-split, <code>scheduler.yield()</code>, web workers</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </section>
+
+            <!-- ══════════════════════════════════════════════════════════
+         13. OPTIMIZATION TECHNIQUES
+    ══════════════════════════════════════════════════════════════ -->
+            <section id="optimization">
+                <h2>Optimization Techniques</h2>
+
+                <h3>1 — Inline Critical CSS</h3>
+                <p>
+                    Identify the CSS needed to render above-the-fold content, inline it in
+                    a <code>&lt;style&gt;</code> block in <code>&lt;head&gt;</code>, and load
+                    the full stylesheet asynchronously. This eliminates the render-blocking
+                    network round-trip.
+                </p>
+                <pre><span class="lang-label">HTML</span><code><span class="tag-c">&lt;head&gt;</span>
+  <span class="com">&lt;!-- Critical CSS inlined — zero extra RTT --&gt;</span>
+  <span class="tag-c">&lt;style&gt;</span>
+    <span class="sel">body</span>  { <span class="prop">margin</span>:<span class="num">0</span>; <span class="prop">font-family</span>:sans-serif; }
+    <span class="sel">.hero</span> { <span class="prop">background</span>:<span class="val">#000</span>; <span class="prop">color</span>:<span class="val">#fff</span>; <span class="prop">padding</span>:<span class="num">2rem</span>; }
+  <span class="tag-c">&lt;/style&gt;</span>
+
+  <span class="com">&lt;!-- Non-critical CSS loaded asynchronously --&gt;</span>
+  <span class="tag-c">&lt;link</span> <span class="attr">rel</span>=<span class="val">"preload"</span> <span class="attr">href</span>=<span class="val">"full.css"</span> <span class="attr">as</span>=<span class="val">"style"</span>
+        <span class="attr">onload</span>=<span class="val">"this.rel='stylesheet'"</span><span class="tag-c">&gt;</span>
+  <span class="tag-c">&lt;noscript&gt;&lt;link</span> <span class="attr">rel</span>=<span class="val">"stylesheet"</span> <span class="attr">href</span>=<span class="val">"full.css"</span><span class="tag-c">&gt;&lt;/noscript&gt;</span>
+<span class="tag-c">&lt;/head&gt;</span></code></pre>
+
+                <h3>2 — Eliminate Layout Thrashing with requestAnimationFrame</h3>
+                <pre><span class="lang-label">JS</span><code><span class="com">// Schedule all DOM reads before writes in the same frame</span>
+<span class="fn">requestAnimationFrame</span>(() => {
+  <span class="kw">const</span> height = el.<span class="fn">offsetHeight</span>;  <span class="com">// read</span>
+  el.style.transform = <span class="str">`translateY(<span class="kw">${</span>height<span class="kw">}</span>px)`</span>; <span class="com">// write (compositor-only)</span>
+});</code></pre>
+
+                <h3>3 — Reduce Render-Blocking CSS with Media Queries</h3>
+                <pre><span class="lang-label">HTML</span><code><span class="com">&lt;!-- Only blocks on matching viewport —&gt;</span>
+<span class="tag-c">&lt;link</span> <span class="attr">rel</span>=<span class="val">"stylesheet"</span> <span class="attr">href</span>=<span class="val">"base.css"</span><span class="tag-c">&gt;</span>
+<span class="tag-c">&lt;link</span> <span class="attr">rel</span>=<span class="val">"stylesheet"</span> <span class="attr">href</span>=<span class="val">"mobile.css"</span>  <span class="attr">media</span>=<span class="val">"(max-width:767px)"</span><span class="tag-c">&gt;</span>
+<span class="tag-c">&lt;link</span> <span class="attr">rel</span>=<span class="val">"stylesheet"</span> <span class="attr">href</span>=<span class="val">"desktop.css"</span> <span class="attr">media</span>=<span class="val">"(min-width:768px)"</span><span class="tag-c">&gt;</span></code></pre>
+
+                <h3>4 — Contain Layout Scope with CSS Containment</h3>
+                <pre><span class="lang-label">CSS</span><code><span class="com">/* Tells browser this element is independent — reflow won't escape */</span>
+<span class="sel">.feed-item</span> {
+  <span class="prop">contain</span>: layout style;  <span class="com">/* layout isolation */</span>
+}
+
+<span class="com">/* content-visibility skips rendering off-screen items entirely */</span>
+<span class="sel">.feed-item</span> {
+  <span class="prop">content-visibility</span>: auto;
+  <span class="prop">contain-intrinsic-size</span>: <span class="num">0 300px</span>;
+}</code></pre>
+
+                <h3>5 — Avoid FOIT with font-display</h3>
+                <pre><span class="lang-label">CSS</span><code><span class="sel">@font-face</span> {
+  <span class="prop">font-family</span>: <span class="str">'Inter'</span>;
+  <span class="prop">src</span>: <span class="fn">url</span>(<span class="str">'inter.woff2'</span>) <span class="fn">format</span>(<span class="str">'woff2'</span>);
+  <span class="prop">font-display</span>: swap;  <span class="com">/* show fallback immediately, swap when ready */</span>
+}</code></pre>
+
+                <h3>6 — Use the Speculation Rules API (Modern)</h3>
+                <pre><span class="lang-label">HTML</span><code><span class="com">&lt;!-- Prerender likely next pages in a background tab --&gt;</span>
+<span class="tag-c">&lt;script</span> <span class="attr">type</span>=<span class="val">"speculationrules"</span><span class="tag-c">&gt;</span>
+{
+  <span class="str">"prerender"</span>: [{
+    <span class="str">"where"</span>: { <span class="str">"href_matches"</span>: <span class="str">"/products/*"</span> },
+    <span class="str">"eagerness"</span>: <span class="str">"moderate"</span>
+  }]
+}
+<span class="tag-c">&lt;/script&gt;</span></code></pre>
+            </section>
+
+            <!-- ══════════════════════════════════════════════════════════
+         14. REAL-WORLD EXAMPLES
+    ══════════════════════════════════════════════════════════════ -->
+            <section id="real-world">
+                <h2>Real-World Examples</h2>
+
+                <h3>Example A — E-Commerce Product Page</h3>
+                <p>
+                    A product page's CRP is dominated by its hero image. Here's the ideal
+                    head section:
+                </p>
+                <pre><span class="lang-label">HTML</span><code><span class="tag-c">&lt;head&gt;</span>
+  <span class="tag-c">&lt;meta</span> <span class="attr">charset</span>=<span class="val">"UTF-8"</span><span class="tag-c">&gt;</span>
+  <span class="tag-c">&lt;meta</span> <span class="attr">name</span>=<span class="val">"viewport"</span> <span class="attr">content</span>=<span class="val">"width=device-width,initial-scale=1"</span><span class="tag-c">&gt;</span>
+
+  <span class="com">&lt;!-- 1. Inline critical CSS (above-fold styles only) --&gt;</span>
+  <span class="tag-c">&lt;style&gt;</span>...<span class="tag-c">&lt;/style&gt;</span>
+
+  <span class="com">&lt;!-- 2. Preconnect to image CDN --&gt;</span>
+  <span class="tag-c">&lt;link</span> <span class="attr">rel</span>=<span class="val">"preconnect"</span> <span class="attr">href</span>=<span class="val">"https://cdn.shop.com"</span><span class="tag-c">&gt;</span>
+
+  <span class="com">&lt;!-- 3. Preload LCP product image --&gt;</span>
+  <span class="tag-c">&lt;link</span> <span class="attr">rel</span>=<span class="val">"preload"</span> <span class="attr">as</span>=<span class="val">"image"</span>
+        <span class="attr">href</span>=<span class="val">"https://cdn.shop.com/product-hero.avif"</span>
+        <span class="attr">fetchpriority</span>=<span class="val">"high"</span><span class="tag-c">&gt;</span>
+
+  <span class="com">&lt;!-- 4. Preload main app bundle (will use defer in body) --&gt;</span>
+  <span class="tag-c">&lt;link</span> <span class="attr">rel</span>=<span class="val">"preload"</span> <span class="attr">as</span>=<span class="val">"script"</span> <span class="attr">href</span>=<span class="val">"main.js"</span><span class="tag-c">&gt;</span>
+
+  <span class="com">&lt;!-- 5. Non-critical CSS async --&gt;</span>
+  <span class="tag-c">&lt;link</span> <span class="attr">rel</span>=<span class="val">"preload"</span> <span class="attr">href</span>=<span class="val">"full.css"</span> <span class="attr">as</span>=<span class="val">"style"</span>
+        <span class="attr">onload</span>=<span class="val">"this.rel='stylesheet'"</span><span class="tag-c">&gt;</span>
+<span class="tag-c">&lt;/head&gt;</span>
+<span class="tag-c">&lt;body&gt;</span>
+  <span class="tag-c">&lt;img</span> <span class="attr">src</span>=<span class="val">"product-hero.avif"</span>
+       <span class="attr">width</span>=<span class="val">"800"</span> <span class="attr">height</span>=<span class="val">"600"</span>
+       <span class="attr">fetchpriority</span>=<span class="val">"high"</span>
+       <span class="attr">alt</span>=<span class="val">"Product"</span><span class="tag-c">&gt;</span>
+
+  <span class="com">&lt;!-- App bundle deferred — does not block render --&gt;</span>
+  <span class="tag-c">&lt;script</span> <span class="attr">src</span>=<span class="val">"main.js"</span> <span class="attr">defer</span><span class="tag-c">&gt;&lt;/script&gt;</span>
+<span class="tag-c">&lt;/body&gt;</span></code></pre>
+
+                <h3>Example B — News Article Page (SSR)</h3>
+                <p>
+                    For an SSR article page, the priority is streaming HTML so the browser
+                    can start parsing immediately, then progressive enhancement:
+                </p>
+                <pre><span class="lang-label">JS — Node.js / Express</span><code><span class="com">// Stream HTML to allow incremental parsing</span>
+app.<span class="fn">get</span>(<span class="str">'/article/:id'</span>, <span class="kw">async</span> (req, res) => {
+  res.<span class="fn">setHeader</span>(<span class="str">'Content-Type'</span>, <span class="str">'text/html'</span>);
+  res.<span class="fn">setHeader</span>(<span class="str">'Transfer-Encoding'</span>, <span class="str">'chunked'</span>);  <span class="com">// enable streaming</span>
+
+  <span class="com">// Flush shell immediately — browser starts CRP right away</span>
+  res.<span class="fn">write</span>(<span class="str">`&lt;!DOCTYPE html&gt;&lt;html&gt;&lt;head&gt;
+    &lt;style&gt;/* critical CSS */&lt;/style&gt;
+    &lt;link rel="preload" href="article.css" as="style"&gt;
+  &lt;/head&gt;&lt;body&gt;&lt;header&gt;My Site&lt;/header&gt;`</span>);
+
+  <span class="kw">const</span> article = <span class="kw">await</span> db.<span class="fn">getArticle</span>(req.params.id);  <span class="com">// async DB call</span>
+
+  <span class="com">// Flush content when ready — parser already built header DOM</span>
+  res.<span class="fn">write</span>(<span class="str">`&lt;main&gt;<span class="kw">${</span>article.html<span class="kw">}</span>&lt;/main&gt;`</span>);
+  res.<span class="fn">end</span>(<span class="str">`&lt;/body&gt;&lt;/html&gt;`</span>);
+});</code></pre>
+
+                <h3>Example C — SPA with React / Framework</h3>
+                <p>
+                    Single-Page Apps replace server-side content with client-side JS.
+                    The CRP becomes a hydration problem:
+                </p>
+                <pre><span class="lang-label">HTML</span><code><span class="com">&lt;!-- Shell: renders immediately (CRP fast) --&gt;</span>
+<span class="tag-c">&lt;div</span> <span class="attr">id</span>=<span class="val">"root"</span><span class="tag-c">&gt;</span>
+  <span class="tag-c">&lt;!--</span> SSR content here for LCP —<span class="tag-c">--&gt;</span>
+  <span class="tag-c">&lt;h1&gt;</span>Loading...<span class="tag-c">&lt;/h1&gt;</span>
+<span class="tag-c">&lt;/div&gt;</span>
+
+<span class="com">&lt;!-- Bundle loads &amp; hydrates without blocking first paint --&gt;</span>
+<span class="tag-c">&lt;script</span> <span class="attr">type</span>=<span class="val">"module"</span> <span class="attr">src</span>=<span class="val">"app.js"</span><span class="tag-c">&gt;&lt;/script&gt;</span></code></pre>
+            </section>
+
+            <!-- ══════════════════════════════════════════════════════════
+         15. DEVTOOLS
+    ══════════════════════════════════════════════════════════════ -->
+            <section id="devtools">
+                <h2>DevTools Workflow</h2>
+
+                <h3>Performance Panel</h3>
+                <ol>
+                    <li>Open <strong>Chrome DevTools → Performance</strong></li>
+                    <li>Click <strong>Record</strong> and reload the page</li>
+                    <li>Look for the <strong>Parse HTML</strong> task in the Main thread row</li>
+                    <li>Identify any <strong>Evaluate Script</strong> tasks that block the render</li>
+                    <li>Check <strong>Layout</strong> and <strong>Paint</strong> tasks for time cost</li>
+                    <li>Purple <strong>Recalculate Style</strong> tasks indicate CSSOM rebuilds</li>
+                </ol>
+
+                <h3>Lighthouse CRP Audit</h3>
+                <pre><span class="lang-label">Shell</span><code><span class="com"># Run Lighthouse via CLI</span>
+npx lighthouse https://example.com \
+  --view \
+  --only-audits=render-blocking-resources,critical-request-chains \
+  --output=html \
+  --output-path=./report.html</code></pre>
+
+                <h3>Key DevTools Markers to Watch</h3>
+                <div class="table-wrap">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Marker / Event</th>
+                                <th>Meaning</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>Blue vertical line</td>
+                                <td>DOMContentLoaded</td>
+                                <td>DOM + CSSOM done, deferred scripts ran</td>
+                            </tr>
+                            <tr>
+                                <td>Red vertical line</td>
+                                <td>Load event</td>
+                                <td>All resources loaded</td>
+                            </tr>
+                            <tr>
+                                <td>Green bar in Network</td>
+                                <td>First Contentful Paint</td>
+                                <td>First paint timestamp</td>
+                            </tr>
+                            <tr>
+                                <td>Long yellow tasks</td>
+                                <td>Long Tasks (&gt;50ms)</td>
+                                <td>Break up with <code>scheduler.yield()</code></td>
+                            </tr>
+                            <tr>
+                                <td>Forced Reflow warning</td>
+                                <td>Layout thrashing</td>
+                                <td>Batch DOM reads/writes</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+
+                <h3>Network Priority Inspector</h3>
+                <p>
+                    In the <strong>Network</strong> panel, enable the
+                    <em>Priority</em> column (right-click column headers) to see how the
+                    browser ranks each resource. Critical resources should show
+                    <strong>Highest</strong> priority. If your LCP image shows
+                    <em>Low</em>, add a preload or <code>fetchpriority="high"</code>.
+                </p>
+
+                <div class="callout tip">
+                    <span class="icon">🔧</span>
+                    <div class="callout-body">
+                        <p>
+                            <strong>Quick wins checklist:</strong> render-blocking stylesheets → inline critical CSS,
+                            sync scripts in <code>&lt;head&gt;</code> → defer,
+                            LCP image missing preload → add <code>rel="preload"</code>,
+                            no <code>width</code>/<code>height</code> on images → causes CLS,
+                            third-party domains → add <code>preconnect</code>.
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Final summary diagram -->
+                <div class="diagram-wrap" style="margin-top:32px">
+                    <figure>
+                        <svg viewBox="0 0 720 280" xmlns="http://www.w3.org/2000/svg" width="100%" height="280">
+                            <defs>
+                                <marker id="arr5" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                                    <path d="M0,0 L0,6 L8,3 z" fill="#6c8ef7" />
+                                </marker>
+                            </defs>
+
+                            <text x="360" y="22" text-anchor="middle" fill="#e2e8f0" font-size="14"
+                                font-weight="700">Full CRP Summary</text>
+
+                            <!-- Column 1: Input -->
+                            <rect x="20" y="38" width="130" height="40" rx="7" fill="#22263a" stroke="#6c8ef7"
+                                stroke-width="1.5" />
+                            <text x="85" y="55" text-anchor="middle" fill="#6c8ef7" font-size="12"
+                                font-weight="700">HTML Bytes</text>
+                            <text x="85" y="71" text-anchor="middle" fill="#8892b0" font-size="10">network stream</text>
+
+                            <rect x="20" y="98" width="130" height="40" rx="7" fill="#22263a" stroke="#34d399"
+                                stroke-width="1.5" />
+                            <text x="85" y="115" text-anchor="middle" fill="#34d399" font-size="12"
+                                font-weight="700">CSS Bytes</text>
+                            <text x="85" y="131" text-anchor="middle" fill="#8892b0"
+                                font-size="10">render-blocking</text>
+
+                            <rect x="20" y="158" width="130" height="40" rx="7" fill="#22263a" stroke="#a78bfa"
+                                stroke-width="1.5" />
+                            <text x="85" y="175" text-anchor="middle" fill="#a78bfa" font-size="12" font-weight="700">JS
+                                Bytes</text>
+                            <text x="85" y="191" text-anchor="middle" fill="#8892b0"
+                                font-size="10">parser-blocking</text>
+
+                            <!-- Arrows to parse -->
+                            <line x1="150" y1="58" x2="200" y2="100" stroke="#6c8ef7" stroke-width="1.5"
+                                marker-end="url(#arr5)" />
+                            <line x1="150" y1="118" x2="200" y2="115" stroke="#34d399" stroke-width="1.5"
+                                marker-end="url(#arr5)" />
+                            <line x1="150" y1="178" x2="200" y2="130" stroke="#a78bfa" stroke-width="1.5"
+                                marker-end="url(#arr5)" />
+
+                            <!-- Parse box -->
+                            <rect x="200" y="85" width="100" height="60" rx="7" fill="#1a1d27" stroke="#f59e0b"
+                                stroke-width="2" />
+                            <text x="250" y="110" text-anchor="middle" fill="#f59e0b" font-size="12"
+                                font-weight="700">Parse</text>
+                            <text x="250" y="128" text-anchor="middle" fill="#8892b0" font-size="10">DOM + CSSOM</text>
+
+                            <!-- Arrow -->
+                            <line x1="300" y1="115" x2="330" y2="115" stroke="#6c8ef7" stroke-width="2"
+                                marker-end="url(#arr5)" />
+
+                            <!-- Render Tree -->
+                            <rect x="330" y="85" width="100" height="60" rx="7" fill="#1a1d27" stroke="#34d399"
+                                stroke-width="2" />
+                            <text x="380" y="110" text-anchor="middle" fill="#34d399" font-size="12"
+                                font-weight="700">Render Tree</text>
+                            <text x="380" y="128" text-anchor="middle" fill="#8892b0" font-size="10">visible
+                                nodes</text>
+
+                            <!-- Arrow -->
+                            <line x1="430" y1="115" x2="460" y2="115" stroke="#6c8ef7" stroke-width="2"
+                                marker-end="url(#arr5)" />
+
+                            <!-- Layout -->
+                            <rect x="460" y="85" width="80" height="60" rx="7" fill="#1a1d27" stroke="#f87171"
+                                stroke-width="2" />
+                            <text x="500" y="110" text-anchor="middle" fill="#f87171" font-size="12"
+                                font-weight="700">Layout</text>
+                            <text x="500" y="128" text-anchor="middle" fill="#8892b0" font-size="10">geometry</text>
+
+                            <!-- Arrow -->
+                            <line x1="540" y1="115" x2="565" y2="115" stroke="#6c8ef7" stroke-width="2"
+                                marker-end="url(#arr5)" />
+
+                            <!-- Paint + Composite -->
+                            <rect x="565" y="85" width="130" height="60" rx="7" fill="#1a1d27" stroke="#6c8ef7"
+                                stroke-width="2" />
+                            <text x="630" y="106" text-anchor="middle" fill="#6c8ef7" font-size="12"
+                                font-weight="700">Paint</text>
+                            <text x="630" y="122" text-anchor="middle" fill="#6c8ef7" font-size="12" font-weight="700">+
+                                Composite</text>
+                            <text x="630" y="139" text-anchor="middle" fill="#8892b0" font-size="10">pixels on
+                                screen</text>
+
+                            <!-- Optimisation hints below -->
+                            <text x="85" y="230" text-anchor="middle" fill="#8892b0" font-size="10">Preload,
+                                Preconnect</text>
+                            <text x="250" y="230" text-anchor="middle" fill="#8892b0" font-size="10">Inline critical
+                                CSS</text>
+                            <text x="380" y="230" text-anchor="middle" fill="#8892b0" font-size="10">Defer
+                                scripts</text>
+                            <text x="500" y="230" text-anchor="middle" fill="#8892b0" font-size="10">Avoid thrash</text>
+                            <text x="630" y="230" text-anchor="middle" fill="#8892b0" font-size="10">will-change,
+                                transform</text>
+
+                            <line x1="85" y1="218" x2="85" y2="200" stroke="#2e3350" stroke-width="1" />
+                            <line x1="250" y1="218" x2="250" y2="170" stroke="#2e3350" stroke-width="1" />
+                            <line x1="380" y1="218" x2="380" y2="170" stroke="#2e3350" stroke-width="1" />
+                            <line x1="500" y1="218" x2="500" y2="170" stroke="#2e3350" stroke-width="1" />
+                            <line x1="630" y1="218" x2="630" y2="170" stroke="#2e3350" stroke-width="1" />
+                        </svg>
+                        <figcaption>Fig 8 — Complete CRP flow with optimisation levers</figcaption>
+                    </figure>
+                </div>
+
+            </section>
+
+        </main>
+    </div>
+
+    <!-- ── Scroll progress + active nav highlight ───────────────────── -->
+    <script>
+        (function () {
+            const bar = document.getElementById('progress-bar');
+            const links = document.querySelectorAll('nav a');
+            const sections = document.querySelectorAll('section[id]');
+
+            function onScroll() {
+                // Progress bar
+                const scrolled = window.scrollY;
+                const total = document.documentElement.scrollHeight - window.innerHeight;
+                bar.style.width = (total > 0 ? (scrolled / total) * 100 : 0) + '%';
+
+                // Active link
+                let current = '';
+                sections.forEach(sec => {
+                    if (window.scrollY >= sec.offsetTop - 100) current = sec.id;
+                });
+                links.forEach(a => {
+                    a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+                });
+            }
+
+            window.addEventListener('scroll', onScroll, { passive: true });
+            onScroll();
+        })();
+    </script>
+
+</body>
+
+</html>
