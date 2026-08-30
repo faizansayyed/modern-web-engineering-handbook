@@ -411,7 +411,7 @@ WebSocket vs SSE: WebSocket is full-duplex and supports binary frames, but requi
 
 ### Q15 [Senior] How do WebSockets scale behind a load balancer?
 
-**Answer:** Support the HTTP upgrade, align idle timeouts and heartbeats, decide whether affinity is needed, externalize room and presence state, and use pub/sub so a message entering node A reaches clients connected to node B.
+**Answer:** "WebSocket connections are long-lived, so the load balancer needs to support the HTTP upgrade and have idle timeouts aligned with application heartbeats. Each connection stays attached to one WebSocket server, so I avoid relying on in-memory state; if affinity is useful I can use sticky sessions, but shared room and presence state should generally be externalized. For cross-node communication, I use Pub/Sub so an event received by Server A can reach clients connected to Server B. Finally, clients need reconnection with backoff and state resynchronization using versions or cursors so they can recover messages missed during disconnects."
 
 **Likely follow-up:** When is sticky routing acceptable?
 
