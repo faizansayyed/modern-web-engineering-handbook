@@ -1,5 +1,18 @@
 # React Advanced Components: Senior Interview Q&A and Production Guide
 
+## Contents
+
+- [1. SSE](#1-sse)
+- [2. WebSockets](#2-websockets)
+- [3. Fetch Streams](#3-fetch-streams)
+- [4. TanStack Query](#4-tanstack-query)
+- [5. Debouncing and throttling](#5-debouncing-and-throttling)
+- [6. Web Workers](#6-web-workers)
+- [7. Chunked uploads](#7-chunked-uploads)
+- [8. React Hook Form](#8-react-hook-form)
+- [9. Service Workers](#9-service-workers)
+
+
 > Scope: SSE, WebSockets, Fetch Streams, TanStack Query, debouncing/throttling, Web Workers, resumable file upload, and React Hook Form.
 >
 > This guide is designed for hands-on interview preparation. Each chapter moves from fundamentals to architecture and senior-level decisions. Code is intentionally concise and should be adapted with authentication, validation, observability, and tests before production use.
@@ -35,6 +48,7 @@ The generic concerns—cleanup, security, backpressure, observability, testing, 
 | TanStack Query | `QueryClient`, `useQuery`, `useMutation`, `queryKey`, `queryFn`, `staleTime`, `gcTime`, `invalidateQueries`, `setQueryData`, `cancelQueries` | Server-state cache |
 | Debounce/Throttle | `setTimeout`, `clearTimeout`, `Date.now`, `useEffect`, `useRef`, `useCallback`, `AbortController` | Control event frequency |
 | Web Workers | `Worker`, `postMessage`, `onmessage`, `onerror`, `terminate`, structured clone, transferable objects | Main thread ↔ worker |
+| Service Workers | `navigator.serviceWorker`, `register`, `install`, `activate`, `fetch`, `caches`, `respondWith`, `waitUntil`, `skipWaiting`, `clients.claim`, `postMessage`, `PushManager`, `SyncManager` | Browser network/background layer |
 | Chunked upload | `File`, `Blob.slice`, `fetch`, `AbortController`, chunk index, checksum, idempotency, multipart upload | Reliable large transfer |
 | React Hook Form | `useForm`, `register`, `Controller`, `useWatch`, `useFormState`, `useFieldArray`, `resolver`, `setError`, `reset`, `trigger` | Form state + validation |
 
@@ -1403,6 +1417,246 @@ React Hook Form vs controlled state: RHF favors registration and isolated subscr
 **Answer:** Use the generated field ID as the React key, not the array index. Confirm backend item IDs are separate from UI keys and avoid stacking multiple field-array actions in one render.
 
 **Likely follow-up:** How do you preserve server IDs during reorder?
+
+# 9. Service Workers
+
+## Mental model
+
+A Service Worker is a background browser worker that sits between the web page and the network. It can intercept requests, serve cached responses, support offline experiences, receive push events, and coordinate background browser capabilities.
+
+**Use it for:** offline/PWA experiences, caching strategies, network fallbacks, push notifications, background synchronization, and controlling how a web app responds to network conditions.
+
+**Do not use it when:** you only need CPU-heavy computation (use a Web Worker), a normal API request is enough, or the requirement needs direct DOM access.
+
+## Important concepts, APIs, hooks, and configuration
+
+- `navigator.serviceWorker`
+- `serviceWorker.register()`
+- `ServiceWorkerRegistration`
+- `install`
+- `activate`
+- `fetch`
+- `message`
+- `ServiceWorkerGlobalScope`
+- `clients`
+- `caches`
+- `CacheStorage`
+- `caches.open()`
+- `cache.match()`
+- `cache.put()`
+- `cache.addAll()`
+- `event.respondWith()`
+- `event.waitUntil()`
+- `skipWaiting()`
+- `clients.claim()`
+- `postMessage()`
+- `PushManager`
+- `Notification`
+- `SyncManager`
+- HTTPS / secure context
+
+## Service Worker API flow — know this sequence
+
+```text
+React / Browser
+      │
+      │ navigator.serviceWorker.register("/sw.js")
+      ▼
+Service Worker
+      │
+      ├── install
+      │      │
+      │      └── caches.open() → cache.addAll()
+      │
+      ├── activate
+      │      │
+      │      ├── delete old caches
+      │      └── clients.claim()
+      │
+      ├── fetch
+      │      │
+      │      ├── cache.match()
+      │      │       ├── HIT  → return cached response
+      │      │       └── MISS → fetch(request)
+      │      │                         │
+      │      │                         └── cache.put()
+      │      │
+      │      └── event.respondWith(response)
+      │
+      └── message
+             │
+             └── page ↔ worker communication
+```
+
+## Setup from scratch
+
+### Register from React
+
+```tsx
+useEffect(() => {
+  if ("serviceWorker" in navigator) {
+    navigator.serviceWorker
+      .register("/sw.js")
+      .then((registration) => {
+        console.log("Service Worker registered", registration.scope);
+      })
+      .catch((error) => {
+        console.error("Service Worker registration failed", error);
+      });
+  }
+}, []);
+```
+
+### Service Worker
+
+```js
+const CACHE_NAME = "app-v1";
+const APP_SHELL = ["/", "/index.html", "/offline.html"];
+
+self.addEventListener("install", (event) => {
+  event.waitUntil(
+    caches.open(CACHE_NAME).then((cache) =>
+      cache.addAll(APP_SHELL)
+    )
+  );
+
+  self.skipWaiting();
+});
+
+self.addEventListener("activate", (event) => {
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(
+        keys
+          .filter((key) => key !== CACHE_NAME)
+          .map((key) => caches.delete(key))
+      )
+    )
+  );
+
+  self.clients.claim();
+});
+
+self.addEventListener("fetch", (event) => {
+  if (event.request.method !== "GET") return;
+
+  event.respondWith(
+    caches.match(event.request).then((cached) => {
+      return (
+        cached ||
+        fetch(event.request).then((response) => {
+          const copy = response.clone();
+
+          caches.open(CACHE_NAME).then((cache) => {
+            cache.put(event.request, copy);
+          });
+
+          return response;
+        }).catch(() => caches.match("/offline.html"))
+      );
+    })
+  );
+});
+```
+
+### Page ↔ Service Worker communication
+
+```tsx
+navigator.serviceWorker.ready.then((registration) => {
+  registration.active?.postMessage({
+    type: "CLEAR_CACHE",
+  });
+});
+```
+
+```js
+self.addEventListener("message", (event) => {
+  if (event.data?.type === "CLEAR_CACHE") {
+    event.waitUntil(
+      caches.delete(CACHE_NAME)
+    );
+  }
+});
+```
+
+## Choosing the approach
+
+**Service Worker vs Web Worker:** a Web Worker is primarily for CPU-heavy JavaScript; a Service Worker is primarily a network/application lifecycle worker that can intercept requests and support offline/PWA capabilities.
+
+**Service Worker vs SSE/WebSocket:** Service Workers are not a replacement for a persistent real-time connection. They are mainly a network interception and background browser capability layer.
+
+## Interview Q&A
+
+### Q1 [Beginner] What problem does a Service Worker solve?
+
+**Answer:** It gives the browser a programmable background layer that can intercept network requests, cache resources, provide offline fallbacks, and support capabilities such as push and background synchronization.
+
+**Likely follow-up:** Why can't a normal React component do the same thing?
+
+### Q2 [Beginner] What are the Service Worker lifecycle stages?
+
+**Answer:** The important lifecycle stages are `install`, `activate`, and normal event handling such as `fetch` and `message`. Installation is commonly used to prepare caches; activation is commonly used for cleanup and taking control.
+
+**Likely follow-up:** Why do we use `skipWaiting()` and `clients.claim()`?
+
+### Q3 [Intermediate] What does `event.respondWith()` do?
+
+**Answer:** It tells the browser that the Service Worker will provide the response for the intercepted request, allowing you to implement cache-first, network-first, stale-while-revalidate, or other strategies.
+
+**Likely follow-up:** What happens if `respondWith()` is not called?
+
+### Q4 [Intermediate] What does `event.waitUntil()` do?
+
+**Answer:** It extends the lifetime of an install, activate, or other supported event until the supplied promise settles, so asynchronous work such as cache preparation or cleanup can finish.
+
+**Likely follow-up:** Why is this important for cache initialization?
+
+### Q5 [Advanced] How would you design a cache strategy?
+
+**Answer:** Choose per resource type. Static versioned assets can use cache-first; frequently changing API data may use network-first; some content can use stale-while-revalidate. Avoid blindly caching authenticated or highly dynamic responses.
+
+**Likely follow-up:** How do you invalidate old caches?
+
+### Q6 [Advanced] How do you communicate between React and a Service Worker?
+
+**Answer:** Use `postMessage()` and message events. Keep the protocol typed/versioned and make commands idempotent where retries or repeated messages are possible.
+
+**Likely follow-up:** How would you notify all open tabs after an update?
+
+### Q7 [Advanced] How do you handle Service Worker updates?
+
+**Answer:** Version caches, install the new worker, remove obsolete caches during activation, and deliberately decide when the new worker should take control. Avoid forcing an update without considering in-progress application work.
+
+**Likely follow-up:** What can go wrong if you call `skipWaiting()` aggressively?
+
+### Q8 [Senior] What are the production/security concerns?
+
+**Answer:** Service Workers require a secure context in normal production use, should be scoped deliberately, must not cache sensitive responses accidentally, and should use explicit cache names and invalidation policies. Treat intercepted requests and cached data as part of the security boundary.
+
+**Likely follow-up:** Would you cache authenticated API responses?
+
+### Q9 [Senior] How would you test it?
+
+**Answer:** Test installation and activation, cache population, cache invalidation, offline behavior, network failures, update transitions, message communication, multiple tabs, and browser-specific behavior using real browser integration tests.
+
+**Likely follow-up:** What behavior would a unit test fail to prove?
+
+### Q10 [Scenario] Users still receive an old JavaScript bundle after deployment.
+
+**Answer:** Check Service Worker registration scope, cache versioning, activation state, whether the old worker still controls the page, and whether HTML is cached with an overly aggressive strategy. Inspect the browser's Service Worker and Cache Storage state before changing code.
+
+**Likely follow-up:** How would you roll out a safe Service Worker update?
+
+## Hands-on exercise
+
+1. Register a Service Worker.
+2. Cache the application shell during `install`.
+3. Delete old cache versions during `activate`.
+4. Implement cache-first for static assets.
+5. Implement network-first for one API endpoint.
+6. Add an offline fallback page.
+7. Add React ↔ Service Worker messaging.
+8. Test update behavior with two browser tabs.
 
 # Cross-topic production checklist
 
