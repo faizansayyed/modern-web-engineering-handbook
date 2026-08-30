@@ -62,7 +62,8 @@ A senior answer should cover: requirement, data direction, consistency, lifecycl
 
 ## Mental model
 
-One-way server push over a long-lived HTTP response using `text/event-stream` and browser `EventSource`.
+The server maintains a persistent HTTP connection and pushes discrete text messages—formatted as `text/event-stream `—to the browser whenever new data is available. The browser's native `EventSource` API consumes this stream, automatically handling connection lifecycle, reconnections, and message parsing.
+
 
 **Use it for:** notifications, job progress, live dashboards, queue updates, and log tails where the browser mainly listens.
 
