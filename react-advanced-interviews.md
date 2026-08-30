@@ -425,7 +425,7 @@ WebSocket vs SSE: WebSocket is full-duplex and supports binary frames, but requi
 
 ## Mental model
 
-Incremental consumption of an HTTP response through `ReadableStream`, avoiding a full in-memory response where the sink supports streaming.
+The client processes an HTTP response chunk-by-chunk via `ReadableStream` as bytes arrive from the network, without waiting for the complete payload to buffer in memory. This enables real-time processing of large or continuous data streams—such as video, logs, or generated text—while keeping memory usage low and constant regardless of total response size
 
 **Use it for:** large downloads, streamed API output, NDJSON, AI token output, media transformation, and progressive processing.
 
@@ -584,7 +584,7 @@ app.get('/api/files/large', async (req, res) => {
 
 ## Mental model
 
-A server-state library for fetching, caching, synchronizing, invalidating, and mutating asynchronous remote data.
+It acts as a smart cache between your UI and remote APIs, automatically handling fetching, background synchronization, and stale-while-revalidate updates so components always reflect the latest server truth. By treating server data as a cacheable, synchronizable resource rather than one-off fetch results, it eliminates manual request state management and ensures mutations intelligently invalidate related queries to keep the client and server in sync.
 
 **Use it for:** REST or GraphQL server state shared by components, caching, pagination, background refresh, mutations, and optimistic UX.
 
@@ -774,7 +774,7 @@ TanStack Query vs Redux: Query owns asynchronous server state and freshness; Red
 
 ## Mental model
 
-Rate-control patterns for noisy user or browser events. Debounce waits for quiet; throttle limits execution frequency during activity.
+Debounce accumulates rapid-fire events and executes the handler only after a specified interval of silence has elapsed, ensuring a single response to a completed burst of activity—like triggering a search only once the user pauses typing. Throttle guarantees execution at most once within a fixed time window, allowing the first event through immediately and dropping subsequent calls until the cooldown expires, which keeps high-frequency streams like scroll or resize events performant without backlog.
 
 **Use it for:** debounced search/autosave/validation and throttled scroll, resize, pointer, telemetry, or expensive visual updates.
 
@@ -927,7 +927,7 @@ Debounce vs throttle vs `useDeferredValue`: debounce and throttle reduce callbac
 
 ## Mental model
 
-Background JavaScript execution outside the main UI thread, communicating through messages.
+Web Workers spawn an isolated JavaScript execution environment on a separate OS thread, freeing the main thread from heavy computation so the UI remains responsive. They exchange data with the main thread exclusively through asynchronous message passing (postMessage/onmessage), since they have no direct access to the DOM or main thread's memory space.
 
 **Use it for:** CPU-heavy parsing, aggregation, image processing, compression, cryptography, search indexing, and calculations that would create long main-thread tasks.
 
@@ -1085,7 +1085,7 @@ Web Worker vs Service Worker: a Web Worker performs background computation for a
 
 ## Mental model
 
-Splitting a file into independently uploadable parts with progress, retry, pause, resume, integrity checking, and final assembly.
+A large file is sliced into smaller, self-contained chunks that are uploaded to the server in parallel or sequentially, with each chunk tracked individually for progress and verified via checksums. If the connection drops, only the failed or missing chunks are retried upon resuming, and once all parts arrive intact, the server reassembles them into the original file.
 
 **Use it for:** large files, unreliable networks, mobile users, cloud object storage, and uploads that must survive interruption.
 
