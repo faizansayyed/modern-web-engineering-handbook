@@ -307,7 +307,7 @@ SSE vs WebSocket vs polling: choose SSE for one-way text push and simple HTTP be
 
 ## Mental model
 
-A persistent full-duplex connection that allows client and server to send messages independently.
+After an initial HTTP handshake, the connection upgrades to the WebSocket protocol (ws:// or wss://), establishing a persistent TCP socket that stays open for the duration of the session. Unlike standard HTTP, both the client and server can transmit messages across this single connection at any time without waiting for the other party to initiate a request.
 
 **Use it for:** chat, multiplayer interaction, collaborative editing, device control, presence, and low-latency bidirectional systems.
 
