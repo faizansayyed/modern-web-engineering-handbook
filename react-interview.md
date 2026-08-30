@@ -1,5 +1,22 @@
 # Interview & Study Guide
 
+## 📚 Contents
+
+- [Interview & Study Guide](#interview-study-guide)
+
+## 🎤 How to use this guide in an interview
+
+For each topic, explain it in this order:
+
+1. **Problem** — what real product problem does it solve?
+2. **API** — which browser/React/library APIs are involved?
+3. **Flow** — what happens from user action to server/browser response?
+4. **Failure** — what happens on errors, cancellation, reconnect, retry, or stale data?
+5. **Production** — what changes with security, performance, observability, and scale?
+6. **Trade-off** — why would you choose this approach over the closest alternative?
+
+> **Interview tip:** Don't just name APIs. Explain the lifecycle and why each API exists.
+
 useState
 Purpose
 useState stores information that:
@@ -104,7 +121,7 @@ User Browser
 
 **.eslintrc.json** ESLint configuration. Rules here enforce code quality — things TypeScript cannot check (like React hook rules, accessibility, security patterns).
 
-**.prettierrc** Prettier formatting rules. Every team member (or AI) produces identically formatted 
+**.prettierrc** Prettier formatting rules. Every team member (or AI) produces identically formatted
 
 **Synthetic Events** are React’s cross-browser wrapper around native browser events, giving you a consistent API like `onClick={(e) => console.log(e.target)}`; modern React uses delegated native events rather than the old pooled-event system.
 
