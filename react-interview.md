@@ -17,86 +17,76 @@ For each topic, explain it in this order:
 
 > **Interview tip:** Don't just name APIs. Explain the lifecycle and why each API exists.
 
-useState
-Purpose
-useState stores information that:
-Must survive across renders
-Must cause the UI to update when changed
-Belongs to one component or a small part of the tree
+Here’s a slightly more interview-friendly version—**what it does + when you actually use it**:
 
-**useReducer**
-Purpose
-useReducer manages state through explicit business actions.
+### `useState`
 
-**useContext**
-Purpose
-useContext reads shared information from the nearest provider without passing props through every intermediate component.
+**Purpose:** Stores component state that survives renders and causes the UI to update when changed. Use it for local UI state like inputs, toggles, modals, tabs, etc.
 
-**useRef**
-Purpose
-A ref stores a mutable value across renders without causing a render when changed.
+### `useReducer`
 
-**useImperativeHandle**
-Purpose
-useImperativeHandle limits or customizes what a parent receives through a ref.
+**Purpose:** Manages complex state through explicit actions and a reducer function. Useful when state has multiple related values or complicated business transitions.
 
-This should be used sparingly because normal React communication is declarative
+### `useContext`
 
-**useEffect**
-Purpose
-useEffect synchronizes a React component with an external system. React’s documentation explicitly describes Effects as synchronization with systems outside React and notes that you might not need an Effect if no external system is involved
+**Purpose:** Reads shared values from the nearest Context Provider without passing props through intermediate components. Common for things like theme, locale, or shared configuration.
 
-**useEffectEvent**
-Purpose
-useEffectEvent separates reactive synchronization from event-like logic inside an Effect.
+### `useRef`
 
-An Effect Event sees the latest committed props and state without forcing the containing Effect to reconnect. It should be called only from Effects or other Effect Events, not from rendering or ordinary event handlers
+**Purpose:** Stores a mutable value across renders **without causing a re-render** when changed. Common for DOM references, timers, previous values, or storing values that shouldn't trigger UI updates.
 
-**useLayoutEffect**
-Purpose
-useLayoutEffect runs after DOM changes but before the browser paints.
+### `useImperativeHandle`
 
-Use it for DOM measurement or a visual correction that must happen before users see the frame.
+**Purpose:** Controls what a parent can access through a child's ref instead of exposing the entire DOM/component instance. Use sparingly when imperative operations such as `focus()` or `open()` are genuinely required.
 
-**useInsertionEffect**
-Purpose
-useInsertionEffect runs before layout Effects and is intended primarily for CSS-in-JS library authors inserting styles before layout measurement.
+### `useEffect`
 
-**useInsertionEffect**
-Purpose
-useInsertionEffect runs before layout Effects and is intended primarily for CSS-in-JS library authors inserting styles before layout measurement.
+**Purpose:** Synchronizes React with an **external system**, such as APIs, subscriptions, timers, WebSockets, or browser APIs. If you're only deriving one piece of React state from another, you often don't need an Effect.
 
-**useMemo**
-Purpose
-useMemo caches a calculated value between renders until dependencies change.
+### `useEffectEvent`
 
-**useCallback**
-Purpose
-useCallback caches a function identity.
+**Purpose:** Separates non-reactive/event-like logic from the reactive synchronization logic inside an Effect. It lets that logic access the latest committed props/state without unnecessarily causing the Effect to reconnect or re-run.
 
-**useTransition**
-Purpose
-useTransition marks an update as non-urgent while keeping urgent interactions responsive.
-useDeferredValue
-Purpose
-useDeferredValue lets one part of the UI temporarily render with an older value while the urgent portion updates immediately.
+### `useLayoutEffect`
 
-**useSyncExternalStore**
-Purpose
-useSyncExternalStore safely subscribes React to information stored outside React
+**Purpose:** Runs after React updates the DOM but **before the browser paints**. Use it when you need to measure the DOM or make a visual adjustment before the user sees the frame.
 
-**useActionState**
-Purpose
-useActionState manages the result and pending state of an Action. The current API returns the state, an Action dispatcher, and an isPending flag.
+### `useInsertionEffect`
 
-**useOptimistic**
-Purpose
-useOptimistic immediately displays an expected successful result while the real operation is pending.
+**Purpose:** Runs before layout Effects and is primarily designed for **CSS-in-JS libraries** to insert styles before DOM measurement. Normal application code rarely needs it.
 
-**useFormStatus** from react-dom
-useFormStatus is provided by react-dom, not the core react package.
-Purpose
-A component nested inside a form can read the nearest parent form’s submission status.
+### `useMemo`
+
+**Purpose:** Caches the result of an expensive calculation between renders until its dependencies change. Use it for expensive derived calculations, not simply because a calculation exists.
+
+### `useCallback`
+
+**Purpose:** Caches a function's identity between renders until dependencies change. Useful when passing callbacks to memoized children or when a stable function reference matters.
+
+### `useTransition`
+
+**Purpose:** Marks an update as **non-urgent**, allowing React to keep urgent interactions such as typing or clicking responsive. Useful for expensive UI updates like filtering or rendering large lists.
+
+### `useDeferredValue`
+
+**Purpose:** Lets a non-urgent part of the UI temporarily use an older value while the urgent UI updates immediately. Useful when typing/searching should stay responsive while expensive results render.
+
+### `useSyncExternalStore`
+
+**Purpose:** Safely subscribes React to state that lives **outside React**, such as an external state store or browser API. It provides React with a consistent way to subscribe and read external data.
+
+### `useActionState`
+
+**Purpose:** Manages the result and pending state of an **Action**, returning the current state, an Action dispatcher, and `isPending`. Useful for forms and async mutations where you want React to manage the action lifecycle.
+
+### `useOptimistic`
+
+**Purpose:** Shows the **expected successful result immediately** while the real operation is still pending. If the operation fails, React can fall back to the actual state.
+
+### `useFormStatus` — `react-dom`
+
+**Purpose:** Allows a component **inside a `<form>`** to read the nearest form's submission status. Useful for disabling a submit button or showing `"Submitting..."` while the form Action is pending.
+
 
 **Babel** is a JavaScript compiler/transpiler that converts modern JavaScript, JSX, and some TypeScript syntax into JavaScript that browsers understand.
 Your Code
