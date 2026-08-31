@@ -11,9 +11,11 @@
 - [7. Chunked uploads](#7-chunked-uploads)
 - [8. React Hook Form](#8-react-hook-form)
 - [9. Service Workers](#9-service-workers)
+- [10. Broadcasting Events](#10-broadcasting-events)
+- [11. Storage Events](#11-storage-events)
 
 
-> Scope: SSE, WebSockets, Fetch Streams, TanStack Query, debouncing/throttling, Web Workers, resumable file upload, and React Hook Form.
+> Scope: SSE, WebSockets, Fetch Streams, TanStack Query, debouncing/throttling, Web Workers, resumable file upload, React Hook Form, Service Workers, Broadcasting Events, and Storage Events.
 >
 > This guide is designed for hands-on interview preparation. Each chapter moves from fundamentals to architecture and senior-level decisions. Code is intentionally concise and should be adapted with authentication, validation, observability, and tests before production use.
 
@@ -51,6 +53,8 @@ The generic concerns—cleanup, security, backpressure, observability, testing, 
 | Service Workers | `navigator.serviceWorker`, `register`, `install`, `activate`, `fetch`, `caches`, `respondWith`, `waitUntil`, `skipWaiting`, `clients.claim`, `postMessage`, `PushManager`, `SyncManager` | Browser network/background layer |
 | Chunked upload | `File`, `Blob.slice`, `fetch`, `AbortController`, chunk index, checksum, idempotency, multipart upload | Reliable large transfer |
 | React Hook Form | `useForm`, `register`, `Controller`, `useWatch`, `useFormState`, `useFieldArray`, `resolver`, `setError`, `reset`, `trigger` | Form state + validation |
+| Broadcasting Events | `BroadcastChannel`, `postMessage`, `message`, `messageerror`, `close` | Tab/window → tab/window |
+| Storage Events | `localStorage`, `sessionStorage`, `storage`, `setItem`, `removeItem`, `clear` | Cross-tab storage notification |
 
 ## Cross-topic decision map
 
@@ -65,6 +69,8 @@ The generic concerns—cleanup, security, backpressure, observability, testing, 
 | CPU-heavy browser work | Web Worker | Moves computation away from the main thread |
 | Reliable large upload | Chunked upload | Independent retry, pause, resume, and integrity |
 | Complex dynamic business form | React Hook Form | Registration, validation, arrays, and isolated subscriptions |
+| Cross-tab application messaging | BroadcastChannel | Structured same-origin messages without server involvement |
+| Simple cross-tab state notification | Storage event | Browser-native notification when localStorage changes in another document |
 
 ## Shared production architecture
 
@@ -1658,6 +1664,663 @@ self.addEventListener("message", (event) => {
 7. Add React ↔ Service Worker messaging.
 8. Test update behavior with two browser tabs.
 
+
+# 10. Broadcasting Events
+
+## Mental model
+
+The **Broadcast Channel API** lets browser contexts on the same origin communicate through named channels. A page, tab, iframe, or worker can publish a message with `postMessage()`, and other contexts listening to the same channel receive a `message` event.
+
+Think of it as a lightweight **browser-level pub/sub channel**:
+
+```text
+Tab A                         Tab B
+  │                              │
+  │ new BroadcastChannel("app")  │
+  │                              │
+  │ postMessage({ type: "..." }) │
+  ├─────────────────────────────►│
+  │                              │
+  │                         message event
+  │                              │
+  │                         update local state
+```
+
+**Use it for:** cross-tab logout, cart synchronization, theme changes, notification badges, cache invalidation signals, and coordination between browser contexts.
+
+**Do not use it when:** communication must cross different origins, messages must reach users on different devices, durable delivery is required, or a server needs to be involved. Use WebSocket/SSE or another server-side mechanism for those cases.
+
+## Important concepts, APIs, hooks, and configuration
+
+- `BroadcastChannel`
+- `new BroadcastChannel(name)`
+- `postMessage()`
+- `message`
+- `messageerror`
+- `close()`
+- structured clone
+- same-origin restriction
+- `useEffect`
+- `useRef`
+- cleanup
+- message schema/versioning
+- deduplication
+- loop prevention
+
+## Broadcasting API flow — know this sequence
+
+```text
+Tab A
+  │
+  │ new BroadcastChannel("app-events")
+  ▼
+Broadcast channel
+  │
+  │ postMessage({
+  │   type: "LOGOUT"
+  │ })
+  ├──────────────────────────────► Tab B
+  │                                │
+  │                                ▼
+  │                           "message" event
+  │                                │
+  │                                ▼
+  │                           clear auth state
+  │
+  └──────────────────────────────► Tab C
+                                   │
+                                   ▼
+                              clear auth state
+```
+
+### Complete client example
+
+```tsx
+import { useEffect } from "react";
+
+type AppEvent =
+  | { type: "LOGOUT" }
+  | { type: "CART_UPDATED"; version: number }
+  | { type: "THEME_CHANGED"; theme: "light" | "dark" };
+
+export function useAppBroadcast(onEvent: (event: AppEvent) => void) {
+  useEffect(() => {
+    const channel = new BroadcastChannel("app-events");
+
+    const handleMessage = (event: MessageEvent<AppEvent>) => {
+      onEvent(event.data);
+    };
+
+    channel.addEventListener("message", handleMessage);
+
+    return () => {
+      channel.removeEventListener("message", handleMessage);
+      channel.close();
+    };
+  }, [onEvent]);
+}
+```
+
+### Sending an event
+
+```ts
+const channel = new BroadcastChannel("app-events");
+
+channel.postMessage({
+  type: "LOGOUT",
+});
+
+channel.close();
+```
+
+### Cross-tab logout example
+
+```tsx
+useEffect(() => {
+  const channel = new BroadcastChannel("auth");
+
+  const handleMessage = (event: MessageEvent) => {
+    if (event.data?.type === "LOGOUT") {
+      queryClient.clear();
+      setUser(null);
+      navigate("/login");
+    }
+  };
+
+  channel.addEventListener("message", handleMessage);
+
+  return () => {
+    channel.removeEventListener("message", handleMessage);
+    channel.close();
+  };
+}, []);
+```
+
+When the user logs out from one tab:
+
+```ts
+authChannel.postMessage({ type: "LOGOUT" });
+```
+
+Other tabs receive the event and can immediately clear their local application state.
+
+## BroadcastChannel vs `window.postMessage`
+
+These are related but solve different problems.
+
+| API | Typical purpose |
+|---|---|
+| `BroadcastChannel` | Same-origin communication between multiple browser contexts |
+| `window.postMessage` | Communication with a specific window/frame, commonly across origins |
+| `ServiceWorker.postMessage` | Page ↔ Service Worker communication |
+| WebSocket | Browser ↔ server real-time communication |
+| SSE | Server → browser real-time communication |
+
+**Interview point:** `BroadcastChannel` is local to the browser environment. It does not create a server connection and does not provide durable delivery.
+
+## Failure and lifecycle considerations
+
+### 1. Always close the channel
+
+A React component that creates a channel should close it during cleanup:
+
+```tsx
+return () => channel.close();
+```
+
+Otherwise, long-lived pages and frequently mounted components can accumulate listeners/resources.
+
+### 2. Treat messages as untrusted input
+
+Even though the message comes from another context of the same origin, validate its structure before acting on it:
+
+```ts
+function isAppEvent(value: unknown): value is AppEvent {
+  if (!value || typeof value !== "object") return false;
+
+  const event = value as Record<string, unknown>;
+
+  return (
+    event.type === "LOGOUT" ||
+    event.type === "CART_UPDATED" ||
+    event.type === "THEME_CHANGED"
+  );
+}
+```
+
+### 3. Prevent message loops
+
+If Tab A receives a message and broadcasts the same message again, tabs can create an event loop.
+
+Prefer:
+
+```text
+Tab A → BroadcastChannel → Tab B
+                         → Tab C
+```
+
+rather than:
+
+```text
+Tab A → Tab B → Tab C → Tab A → ...
+```
+
+Only rebroadcast when the architecture explicitly requires it.
+
+### 4. Do not treat it as durable messaging
+
+If Tab B is closed when an event is sent, you should not design the system assuming Tab B will later receive that event.
+
+For important state:
+
+```text
+Broadcast event
+      ↓
+"Something changed"
+      ↓
+Read authoritative state
+      ↓
+API / IndexedDB / application state
+```
+
+The broadcast should often be treated as an **invalidation or wake-up signal**, not the source of truth.
+
+## Using BroadcastChannel with TanStack Query
+
+A strong production pattern is to broadcast an invalidation signal and let each tab refresh its own server state:
+
+```ts
+channel.postMessage({
+  type: "PRODUCTS_CHANGED",
+});
+```
+
+Receiver:
+
+```ts
+if (event.data?.type === "PRODUCTS_CHANGED") {
+  queryClient.invalidateQueries({
+    queryKey: ["products"],
+  });
+}
+```
+
+This is often safer than broadcasting an entire large dataset because each tab obtains the authoritative state from the server.
+
+## Interview Q&A
+
+### Q1 [Beginner] What is BroadcastChannel?
+
+**Answer:** `BroadcastChannel` is a browser API that allows same-origin browser contexts such as tabs, windows, iframes, and workers to exchange messages through a named channel.
+
+**Likely follow-up:** Does it communicate with your backend?
+
+### Q2 [Intermediate] What is a practical use case?
+
+**Answer:** Cross-tab logout is a common example. When one tab logs out, it broadcasts a `LOGOUT` event and other tabs clear their authentication-related state.
+
+**Likely follow-up:** What if the other tab was not open?
+
+### Q3 [Advanced] Should you broadcast the complete updated application state?
+
+**Answer:** Usually no. For important server state, broadcast a small invalidation message such as `PRODUCTS_CHANGED`, then let each tab refetch the authoritative state. This avoids large messages and stale payloads.
+
+**Likely follow-up:** When would broadcasting the actual value be acceptable?
+
+### Q4 [Senior] How do you design cross-tab synchronization safely?
+
+**Answer:** Define a typed/versioned message protocol, validate incoming messages, keep payloads small, make handlers idempotent, close channels during cleanup, prevent rebroadcast loops, and treat the server or durable browser storage as the source of truth for important state.
+
+**Likely follow-up:** How would you handle two tabs updating the same resource simultaneously?
+
+### Q5 [Scenario] A logout event sometimes does not appear to work.
+
+**Answer:** Verify that all tabs use the same channel name and origin, confirm the listener is registered before the event is emitted, check cleanup and browser support, and verify that logout state is actually cleared locally. For critical authentication guarantees, do not rely on the broadcast alone; enforce token/session invalidation server-side.
+
+**Likely follow-up:** Why should BroadcastChannel not be the security boundary?
+
+## Hands-on exercise
+
+1. Open the same application in three tabs.
+2. Create a `BroadcastChannel("app-events")`.
+3. Broadcast a `LOGOUT` event.
+4. Clear local auth state in every receiving tab.
+5. Broadcast a `CART_UPDATED` invalidation.
+6. Connect it to TanStack Query.
+7. Add runtime message validation.
+8. Add cleanup and verify no duplicate listeners after remounting.
+
+# 11. Storage Events
+
+## Mental model
+
+The browser's **`storage` event** lets one document learn that another document changed Web Storage. It is most commonly used with `localStorage` to notify other tabs or windows of a state change.
+
+The key interview detail is:
+
+> The `storage` event is fired in **other documents**, not in the document that made the `localStorage` change.
+
+Example:
+
+```text
+Tab A
+  │
+  │ localStorage.setItem("theme", "dark")
+  │
+  ├──────────────────────────► Tab B
+  │                              │
+  │                              ▼
+  │                         storage event
+  │
+  └──────────────────────────► Tab C
+                                 │
+                                 ▼
+                            storage event
+```
+
+**Use it for:** simple cross-tab synchronization, logout notifications, theme preferences, selected workspace IDs, and lightweight cache invalidation signals.
+
+**Do not use it when:** you need rich messaging, guaranteed delivery, large payloads, high-frequency events, or server-side communication. `BroadcastChannel` is generally a better fit for application messaging.
+
+## Important concepts, APIs, hooks, and configuration
+
+- `localStorage`
+- `sessionStorage`
+- `storage`
+- `StorageEvent`
+- `setItem()`
+- `getItem()`
+- `removeItem()`
+- `clear()`
+- `key`
+- `newValue`
+- `oldValue`
+- `storageArea`
+- `url`
+- `window.addEventListener()`
+- `window.removeEventListener()`
+- JSON serialization
+- same-origin behavior
+- cleanup
+
+## Storage event API flow — know this sequence
+
+```text
+Tab A
+  │
+  │ localStorage.setItem(
+  │   "app-event",
+  │   JSON.stringify({ type: "LOGOUT" })
+  │ )
+  ▼
+Browser Web Storage
+  │
+  ├──────────────────────────────► Tab B
+  │                                │
+  │                                ▼
+  │                           "storage" event
+  │                                │
+  │                                ▼
+  │                           handle event
+  │
+  └──────────────────────────────► Tab C
+                                   │
+                                   ▼
+                              handle event
+
+Tab A does NOT receive its own storage event.
+```
+
+### Basic example
+
+```ts
+window.addEventListener("storage", (event) => {
+  if (event.key === "theme") {
+    console.log("Theme changed:", event.newValue);
+  }
+});
+```
+
+From another tab:
+
+```ts
+localStorage.setItem("theme", "dark");
+```
+
+The receiving tab gets:
+
+```ts
+event.key       // "theme"
+event.oldValue  // previous value or null
+event.newValue  // "dark"
+event.url       // URL of the document that changed storage
+```
+
+### Cross-tab logout example
+
+Sender:
+
+```ts
+localStorage.setItem(
+  "auth-event",
+  JSON.stringify({
+    type: "LOGOUT",
+    timestamp: Date.now(),
+  })
+);
+```
+
+Receiver:
+
+```tsx
+useEffect(() => {
+  const handleStorage = (event: StorageEvent) => {
+    if (event.key !== "auth-event" || !event.newValue) {
+      return;
+    }
+
+    const message = JSON.parse(event.newValue);
+
+    if (message.type === "LOGOUT") {
+      queryClient.clear();
+      setUser(null);
+      navigate("/login");
+    }
+  };
+
+  window.addEventListener("storage", handleStorage);
+
+  return () => {
+    window.removeEventListener("storage", handleStorage);
+  };
+}, []);
+```
+
+## `localStorage` vs `sessionStorage`
+
+| Feature | `localStorage` | `sessionStorage` |
+|---|---|---|
+| Lifetime | Persists across browser restarts until removed | Usually tied to a page session |
+| Scope | Same origin | Same origin + browser tab/page session |
+| Typical use | Preferences, lightweight persistent state | Temporary tab-specific state |
+| Storage event | Changes can notify other documents sharing the storage area | Behavior is more limited and tied to the page/session model |
+
+**Interview point:** Do not say "`storage` is just an event for localStorage." The event is related to Web Storage, and its exact propagation depends on which storage area changed.
+
+## Important storage-event behavior
+
+### 1. The initiating tab does not receive the event
+
+This surprises many developers.
+
+```ts
+localStorage.setItem("status", "ready");
+```
+
+The tab executing that line does not get its own `storage` event.
+
+If the same tab needs to react immediately, update local state directly:
+
+```ts
+setStatus("ready");
+localStorage.setItem("status", "ready");
+```
+
+Other tabs receive the event.
+
+### 2. It is not a message queue
+
+Do not treat `localStorage` as a durable event stream.
+
+A later tab can read the current value:
+
+```ts
+const value = localStorage.getItem("status");
+```
+
+but it cannot automatically reconstruct every historical change.
+
+### 3. Values are strings
+
+Web Storage stores strings:
+
+```ts
+localStorage.setItem("user", JSON.stringify(user));
+```
+
+Read it with:
+
+```ts
+const user = JSON.parse(
+  localStorage.getItem("user") ?? "null"
+);
+```
+
+For application protocols, validate parsed values before using them.
+
+### 4. Storage is synchronous
+
+`localStorage` APIs are synchronous. Avoid repeatedly reading/writing large values during hot UI paths such as scroll, pointer movement, or every keystroke.
+
+Bad:
+
+```ts
+window.addEventListener("scroll", () => {
+  localStorage.setItem("scroll", String(window.scrollY));
+});
+```
+
+Better:
+
+```ts
+// throttle/debounce the write or persist only meaningful changes
+```
+
+## Storage events vs BroadcastChannel
+
+This is an important senior-level comparison:
+
+| Requirement | Better choice |
+|---|---|
+| Simple cross-tab state notification | `storage` event |
+| Rich structured messaging | `BroadcastChannel` |
+| Need to know old/new storage values | `storage` event |
+| High-frequency application messages | `BroadcastChannel` |
+| Need persistence of the current value | `localStorage` |
+| Need server communication | WebSocket/SSE/HTTP |
+| Need durable server-side events | Server-side event log/message broker |
+
+A useful mental model:
+
+```text
+storage event
+    = "another document changed this stored value"
+
+BroadcastChannel
+    = "another browser context sent me this message"
+```
+
+## Security considerations
+
+Do not store highly sensitive secrets in `localStorage simply because it is convenient. JavaScript running in the origin can generally access Web Storage, so an XSS vulnerability can expose stored values.
+
+For authentication, prefer an architecture where sensitive session credentials are protected appropriately, commonly using secure, `HttpOnly` cookies where applicable, while using storage/broadcast mechanisms only for coordination.
+
+For example:
+
+```text
+Server session / secure cookie
+          │
+          ▼
+     authentication
+          │
+          ▼
+local browser coordination
+    ├── storage event
+    └── BroadcastChannel
+```
+
+The coordination mechanism should not become the security boundary.
+
+## Production pattern: storage as an invalidation signal
+
+Instead of putting a complete server response into localStorage:
+
+```ts
+localStorage.setItem(
+  "products",
+  JSON.stringify(hugeProductList)
+);
+```
+
+prefer a small signal:
+
+```ts
+localStorage.setItem(
+  "products-version",
+  String(Date.now())
+);
+```
+
+Other tabs receive the change:
+
+```ts
+window.addEventListener("storage", (event) => {
+  if (event.key === "products-version") {
+    queryClient.invalidateQueries({
+      queryKey: ["products"],
+    });
+  }
+});
+```
+
+This keeps TanStack Query/server data as the source of truth while using storage only for cross-tab coordination.
+
+## Interview Q&A
+
+### Q1 [Beginner] What is the `storage` event?
+
+**Answer:** It is a browser event that notifies other relevant documents when Web Storage changes, commonly when one tab changes `localStorage`.
+
+**Likely follow-up:** Does the same tab receive the event?
+
+### Q2 [Intermediate] Why does logout synchronization often use `storage`?
+
+**Answer:** One tab can write a small logout marker to `localStorage`, and other tabs receive the `storage` event and clear their local application state.
+
+**Likely follow-up:** Why not store the authentication token there?
+
+### Q3 [Intermediate] Why is `storage` different from BroadcastChannel?
+
+**Answer:** Storage events are tied to changes in Web Storage, while `BroadcastChannel` is designed for direct structured messaging between browser contexts. BroadcastChannel is generally cleaner for richer application events.
+
+**Likely follow-up:** Which would you choose for 100 messages per second?
+
+### Q4 [Advanced] Why should you avoid large localStorage writes?
+
+**Answer:** Web Storage operations are synchronous and can add main-thread work. Large serialized values also create parsing, serialization, memory, and quota pressure.
+
+**Likely follow-up:** What would you use for larger client-side data?
+
+### Q5 [Senior] How would you synchronize TanStack Query across tabs?
+
+**Answer:** Use a lightweight cross-tab invalidation mechanism such as BroadcastChannel or a storage signal. Each tab then invalidates the relevant query and fetches authoritative data rather than copying the complete cache through localStorage.
+
+**Likely follow-up:** How do you avoid refetch storms?
+
+### Q6 [Scenario] A developer says "the storage event is broken because it doesn't fire."
+
+**Answer:** First check whether they are testing the event in the same tab that called `setItem()`. The initiating document does not receive the event. Test from a second same-origin tab or window and verify the listener, storage key, and browser context.
+
+**Likely follow-up:** What happens if the value is set to the same string again?
+
+## Hands-on exercise
+
+1. Open the application in two tabs.
+2. Add a `storage` listener.
+3. Synchronize a theme preference.
+4. Implement cross-tab logout coordination.
+5. Confirm the initiating tab does not receive its own event.
+6. Add a small query-invalidation signal.
+7. Avoid storing the complete server response.
+8. Compare the implementation with `BroadcastChannel`.
+
+## Quick interview distinction
+
+```text
+Need to send a message?
+        │
+        ├── Same-origin browser contexts
+        │       └── BroadcastChannel
+        │
+        ├── Simple "storage changed" notification
+        │       └── storage event
+        │
+        └── Server must participate
+                ├── SSE
+                └── WebSocket
+```
+
 # Cross-topic production checklist
 
 Use this checklist across all topics rather than memorizing the same checklist eight times:
@@ -1760,5 +2423,6 @@ Observability verification
 - Day 3: TanStack Query, including query keys, freshness, optimistic updates, and SSR hydration.
 - Day 4: Debounce, throttle, and Web Workers, including profiling and cancellation.
 - Day 5: React Hook Form, dynamic fields, schema validation, and accessible enterprise workflows.
-- Day 6: Build one integrated system-design exercise and inject failures.
-- Day 7: Mock interview. Answer every senior and scenario question aloud, then implement one topic from scratch.
+- Day 6: Broadcasting Events and Storage Events, including cross-tab synchronization, invalidation, cleanup, and security.
+- Day 7: Build one integrated system-design exercise and inject failures.
+- Day 8: Mock interview. Answer every senior and scenario question aloud, then implement one topic from scratch.
