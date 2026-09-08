@@ -42,11 +42,16 @@ Don't only explain *what* a technology does. Explain **why you would choose it a
 
 ### Strong answer structure
 
-> "I'm a Senior Frontend Engineer with 8+ years of experience building enterprise-scale web applications. My primary focus is React and TypeScript, with experience across state management, API integration, performance optimization, testing, accessibility, and frontend architecture.
->
-> I've worked on data-intensive and enterprise applications where frontend performance, maintainability, and reliability were important. I've worked with technologies such as React, Redux Toolkit, TanStack Query, TypeScript, Vite/Webpack, AG Grid, Playwright, and cloud/containerized environments.
->
-> At a senior level, I focus not only on implementing features but also on architecture, identifying performance bottlenecks, improving developer experience, establishing testing strategies, and making technical decisions that scale with the product and team."
+Hi, I’m Faizan Sayyed. I’m a Senior Frontend Engineer with over 9 years of experience building scalable, high-performance enterprise web applications.
+
+My core expertise is in React, TypeScript, and modern frontend architecture. I’ve worked extensively on data-intensive applications, reusable UI architectures, micro-frontends, and complex workflows. I also focus strongly on frontend performance, accessibility following WCAG guidelines, and building reliable applications with unit, integration, and end-to-end testing.
+
+Currently, I’m working with Capital Group on investment research and data-extraction platforms used by quantitative and research teams. My work involves building React and TypeScript applications, optimizing large-data experiences using technologies like TanStack Query, AG Grid and Web Workers, implementing real-time workflows using SSE, and contributing to micro-frontend architecture with Module Federation. I’m also involved in cloud-native delivery using AWS, Docker, Kubernetes, and CI/CD.
+
+Before Capital Group, I worked on Verizon’s 5G B2B platform at HCL Technologies and the NORC GSS Data Explorer at Persistent Systems, where I built reusable React applications, secure authentication flows, data-driven interfaces, and cloud-integrated features.
+
+Overall, I enjoy solving complex frontend engineering problems, improving application performance and user experience, and turning business requirements into scalable, secure, accessible, and maintainable products.
+
 
 ### Follow-up
 **"What is the most technically challenging frontend problem you solved?"**
