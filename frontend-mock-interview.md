@@ -438,6 +438,29 @@ This can produce bugs such as:
 
 ---
 
+## Q13. What is a redux middleware
+
+### `Redux middleware`
+Redux middleware intercepts actions before they reach reducers. It is mainly used for side effects like API calls, logging, analytics, authentication checks, and async operations. Common middleware are Redux Thunk, Redux Saga, and Redux Observable. A custom middleware follows the pattern (store) => (next) => (action) and can inspect, modify, delay, or trigger additional actions before forwarding the action using next(action).
+
+```typescript
+import { Middleware } from "@reduxjs/toolkit";
+
+export const loggerMiddleware: Middleware =
+  (store) => (next) => (action) => {
+
+    console.log("Before", store.getState());
+
+    const result = next(action);
+
+    console.log("Action", action);
+
+    console.log("After", store.getState());
+
+    return result;
+  };
+```
+
 ## Q14. Explain optimistic updates.
 
 ### Answer
