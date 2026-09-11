@@ -1,0 +1,3507 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>UI Engineering — DevOps Deep Guide</title>
+    <style>
+        *,
+        *::before,
+        *::after {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        :root {
+            --bg: #0f1117;
+            --surface: #1a1d27;
+            --surface2: #22263a;
+            --border: #2e3350;
+            --accent: #6c8ef7;
+            --accent2: #a78bfa;
+            --accent3: #34d399;
+            --accent4: #f59e0b;
+            --accent5: #f87171;
+            --text: #e2e8f0;
+            --muted: #8892b0;
+            --code-bg: #0d1117;
+            --r: 12px;
+            --font-mono: "Fira Code", "Cascadia Code", Consolas, monospace;
+        }
+
+        html {
+            scroll-behavior: smooth;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            background: var(--bg);
+            color: var(--text);
+            line-height: 1.75;
+            font-size: 15px;
+        }
+
+        .page-wrap {
+            display: grid;
+            grid-template-columns: 280px 1fr;
+            min-height: 100vh;
+        }
+
+        nav {
+            position: sticky;
+            top: 0;
+            height: 100vh;
+            overflow-y: auto;
+            background: var(--surface);
+            border-right: 1px solid var(--border);
+            padding: 28px 0;
+        }
+
+        nav::-webkit-scrollbar {
+            width: 4px;
+        }
+
+        nav::-webkit-scrollbar-thumb {
+            background: var(--border);
+            border-radius: 2px;
+        }
+
+        nav .nav-logo {
+            padding: 0 22px 20px;
+            border-bottom: 1px solid var(--border);
+            margin-bottom: 16px;
+        }
+
+        nav .nav-logo h2 {
+            font-size: 13px;
+            font-weight: 700;
+            letter-spacing: 0.1em;
+            text-transform: uppercase;
+            color: var(--accent);
+        }
+
+        nav .nav-logo p {
+            font-size: 11px;
+            color: var(--muted);
+            margin-top: 4px;
+        }
+
+        nav ul {
+            list-style: none;
+        }
+
+        nav ul li a {
+            display: block;
+            padding: 6px 22px;
+            text-decoration: none;
+            color: var(--muted);
+            font-size: 12.5px;
+            border-left: 2px solid transparent;
+            transition: color .2s, border-color .2s, background .2s;
+        }
+
+        nav ul li a:hover,
+        nav ul li a.active {
+            color: var(--accent);
+            border-left-color: var(--accent);
+            background: rgba(108, 142, 247, .07);
+        }
+
+        nav ul li.section-label {
+            padding: 14px 22px 4px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .12em;
+            text-transform: uppercase;
+            color: var(--muted);
+        }
+
+        main {
+            padding: 48px 56px 100px;
+            max-width: 980px;
+        }
+
+        section {
+            padding-top: 16px;
+            margin-bottom: 72px;
+        }
+
+        h1 {
+            font-size: 2.4rem;
+            font-weight: 800;
+            background: linear-gradient(135deg, var(--accent) 0%, var(--accent2) 100%);
+            -webkit-background-clip: text;
+            -webkit-text-fill-color: transparent;
+            background-clip: text;
+            margin-bottom: 12px;
+            line-height: 1.2;
+        }
+
+        h2 {
+            font-size: 1.5rem;
+            font-weight: 700;
+            color: var(--text);
+            margin-bottom: 18px;
+            padding-bottom: 10px;
+            border-bottom: 1px solid var(--border);
+        }
+
+        h3 {
+            font-size: 1.1rem;
+            font-weight: 600;
+            color: var(--accent2);
+            margin: 28px 0 10px;
+        }
+
+        h4 {
+            font-size: .95rem;
+            font-weight: 600;
+            color: var(--accent3);
+            margin: 20px 0 8px;
+        }
+
+        h5 {
+            font-size: .9rem;
+            font-weight: 600;
+            color: var(--accent4);
+            margin: 16px 0 6px;
+        }
+
+        p {
+            margin-bottom: 14px;
+            color: var(--text);
+        }
+
+        a {
+            color: var(--accent);
+            text-decoration: none;
+        }
+
+        a:hover {
+            text-decoration: underline;
+        }
+
+        strong {
+            color: #fff;
+        }
+
+        em {
+            color: var(--accent4);
+            font-style: normal;
+            font-weight: 600;
+        }
+
+        .hero {
+            background: linear-gradient(135deg, rgba(108, 142, 247, .12) 0%, rgba(167, 139, 250, .08) 100%);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 36px 40px;
+            margin-bottom: 44px;
+        }
+
+        .hero .subtitle {
+            font-size: 1.05rem;
+            color: var(--muted);
+            margin-top: 10px;
+            max-width: 700px;
+        }
+
+        .hero .tags {
+            display: flex;
+            gap: 8px;
+            flex-wrap: wrap;
+            margin-top: 18px;
+        }
+
+        .tag {
+            padding: 3px 10px;
+            border-radius: 999px;
+            font-size: 11px;
+            font-weight: 600;
+            letter-spacing: .05em;
+            background: rgba(108, 142, 247, .15);
+            color: var(--accent);
+            border: 1px solid rgba(108, 142, 247, .3);
+        }
+
+        /* ── Code ── */
+        pre {
+            background: var(--code-bg);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 20px 24px;
+            overflow-x: auto;
+            margin: 16px 0 24px;
+            position: relative;
+        }
+
+        pre .lang-label {
+            position: absolute;
+            top: 8px;
+            right: 14px;
+            font-size: 10px;
+            font-weight: 700;
+            letter-spacing: .08em;
+            color: var(--muted);
+            text-transform: uppercase;
+        }
+
+        code {
+            font-family: var(--font-mono);
+            font-size: 13px;
+            line-height: 1.85;
+        }
+
+        p code,
+        li code,
+        td code {
+            background: rgba(108, 142, 247, .12);
+            color: var(--accent);
+            padding: 1px 6px;
+            border-radius: 4px;
+            font-size: 12.5px;
+        }
+
+        /* syntax colours */
+        .kw {
+            color: #c678dd;
+        }
+
+        .str {
+            color: #98c379;
+        }
+
+        .com {
+            color: #5c6370;
+            font-style: italic;
+        }
+
+        .tc {
+            color: #e06c75;
+        }
+
+        .at {
+            color: #d19a66;
+        }
+
+        .vl {
+            color: #98c379;
+        }
+
+        .fn {
+            color: #61afef;
+        }
+
+        .nm {
+            color: #d19a66;
+        }
+
+        .sl {
+            color: #e06c75;
+        }
+
+        .pr {
+            color: #61afef;
+        }
+
+        .ky {
+            color: #e06c75;
+        }
+
+        /* ── Callouts ── */
+        .callout {
+            border-radius: var(--r);
+            padding: 16px 20px;
+            margin: 20px 0;
+            border-left: 4px solid;
+            display: flex;
+            gap: 12px;
+        }
+
+        .callout .icon {
+            font-size: 18px;
+            flex-shrink: 0;
+            line-height: 1.8;
+        }
+
+        .callout.info {
+            background: rgba(108, 142, 247, .08);
+            border-color: var(--accent);
+        }
+
+        .callout.tip {
+            background: rgba(52, 211, 153, .08);
+            border-color: var(--accent3);
+        }
+
+        .callout.warn {
+            background: rgba(245, 158, 11, .08);
+            border-color: var(--accent4);
+        }
+
+        .callout.danger {
+            background: rgba(248, 113, 113, .08);
+            border-color: var(--accent5);
+        }
+
+        .callout .body p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ── Diagrams ── */
+        .diagram-wrap {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 28px 24px;
+            margin: 24px 0;
+            overflow-x: auto;
+        }
+
+        .diagram-wrap figcaption {
+            text-align: center;
+            font-size: 12px;
+            color: var(--muted);
+            margin-top: 14px;
+        }
+
+        svg text {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        }
+
+        /* ── Tables ── */
+        .table-wrap {
+            overflow-x: auto;
+            margin: 20px 0;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13.5px;
+        }
+
+        th {
+            background: var(--surface2);
+            color: var(--accent);
+            font-weight: 700;
+            padding: 10px 14px;
+            text-align: left;
+            border: 1px solid var(--border);
+            font-size: 12px;
+            letter-spacing: .05em;
+            text-transform: uppercase;
+        }
+
+        td {
+            padding: 9px 14px;
+            border: 1px solid var(--border);
+            vertical-align: top;
+        }
+
+        tr:nth-child(even) td {
+            background: rgba(255, 255, 255, .02);
+        }
+
+        /* ── Steps ── */
+        .steps {
+            display: flex;
+            flex-direction: column;
+        }
+
+        .step {
+            display: grid;
+            grid-template-columns: 50px 1fr;
+            gap: 0 18px;
+            position: relative;
+        }
+
+        .step-num {
+            width: 42px;
+            height: 42px;
+            border-radius: 50%;
+            background: linear-gradient(135deg, var(--accent), var(--accent2));
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: 800;
+            font-size: 15px;
+            color: #fff;
+            flex-shrink: 0;
+            position: relative;
+            z-index: 1;
+            margin-top: 2px;
+        }
+
+        .step-line {
+            position: absolute;
+            left: 21px;
+            top: 46px;
+            bottom: 0;
+            width: 1px;
+            background: var(--border);
+        }
+
+        .step-body {
+            padding-bottom: 40px;
+        }
+
+        .step-body h3 {
+            margin-top: 4px;
+        }
+
+        /* ── Connection box ── */
+        .connect-box {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-left: 4px solid var(--accent3);
+            border-radius: var(--r);
+            padding: 16px 20px;
+            margin: 16px 0;
+        }
+
+        .connect-box .cb-title {
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--accent3);
+            margin-bottom: 8px;
+        }
+
+        .connect-box p {
+            margin-bottom: 8px;
+            font-size: 13.5px;
+        }
+
+        .connect-box p:last-child {
+            margin-bottom: 0;
+        }
+
+        /* ── Concept card ── */
+        .concept-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+            gap: 14px;
+            margin: 20px 0;
+        }
+
+        .concept-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 18px;
+        }
+
+        .concept-card .cc-icon {
+            font-size: 24px;
+            margin-bottom: 8px;
+        }
+
+        .concept-card .cc-title {
+            font-size: 13px;
+            font-weight: 700;
+            color: #fff;
+            margin-bottom: 6px;
+        }
+
+        .concept-card .cc-desc {
+            font-size: 12px;
+            color: var(--muted);
+            line-height: 1.6;
+        }
+
+        /* ── Badges ── */
+        .badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-size: 11px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .05em;
+        }
+
+        .badge-red {
+            background: rgba(248, 113, 113, .15);
+            color: var(--accent5);
+            border: 1px solid rgba(248, 113, 113, .3);
+        }
+
+        .badge-green {
+            background: rgba(52, 211, 153, .15);
+            color: var(--accent3);
+            border: 1px solid rgba(52, 211, 153, .3);
+        }
+
+        .badge-blue {
+            background: rgba(108, 142, 247, .15);
+            color: var(--accent);
+            border: 1px solid rgba(108, 142, 247, .3);
+        }
+
+        .badge-purple {
+            background: rgba(167, 139, 250, .15);
+            color: var(--accent2);
+            border: 1px solid rgba(167, 139, 250, .3);
+        }
+
+        .badge-yellow {
+            background: rgba(245, 158, 11, .15);
+            color: var(--accent4);
+            border: 1px solid rgba(245, 158, 11, .3);
+        }
+
+        ul,
+        ol {
+            margin: 12px 0 16px 24px;
+        }
+
+        ul li,
+        ol li {
+            margin-bottom: 7px;
+        }
+
+        .compare {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            margin: 20px 0;
+        }
+
+        .compare-card {
+            background: var(--surface);
+            border: 1px solid var(--border);
+            border-radius: var(--r);
+            padding: 18px 20px;
+        }
+
+        .compare-card h4 {
+            margin-top: 0;
+        }
+
+        /* ── Pipeline flow bar ── */
+        .pipe-flow {
+            display: flex;
+            align-items: stretch;
+            overflow-x: auto;
+            gap: 0;
+            margin: 24px 0;
+            padding-bottom: 6px;
+        }
+
+        .pf-stage {
+            background: var(--surface2);
+            border: 1px solid var(--border);
+            border-radius: 8px;
+            padding: 14px 16px;
+            min-width: 120px;
+            text-align: center;
+            flex-shrink: 0;
+        }
+
+        .pf-stage .pf-icon {
+            font-size: 22px;
+            margin-bottom: 6px;
+        }
+
+        .pf-stage .pf-name {
+            font-size: 11px;
+            font-weight: 700;
+            color: var(--text);
+        }
+
+        .pf-stage .pf-sub {
+            font-size: 10px;
+            color: var(--muted);
+            margin-top: 3px;
+        }
+
+        .pf-arrow {
+            color: var(--accent);
+            font-size: 20px;
+            padding: 0 4px;
+            display: flex;
+            align-items: center;
+            flex-shrink: 0;
+        }
+
+        /* ── Scroll progress ── */
+        #progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 3px;
+            background: linear-gradient(90deg, var(--accent), var(--accent2));
+            z-index: 999;
+            transition: width .1s linear;
+            width: 0%;
+        }
+
+        /* ── Flow annotation ── */
+        .flow-annotation {
+            background: rgba(52, 211, 153, .06);
+            border: 1px solid rgba(52, 211, 153, .2);
+            border-radius: 8px;
+            padding: 12px 16px;
+            margin: 8px 0 16px;
+            font-size: 13px;
+        }
+
+        .flow-annotation .fa-label {
+            font-size: 10px;
+            font-weight: 700;
+            text-transform: uppercase;
+            letter-spacing: .1em;
+            color: var(--accent3);
+            margin-bottom: 6px;
+        }
+
+        @media (max-width: 900px) {
+            .page-wrap {
+                grid-template-columns: 1fr;
+            }
+
+            nav {
+                position: static;
+                height: auto;
+                border-right: none;
+                border-bottom: 1px solid var(--border);
+            }
+
+            main {
+                padding: 28px 20px 60px;
+            }
+
+            .compare {
+                grid-template-columns: 1fr;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="progress-bar"></div>
+
+    <div class="page-wrap">
+
+        <!-- ══ SIDEBAR ══════════════════════════════════════════════════ -->
+        <nav id="sidebar">
+            <div class="nav-logo">
+                <h2>UI DevOps Guide</h2>
+                <p>Deep explanations + full flow</p>
+            </div>
+            <ul>
+                <li class="section-label">Start Here</li>
+                <li><a href="#overview">Overview & Stack</a></li>
+                <li><a href="#glossary">Tool Glossary</a></li>
+                <li><a href="#connection-chain">How They Connect</a></li>
+
+                <li class="section-label">Frontend First</li>
+                <li><a href="#optimization">Build Optimization</a></li>
+                <li><a href="#security">Web Security</a></li>
+
+                <li class="section-label">Containerization</li>
+                <li><a href="#docker-concepts">Docker — Concepts</a></li>
+                <li><a href="#docker-build">Multi-Stage Builds</a></li>
+                <li><a href="#docker-compose">Docker Compose</a></li>
+
+                <li class="section-label">AWS Deep Dive</li>
+                <li><a href="#iam">IAM — The Glue</a></li>
+                <li><a href="#ecr">ECR — Container Registry</a></li>
+                <li><a href="#codebuild">CodeBuild</a></li>
+                <li><a href="#codepipeline">CodePipeline</a></li>
+                <li><a href="#cloudfront">CloudFront + S3</a></li>
+
+                <li class="section-label">Kubernetes</li>
+                <li><a href="#k8s-concepts">K8s Concepts</a></li>
+                <li><a href="#k8s-manifests">Manifests Deep Dive</a></li>
+                <li><a href="#eks">AWS EKS</a></li>
+                <li><a href="#k8s-ingress">Ingress + ALB</a></li>
+
+                <li class="section-label">Helm</li>
+                <li><a href="#helm-concepts">Helm — What & Why</a></li>
+                <li><a href="#helm-chart">Chart Deep Dive</a></li>
+                <li><a href="#helm-deploy">Deploy & Rollback</a></li>
+
+                <li class="section-label">Full Pipeline</li>
+                <li><a href="#pipeline-flow">Step-by-Step Flow</a></li>
+                <li><a href="#auth-chain">Auth at Every Step</a></li>
+                <li><a href="#env-strategy">Env Strategy</a></li>
+                <li><a href="#monitoring">Monitoring</a></li>
+            </ul>
+        </nav>
+
+        <main>
+            <!-- HERO -->
+            <div class="hero">
+            <h1>UI Engineering DevOps — Deep Guide</h1>
+            <p class="subtitle">
+                Every tool explained from scratch. How Docker, ECR, CodeBuild, CodePipeline,
+                Kubernetes, Helm, and CloudFront connect to form a production pipeline —
+                with every command, credential, and configuration that makes each step
+                recognise the next.
+            </p>
+            <div class="tags">
+                <span class="tag">Docker</span>
+                <span class="tag">ECR</span>
+                <span class="tag">CodeBuild</span>
+                <span class="tag">CodePipeline</span>
+                <span class="tag">EKS</span>
+                <span class="tag">Helm</span>
+                <span class="tag">IAM</span>
+                <span class="tag">CloudFront</span>
+                <span class="tag">K8s</span>
+                <span class="tag">Security</span>
+            </div>
+        </div>
+
+        <!-- ══════════════════════════════════════════════════════════
+         OVERVIEW
+    ══════════════════════════════════════════════════════════════ -->
+        <section id="overview">
+            <h2>Overview — Why UI Engineers Need DevOps</h2>
+
+            <p>
+                In the past, a UI engineer wrote code and handed it to an ops team.
+                Today, <strong>you own the delivery pipeline</strong>. That means knowing how your
+                React app gets from a laptop to a production Kubernetes pod — and being able
+                to debug it when something goes wrong at 2 am.
+            </p>
+
+            <p>
+                The pipeline has three phases:
+            </p>
+
+            <ul>
+                <li><strong>Build phase</strong> — source code → tested artifact → Docker image</li>
+                <li><strong>Publish phase</strong> — Docker image → container registry (ECR)</li>
+                <li><strong>Deploy phase</strong> — registry image → running pods on Kubernetes, behind a CDN</li>
+            </ul>
+
+            <!-- Full flow SVG -->
+            <div class="diagram-wrap">
+                <figure>
+                    <svg viewBox="0 0 820 200" xmlns="http://www.w3.org/2000/svg" width="100%" height="200">
+                        <defs>
+                            <marker id="a" markerWidth="8" markerHeight="8" refX="6" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L8,3 z" fill="#6c8ef7" />
+                            </marker>
+                        </defs>
+
+                        <!-- Phase labels -->
+                        <rect x="10" y="8" width="240" height="20" rx="4" fill="rgba(108,142,247,.1)" />
+                        <text x="130" y="22" text-anchor="middle" fill="#6c8ef7" font-size="10" font-weight="700">BUILD
+                            PHASE</text>
+                        <rect x="270" y="8" width="160" height="20" rx="4" fill="rgba(52,211,153,.1)" />
+                        <text x="350" y="22" text-anchor="middle" fill="#34d399" font-size="10"
+                            font-weight="700">PUBLISH PHASE</text>
+                        <rect x="450" y="8" width="360" height="20" rx="4" fill="rgba(245,158,11,.1)" />
+                        <text x="630" y="22" text-anchor="middle" fill="#f59e0b" font-size="10" font-weight="700">DEPLOY
+                            PHASE</text>
+
+                        <!-- Boxes row 1 -->
+                        <rect x="10" y="40" width="100" height="52" rx="8" fill="#1a1d27" stroke="#6c8ef7"
+                            stroke-width="1.5" />
+                        <text x="60" y="61" text-anchor="middle" fill="#6c8ef7" font-size="11" font-weight="700">git
+                            push</text>
+                        <text x="60" y="77" text-anchor="middle" fill="#8892b0" font-size="9">main branch</text>
+                        <text x="60" y="88" text-anchor="middle" fill="#8892b0" font-size="9">→ triggers pipeline</text>
+
+                        <line x1="110" y1="66" x2="130" y2="66" stroke="#6c8ef7" stroke-width="1.5"
+                            marker-end="url(#a)" />
+
+                        <rect x="131" y="40" width="110" height="52" rx="8" fill="#1a1d27" stroke="#a78bfa"
+                            stroke-width="1.5" />
+                        <text x="186" y="61" text-anchor="middle" fill="#a78bfa" font-size="11"
+                            font-weight="700">CodeBuild</text>
+                        <text x="186" y="77" text-anchor="middle" fill="#8892b0" font-size="9">npm ci → lint →
+                            test</text>
+                        <text x="186" y="88" text-anchor="middle" fill="#8892b0" font-size="9">docker build</text>
+
+                        <line x1="241" y1="66" x2="261" y2="66" stroke="#6c8ef7" stroke-width="1.5"
+                            marker-end="url(#a)" />
+
+                        <rect x="262" y="40" width="100" height="52" rx="8" fill="#1a1d27" stroke="#34d399"
+                            stroke-width="1.5" />
+                        <text x="312" y="61" text-anchor="middle" fill="#34d399" font-size="11" font-weight="700">ECR
+                            Push</text>
+                        <text x="312" y="77" text-anchor="middle" fill="#8892b0" font-size="9">docker push</text>
+                        <text x="312" y="88" text-anchor="middle" fill="#8892b0" font-size="9">:abc12345</text>
+
+                        <line x1="362" y1="66" x2="382" y2="66" stroke="#6c8ef7" stroke-width="1.5"
+                            marker-end="url(#a)" />
+
+                        <rect x="383" y="40" width="100" height="52" rx="8" fill="#1a1d27" stroke="#f59e0b"
+                            stroke-width="1.5" />
+                        <text x="433" y="61" text-anchor="middle" fill="#f59e0b" font-size="11" font-weight="700">Helm
+                            Deploy</text>
+                        <text x="433" y="77" text-anchor="middle" fill="#8892b0" font-size="9">helm upgrade</text>
+                        <text x="433" y="88" text-anchor="middle" fill="#8892b0" font-size="9">--set
+                            image.tag=abc1</text>
+
+                        <line x1="483" y1="66" x2="503" y2="66" stroke="#6c8ef7" stroke-width="1.5"
+                            marker-end="url(#a)" />
+
+                        <rect x="504" y="40" width="100" height="52" rx="8" fill="#1a1d27" stroke="#f87171"
+                            stroke-width="1.5" />
+                        <text x="554" y="61" text-anchor="middle" fill="#f87171" font-size="11" font-weight="700">EKS
+                            Pods</text>
+                        <text x="554" y="77" text-anchor="middle" fill="#8892b0" font-size="9">pulls ECR image</text>
+                        <text x="554" y="88" text-anchor="middle" fill="#8892b0" font-size="9">nginx serves app</text>
+
+                        <line x1="604" y1="66" x2="624" y2="66" stroke="#6c8ef7" stroke-width="1.5"
+                            marker-end="url(#a)" />
+
+                        <rect x="625" y="40" width="80" height="52" rx="8" fill="#1a1d27" stroke="#6c8ef7"
+                            stroke-width="1.5" />
+                        <text x="665" y="61" text-anchor="middle" fill="#6c8ef7" font-size="11"
+                            font-weight="700">ALB</text>
+                        <text x="665" y="77" text-anchor="middle" fill="#8892b0" font-size="9">load balance</text>
+                        <text x="665" y="88" text-anchor="middle" fill="#8892b0" font-size="9">HTTPS 443</text>
+
+                        <line x1="705" y1="66" x2="725" y2="66" stroke="#6c8ef7" stroke-width="1.5"
+                            marker-end="url(#a)" />
+
+                        <rect x="726" y="40" width="84" height="52" rx="8" fill="#1a1d27" stroke="#f59e0b"
+                            stroke-width="1.5" />
+                        <text x="768" y="61" text-anchor="middle" fill="#f59e0b" font-size="11"
+                            font-weight="700">CloudFront</text>
+                        <text x="768" y="77" text-anchor="middle" fill="#8892b0" font-size="9">CDN edge</text>
+                        <text x="768" y="88" text-anchor="middle" fill="#8892b0" font-size="9">→ Users</text>
+
+                        <!-- Auth annotations below -->
+                        <text x="186" y="120" text-anchor="middle" fill="#5c6370" font-size="9">IAM Role (no
+                            keys)</text>
+                        <text x="312" y="120" text-anchor="middle" fill="#5c6370" font-size="9">ecr
+                            get-login-password</text>
+                        <text x="433" y="120" text-anchor="middle" fill="#5c6370" font-size="9">eks
+                            update-kubeconfig</text>
+                        <text x="554" y="120" text-anchor="middle" fill="#5c6370" font-size="9">IRSA pod auth</text>
+                        <text x="665" y="120" text-anchor="middle" fill="#5c6370" font-size="9">TLS cert (ACM)</text>
+
+                        <line x1="186" y1="92" x2="186" y2="112" stroke="#2e3350" stroke-width="1" />
+                        <line x1="312" y1="92" x2="312" y2="112" stroke="#2e3350" stroke-width="1" />
+                        <line x1="433" y1="92" x2="433" y2="112" stroke="#2e3350" stroke-width="1" />
+                        <line x1="554" y1="92" x2="554" y2="112" stroke="#2e3350" stroke-width="1" />
+                        <line x1="665" y1="92" x2="665" y2="112" stroke="#2e3350" stroke-width="1" />
+
+                        <text x="410" y="170" text-anchor="middle" fill="#2e3350" font-size="9">← authentication
+                            mechanism at each stage ———————————————————————→</text>
+                    </svg>
+                    <figcaption>Fig 1 — Full pipeline with authentication mechanism at each step</figcaption>
+                </figure>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+         GLOSSARY
+    ══════════════════════════════════════════════════════════════ -->
+        <section id="glossary">
+            <h2>Tool Glossary — What Each Thing Actually Is</h2>
+
+            <p>Before running a single command, understand what you are working with.</p>
+
+            <div class="concept-grid">
+                <div class="concept-card">
+                    <div class="cc-icon">🐳</div>
+                    <div class="cc-title">Docker</div>
+                    <div class="cc-desc">Packages your app + its entire runtime (Node, nginx, OS libs) into an isolated,
+                        portable <strong>container</strong>. "Works on my machine" becomes "works everywhere."</div>
+                </div>
+                <div class="concept-card">
+                    <div class="cc-icon">🗄️</div>
+                    <div class="cc-title">ECR (Elastic Container Registry)</div>
+                    <div class="cc-desc">AWS's private Docker image storage. Like Docker Hub but inside your AWS
+                        account. CodeBuild pushes images here; EKS nodes pull them.</div>
+                </div>
+                <div class="concept-card">
+                    <div class="cc-icon">🔨</div>
+                    <div class="cc-title">CodeBuild</div>
+                    <div class="cc-desc">AWS's managed CI server. Reads <code>buildspec.yml</code>, spins up a fresh VM,
+                        runs your commands, produces artifacts. No servers to manage.</div>
+                </div>
+                <div class="concept-card">
+                    <div class="cc-icon">🔁</div>
+                    <div class="cc-title">CodePipeline</div>
+                    <div class="cc-desc">The orchestrator. Watches your git repo and sequences stages: Source → Build →
+                        Test → Deploy Staging → Approve → Deploy Prod. It does not build anything itself.</div>
+                </div>
+                <div class="concept-card">
+                    <div class="cc-icon">☸️</div>
+                    <div class="cc-title">Kubernetes (K8s)</div>
+                    <div class="cc-desc">A platform that manages running containers across a fleet of servers. You
+                        declare the desired state ("3 replicas of this image") and K8s continuously makes it so.</div>
+                </div>
+                <div class="concept-card">
+                    <div class="cc-icon">🏗️</div>
+                    <div class="cc-title">EKS</div>
+                    <div class="cc-desc">AWS Elastic Kubernetes Service. Managed K8s — AWS runs the control plane (API
+                        server, etcd) so you only manage worker nodes (EC2 instances that run your pods).</div>
+                </div>
+                <div class="concept-card">
+                    <div class="cc-icon">⛵</div>
+                    <div class="cc-title">Helm</div>
+                    <div class="cc-desc">Package manager for Kubernetes. Bundles all your K8s YAML files into a
+                        <strong>chart</strong> with variables so you can deploy the same app to staging/prod with
+                        different values.
+                    </div>
+                </div>
+                <div class="concept-card">
+                    <div class="cc-icon">🌐</div>
+                    <div class="cc-title">CloudFront</div>
+                    <div class="cc-desc">AWS CDN. Caches your app's static assets at 400+ edge locations worldwide.
+                        Users get assets from the nearest server, not your origin. Also handles HTTPS + WAF.</div>
+                </div>
+                <div class="concept-card">
+                    <div class="cc-icon">🪣</div>
+                    <div class="cc-title">S3</div>
+                    <div class="cc-desc">AWS object storage. Stores files (HTML, JS, images). For purely static apps, S3
+                        + CloudFront replaces a server entirely. Also stores CodePipeline artifacts.</div>
+                </div>
+                <div class="concept-card">
+                    <div class="cc-icon">🔑</div>
+                    <div class="cc-title">IAM</div>
+                    <div class="cc-desc">AWS Identity and Access Management. Every AWS service talks to another through
+                        IAM roles — no passwords, no API keys scattered in code. This is the authentication glue.</div>
+                </div>
+                <div class="concept-card">
+                    <div class="cc-icon">🔒</div>
+                    <div class="cc-title">Secrets Manager</div>
+                    <div class="cc-desc">Stores sensitive config (DB passwords, API keys). Apps fetch secrets at runtime
+                        via IAM — secrets never touch environment files or Docker images.</div>
+                </div>
+                <div class="concept-card">
+                    <div class="cc-icon">⚖️</div>
+                    <div class="cc-title">ALB (App Load Balancer)</div>
+                    <div class="cc-desc">AWS Layer-7 load balancer. Routes HTTPS traffic to K8s pods. Terminates TLS.
+                        Works with the AWS Load Balancer Controller (a K8s operator) to auto-create from Ingress
+                        objects.</div>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+         CONNECTION CHAIN
+    ══════════════════════════════════════════════════════════════ -->
+        <section id="connection-chain">
+            <h2>How Every Tool Connects to the Next</h2>
+
+            <p>
+                The most confusing part of this stack is not individual tools — it's the
+                <strong>authentication and handoff between them</strong>.
+                Here is every connection point explained.
+            </p>
+
+            <div class="diagram-wrap">
+                <figure>
+                    <svg viewBox="0 0 760 340" xmlns="http://www.w3.org/2000/svg" width="100%" height="340">
+                        <defs>
+                            <marker id="b1" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L7,3 z" fill="#34d399" />
+                            </marker>
+                            <marker id="b2" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L7,3 z" fill="#f59e0b" />
+                            </marker>
+                        </defs>
+
+                        <!-- Title -->
+                        <text x="380" y="18" text-anchor="middle" fill="#e2e8f0" font-size="13"
+                            font-weight="700">Authentication Chain</text>
+
+                        <!-- GitHub -->
+                        <rect x="20" y="32" width="110" height="48" rx="8" fill="#1a1d27" stroke="#6c8ef7"
+                            stroke-width="1.5" />
+                        <text x="75" y="52" text-anchor="middle" fill="#6c8ef7" font-size="11"
+                            font-weight="700">GitHub</text>
+                        <text x="75" y="66" text-anchor="middle" fill="#8892b0" font-size="9">webhook / CodeStar</text>
+                        <text x="75" y="76" text-anchor="middle" fill="#8892b0" font-size="9">connection</text>
+
+                        <line x1="130" y1="56" x2="158" y2="56" stroke="#34d399" stroke-width="1.5"
+                            marker-end="url(#b1)" />
+                        <text x="144" y="50" text-anchor="middle" fill="#34d399" font-size="8">OAuth token</text>
+
+                        <!-- CodePipeline -->
+                        <rect x="159" y="32" width="120" height="48" rx="8" fill="#1a1d27" stroke="#f59e0b"
+                            stroke-width="1.5" />
+                        <text x="219" y="52" text-anchor="middle" fill="#f59e0b" font-size="11"
+                            font-weight="700">CodePipeline</text>
+                        <text x="219" y="66" text-anchor="middle" fill="#8892b0" font-size="9">IAM service role</text>
+                        <text x="219" y="76" text-anchor="middle" fill="#8892b0" font-size="9">triggers CodeBuild</text>
+
+                        <line x1="279" y1="56" x2="307" y2="56" stroke="#34d399" stroke-width="1.5"
+                            marker-end="url(#b1)" />
+                        <text x="293" y="50" text-anchor="middle" fill="#34d399" font-size="8">IAM role</text>
+
+                        <!-- CodeBuild -->
+                        <rect x="308" y="32" width="120" height="48" rx="8" fill="#1a1d27" stroke="#a78bfa"
+                            stroke-width="1.5" />
+                        <text x="368" y="52" text-anchor="middle" fill="#a78bfa" font-size="11"
+                            font-weight="700">CodeBuild</text>
+                        <text x="368" y="66" text-anchor="middle" fill="#8892b0" font-size="9">service role has
+                            ECR</text>
+                        <text x="368" y="76" text-anchor="middle" fill="#8892b0" font-size="9">+ SSM + S3 + EKS
+                            access</text>
+
+                        <!-- CodeBuild → ECR -->
+                        <line x1="428" y1="56" x2="456" y2="56" stroke="#34d399" stroke-width="1.5"
+                            marker-end="url(#b1)" />
+                        <text x="442" y="50" text-anchor="middle" fill="#34d399" font-size="8">temp token via IAM</text>
+
+                        <!-- ECR -->
+                        <rect x="457" y="32" width="90" height="48" rx="8" fill="#1a1d27" stroke="#34d399"
+                            stroke-width="1.5" />
+                        <text x="502" y="52" text-anchor="middle" fill="#34d399" font-size="11"
+                            font-weight="700">ECR</text>
+                        <text x="502" y="66" text-anchor="middle" fill="#8892b0" font-size="9">stores image</text>
+                        <text x="502" y="76" text-anchor="middle" fill="#8892b0" font-size="9">:git-sha tag</text>
+
+                        <!-- CodeBuild → EKS -->
+                        <line x1="368" y1="80" x2="368" y2="130" stroke="#f59e0b" stroke-width="1.5"
+                            marker-end="url(#b2)" />
+                        <text x="420" y="115" fill="#f59e0b" font-size="8">aws eks update-kubeconfig</text>
+                        <text x="420" y="126" fill="#f59e0b" font-size="8">(CodeBuild role in aws-auth)</text>
+
+                        <!-- EKS -->
+                        <rect x="280" y="131" width="180" height="56" rx="8" fill="#1a1d27" stroke="#f87171"
+                            stroke-width="2" />
+                        <text x="370" y="153" text-anchor="middle" fill="#f87171" font-size="12" font-weight="700">EKS
+                            Cluster</text>
+                        <text x="370" y="169" text-anchor="middle" fill="#8892b0" font-size="9">K8s API server</text>
+                        <text x="370" y="181" text-anchor="middle" fill="#8892b0" font-size="9">aws-auth ConfigMap
+                            controls access</text>
+
+                        <!-- Helm → EKS -->
+                        <text x="230" y="158" text-anchor="middle" fill="#f59e0b" font-size="9">helm uses
+                            kubeconfig</text>
+                        <text x="230" y="170" text-anchor="middle" fill="#f59e0b" font-size="9">to call K8s API</text>
+                        <line x1="270" y1="162" x2="282" y2="162" stroke="#f59e0b" stroke-width="1.5"
+                            marker-end="url(#b2)" />
+
+                        <!-- ECR → K8s nodes -->
+                        <line x1="502" y1="80" x2="502" y2="115" stroke="#34d399" stroke-width="1.5"
+                            marker-end="url(#b1)" />
+                        <line x1="502" y1="116" x2="460" y2="155" stroke="#34d399" stroke-width="1.5"
+                            marker-end="url(#b1)" />
+                        <text x="530" y="110" fill="#34d399" font-size="8">node IAM role</text>
+                        <text x="530" y="121" fill="#34d399" font-size="8">pulls image</text>
+
+                        <!-- K8s pods → Secrets Manager -->
+                        <line x1="370" y1="187" x2="370" y2="230" stroke="#a78bfa" stroke-width="1.5"
+                            marker-end="url(#b1)" />
+                        <text x="390" y="218" fill="#a78bfa" font-size="8">IRSA: K8s ServiceAccount</text>
+                        <text x="390" y="229" fill="#a78bfa" font-size="8">→ IAM role (OIDC token)</text>
+
+                        <!-- Secrets Manager -->
+                        <rect x="280" y="231" width="180" height="48" rx="8" fill="#1a1d27" stroke="#a78bfa"
+                            stroke-width="1.5" />
+                        <text x="370" y="252" text-anchor="middle" fill="#a78bfa" font-size="11"
+                            font-weight="700">Secrets Manager</text>
+                        <text x="370" y="267" text-anchor="middle" fill="#8892b0" font-size="9">secrets fetched at
+                            runtime</text>
+                        <text x="370" y="277" text-anchor="middle" fill="#8892b0" font-size="9">mounted as volume by CSI
+                            driver</text>
+
+                        <!-- ALB -->
+                        <rect x="570" y="131" width="130" height="56" rx="8" fill="#1a1d27" stroke="#6c8ef7"
+                            stroke-width="1.5" />
+                        <text x="635" y="153" text-anchor="middle" fill="#6c8ef7" font-size="11"
+                            font-weight="700">ALB</text>
+                        <text x="635" y="169" text-anchor="middle" fill="#8892b0" font-size="9">K8s Ingress → AWS
+                            LBC</text>
+                        <text x="635" y="181" text-anchor="middle" fill="#8892b0" font-size="9">creates ALB
+                            automatically</text>
+                        <line x1="460" y1="162" x2="570" y2="162" stroke="#6c8ef7" stroke-width="1"
+                            stroke-dasharray="4,3" />
+                        <text x="515" y="155" text-anchor="middle" fill="#8892b0" font-size="8">Ingress resource</text>
+
+                        <!-- CloudFront -->
+                        <rect x="570" y="231" width="130" height="48" rx="8" fill="#1a1d27" stroke="#f59e0b"
+                            stroke-width="1.5" />
+                        <text x="635" y="252" text-anchor="middle" fill="#f59e0b" font-size="11"
+                            font-weight="700">CloudFront</text>
+                        <text x="635" y="267" text-anchor="middle" fill="#8892b0" font-size="9">origin = ALB DNS</text>
+                        <text x="635" y="277" text-anchor="middle" fill="#8892b0" font-size="9">or S3 origin access
+                            ctrl</text>
+                        <line x1="635" y1="187" x2="635" y2="231" stroke="#f59e0b" stroke-width="1.5"
+                            marker-end="url(#b2)" />
+
+                        <!-- Users -->
+                        <rect x="600" y="300" width="100" height="36" rx="7" fill="#1a1d27" stroke="#6c8ef7"
+                            stroke-width="1.5" />
+                        <text x="650" y="314" text-anchor="middle" fill="#6c8ef7" font-size="10" font-weight="700">👤
+                            Users</text>
+                        <text x="650" y="330" text-anchor="middle" fill="#8892b0" font-size="9">HTTPS via CDN</text>
+                        <line x1="650" y1="279" x2="650" y2="300" stroke="#6c8ef7" stroke-width="1.5"
+                            marker-end="url(#b1)" />
+                    </svg>
+                    <figcaption>Fig 2 — Authentication chain: how every service proves its identity to the next
+                    </figcaption>
+                </figure>
+            </div>
+
+            <div class="callout info">
+                <span class="icon">💡</span>
+                <div class="body">
+                    <p>
+                        <strong>The golden rule:</strong> In AWS, services authenticate
+                        using <strong>IAM roles</strong>, never hardcoded access keys.
+                        A role is a temporary set of permissions that a service assumes.
+                        CodeBuild assumes its service role; EKS pods assume IRSA roles.
+                        No password is ever stored anywhere in the pipeline.
+                    </p>
+                </div>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+         FRONTEND OPTIMIZATION
+    ══════════════════════════════════════════════════════════════ -->
+        <section id="optimization">
+            <h2>Frontend Build Optimization</h2>
+
+            <p>
+                Before code enters any pipeline, your build output must be optimal.
+                A bloated bundle wastes CloudFront bandwidth, slows LCP, and makes
+                K8s image pulls slower. Good optimization compounds across the entire stack.
+            </p>
+
+            <h3>What Vite Does at Build Time</h3>
+            <p>
+                Vite uses <strong>Rollup</strong> under the hood for production builds.
+                Rollup performs <em>tree-shaking</em> (removes unused exports),
+                <em>code splitting</em> (splits chunks at dynamic imports), and
+                <em>minification</em> (renames variables, removes whitespace).
+                The output is a set of hashed JS/CSS files in <code>dist/</code>.
+            </p>
+
+            <pre><span class="lang-label">vite.config.ts</span><code><span class="kw">import</span> { defineConfig } <span class="kw">from</span> <span class="str">'vite'</span>;
+<span class="kw">import</span> react     <span class="kw">from</span> <span class="str">'@vitejs/plugin-react'</span>;
+<span class="kw">import</span> { visualizer } <span class="kw">from</span> <span class="str">'rollup-plugin-visualizer'</span>;
+
+<span class="kw">export default</span> <span class="fn">defineConfig</span>({
+  plugins: [
+    <span class="fn">react</span>(),
+    <span class="fn">visualizer</span>({ open: <span class="kw">true</span>, gzipSize: <span class="kw">true</span> }), <span class="com">// opens bundle treemap after build</span>
+  ],
+
+  build: {
+    target: <span class="str">'es2020'</span>,       <span class="com">// no IE11 polyfills — reduces output size</span>
+    minify: <span class="str">'esbuild'</span>,      <span class="com">// esbuild is 20–100× faster than terser</span>
+    sourcemap: <span class="kw">false</span>,       <span class="com">// never expose source in prod bundle</span>
+    chunkSizeWarningLimit: <span class="num">500</span>,
+
+    rollupOptions: {
+      output: {
+        <span class="com">// Splits vendor deps into a separate chunk.
+        // Browser caches vendor.js across deploys — only re-downloads if deps change.</span>
+        manualChunks(id) {
+          <span class="kw">if</span> (id.<span class="fn">includes</span>(<span class="str">'node_modules'</span>)) {
+            <span class="kw">if</span> (id.<span class="fn">includes</span>(<span class="str">'react'</span>))     <span class="kw">return</span> <span class="str">'vendor-react'</span>;
+            <span class="kw">if</span> (id.<span class="fn">includes</span>(<span class="str">'@radix-ui'</span>)) <span class="kw">return</span> <span class="str">'vendor-ui'</span>;
+            <span class="kw">return</span> <span class="str">'vendor-misc'</span>;
+          }
+        },
+        <span class="com">// Content-hash in filename = safe forever caching on CloudFront</span>
+        entryFileNames:  <span class="str">'assets/[name]-[hash].js'</span>,
+        chunkFileNames:  <span class="str">'assets/[name]-[hash].js'</span>,
+        assetFileNames:  <span class="str">'assets/[name]-[hash][extname]'</span>,
+      },
+    },
+  },
+});</code></pre>
+
+            <div class="connect-box">
+                <div class="cb-title">⟶ How this connects to CloudFront</div>
+                <p>
+                    The <code>[hash]</code> in filenames is a fingerprint of the file content.
+                    If <code>main-abc123.js</code> is unchanged, the hash stays <code>abc123</code>.
+                    CloudFront can cache it with <code>max-age=31536000, immutable</code>
+                    — a full year. When you change the file, Vite produces a new hash
+                    (<code>main-def456.js</code>), <code>index.html</code> references the new name,
+                    and CloudFront fetches it fresh. <strong>No invalidations needed for assets.</strong>
+                </p>
+            </div>
+
+            <h3>Code Splitting — How It Works</h3>
+            <p>
+                <code>React.lazy()</code> wraps a dynamic <code>import()</code>. Rollup
+                sees this import and automatically creates a separate chunk file for that
+                component. The browser only downloads that chunk when the user navigates
+                to that route.
+            </p>
+
+            <pre><span class="lang-label">React — lazy routes</span><code><span class="kw">import</span> { lazy, Suspense } <span class="kw">from</span> <span class="str">'react'</span>;
+<span class="kw">import</span> { Routes, Route } <span class="kw">from</span> <span class="str">'react-router-dom'</span>;
+
+<span class="com">// Each of these becomes a separate file: Dashboard-[hash].js, etc.
+// Dashboard.js is NOT in the initial bundle — it loads on demand.</span>
+<span class="kw">const</span> Dashboard = <span class="fn">lazy</span>(() => <span class="kw">import</span>(<span class="str">'./pages/Dashboard'</span>));
+<span class="kw">const</span> Settings  = <span class="fn">lazy</span>(() => <span class="kw">import</span>(<span class="str">'./pages/Settings'</span>));
+<span class="kw">const</span> Reports   = <span class="fn">lazy</span>(() => <span class="kw">import</span>(<span class="str">'./pages/Reports'</span>));
+
+<span class="kw">function</span> <span class="fn">App</span>() {
+  <span class="kw">return</span> (
+    <span class="com">// Suspense shows a fallback while the chunk loads over the network</span>
+    &lt;Suspense fallback=&lt;PageSkeleton /&gt;&gt;
+      &lt;Routes&gt;
+        &lt;Route path="/dashboard" element=&lt;Dashboard /&gt; /&gt;
+        &lt;Route path="/settings"  element=&lt;Settings /&gt;  /&gt;
+        &lt;Route path="/reports"   element=&lt;Reports /&gt;   /&gt;
+      &lt;/Routes&gt;
+    &lt;/Suspense&gt;
+  );
+}</code></pre>
+
+            <h3>Cache-Control Strategy</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>File</th>
+                            <th>Header</th>
+                            <th>Why</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>*.js</code>, <code>*.css</code> (hashed)</td>
+                            <td><code>max-age=31536000, immutable</code></td>
+                            <td>Hash changes when content changes — safe to cache forever. <code>immutable</code> tells
+                                browser to never revalidate.</td>
+                        </tr>
+                        <tr>
+                            <td><code>index.html</code></td>
+                            <td><code>no-cache, no-store</code></td>
+                            <td>Entry point references hashed assets. Must always be fresh so users get new file names
+                                on deploy.</td>
+                        </tr>
+                        <tr>
+                            <td>Images, fonts (hashed)</td>
+                            <td><code>max-age=31536000, immutable</code></td>
+                            <td>Same as JS/CSS — fingerprint ensures correctness.</td>
+                        </tr>
+                        <tr>
+                            <td><code>sw.js</code> (Service Worker)</td>
+                            <td><code>no-cache</code></td>
+                            <td>Browser always checks for SW updates — must never serve a stale SW.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+         SECURITY
+    ══════════════════════════════════════════════════════════════ -->
+        <section id="security">
+            <h2>Web Security — What It Is and Why It Matters</h2>
+
+            <p>
+                Security in a UI app operates at multiple layers: what the browser
+                enforces (CSP), what the network enforces (HTTPS, CORS), and what your
+                pipeline enforces (secrets management, image scanning).
+                Each layer is independent — a failure in one does not protect the others.
+            </p>
+
+            <h3>Content Security Policy (CSP) — Deep Explanation</h3>
+            <p>
+                CSP is an HTTP response header that tells the browser
+                <strong>what content it is allowed to load and execute</strong>.
+                Without it, if an attacker injects a <code>&lt;script&gt;</code> tag
+                (XSS), the browser happily executes it. With a strict CSP, the browser
+                refuses to execute any script not explicitly whitelisted.
+            </p>
+            <p>
+                The most important directive is <code>script-src</code>. Using
+                <code>'nonce-{random}'</code> means only scripts carrying a server-generated
+                nonce attribute can execute — an attacker injecting a script tag cannot
+                know the nonce.
+            </p>
+
+            <pre><span class="lang-label">HTTP Response Header</span><code>Content-Security-Policy:
+  default-src 'self';
+
+  <span class="com"># Only scripts with matching nonce="" attribute may execute.
+  # The nonce is generated per-request — never reuse.</span>
+  script-src  'self' 'nonce-{SERVER_NONCE_PER_REQUEST}';
+
+  <span class="com"># Same for inline styles</span>
+  style-src   'self' 'nonce-{SERVER_NONCE_PER_REQUEST}';
+
+  <span class="com"># Allow images from self and your CDN</span>
+  img-src     'self' data: https://cdn.example.com;
+
+  <span class="com"># Allow fonts from self and Google Fonts</span>
+  font-src    'self' https://fonts.gstatic.com;
+
+  <span class="com"># Allow API calls only to known domains</span>
+  connect-src 'self' https://api.example.com wss://realtime.example.com;
+
+  <span class="com"># Prevent this page from being loaded in an iframe (clickjacking)</span>
+  frame-ancestors 'none';
+
+  <span class="com"># Report violations to your monitoring endpoint</span>
+  report-to   default;</code></pre>
+
+            <pre><span class="lang-label">Express + Helmet — generate nonce per request</span><code><span class="kw">import</span> helmet   <span class="kw">from</span> <span class="str">'helmet'</span>;
+<span class="kw">import</span> crypto   <span class="kw">from</span> <span class="str">'crypto'</span>;
+
+<span class="com">// Middleware: attach a fresh nonce to every response</span>
+app.<span class="fn">use</span>((req, res, next) => {
+  res.locals.nonce = crypto.<span class="fn">randomBytes</span>(<span class="nm">16</span>).<span class="fn">toString</span>(<span class="str">'base64'</span>);
+  <span class="fn">next</span>();
+});
+
+app.<span class="fn">use</span>((req, res, next) => <span class="fn">helmet</span>({
+  contentSecurityPolicy: {
+    directives: {
+      defaultSrc:     [<span class="str">"'self'"</span>],
+      scriptSrc:      [<span class="str">"'self'"</span>, () => <span class="str">`'nonce-<span class="kw">${</span>res.locals.nonce<span class="kw">}</span>'`</span>],
+      styleSrc:       [<span class="str">"'self'"</span>, () => <span class="str">`'nonce-<span class="kw">${</span>res.locals.nonce<span class="kw">}</span>'`</span>],
+      frameAncestors: [<span class="str">"'none'"</span>],
+      connectSrc:     [<span class="str">"'self'"</span>, <span class="str">'https://api.example.com'</span>],
+    },
+  },
+  hsts: { maxAge: <span class="nm">63072000</span>, includeSubDomains: <span class="kw">true</span>, preload: <span class="kw">true</span> },
+})(req, res, next));
+
+<span class="com">// In your SSR template, apply the nonce to every inline script/style:</span>
+<span class="com">// &lt;script nonce="&lt;%= nonce %&gt;"&gt;...&lt;/script&gt;</span></code></pre>
+
+            <h3>CORS — What It Protects and How</h3>
+            <p>
+                CORS (Cross-Origin Resource Sharing) is a browser mechanism that
+                prevents malicious websites from making API calls on behalf of
+                an authenticated user. When <code>app.evil.com</code> tries to
+                <code>fetch('https://api.yourapp.com/user')</code>, the browser
+                sends a preflight <code>OPTIONS</code> request first. The server
+                must respond with an <code>Access-Control-Allow-Origin</code> header
+                matching the requesting origin — otherwise the browser blocks the response.
+            </p>
+
+            <div class="callout warn">
+                <span class="icon">⚠️</span>
+                <div class="body">
+                    <p>
+                        <strong>CORS protects users, not servers.</strong> CORS is enforced
+                        by browsers only. A server-to-server request (curl, Postman,
+                        your backend service) ignores CORS entirely. Use CORS to prevent
+                        unauthorized browser-based calls, but always validate
+                        authorization server-side.
+                    </p>
+                </div>
+            </div>
+
+            <pre><span class="lang-label">Express — strict CORS configuration</span><code"><span class="kw">import</span> cors <span class="kw">from</span> <span class="str">'cors'</span>;
+
+<span class="com">// Allowed origins come from environment config — not hardcoded</span>
+<span class="kw">const</span> allowedOrigins = process.env.ALLOWED_ORIGINS.<span class="fn">split</span>(<span class="str">','</span>);
+<span class="com">// e.g. "https://app.example.com,https://staging.example.com"</span>
+
+app.<span class="fn">use</span>(<span class="fn">cors</span>({
+  origin(origin, callback) {
+    <span class="com">// Allow server-to-server calls (no Origin header) or whitelisted origins</span>
+    <span class="kw">if</span> (!origin || allowedOrigins.<span class="fn">includes</span>(origin)) {
+      <span class="fn">callback</span>(<span class="kw">null</span>, <span class="kw">true</span>);
+    } <span class="kw">else</span> {
+      <span class="fn">callback</span>(<span class="kw">new</span> Error(<span class="str">`CORS: origin ${origin} not permitted`</span>));
+    }
+  },
+  credentials: <span class="kw">true</span>,   <span class="com">// allow cookies / Authorization header</span>
+  maxAge: <span class="nm">86400</span>,         <span class="com">// cache preflight for 24h — reduces OPTIONS requests</span>
+}));</code></pre>
+
+            <h3>Secrets Management — Why Frontend Env Vars Are NOT Secrets</h3>
+            <p>
+                When you run <code>npm run build</code>, Vite replaces every
+                <code>import.meta.env.VITE_*</code> reference in your source code
+                with the literal string value. This means the value ends up
+                <strong>verbatim in your JavaScript bundle</strong> on the CDN —
+                accessible to anyone who opens DevTools.
+            </p>
+
+            <pre><span class="lang-label">CORRECT vs WRONG secret handling</span><code"><span class="com">// ✅ SAFE: public config — CDN URL, feature flags, env name</span>
+<span class="kw">const</span> apiUrl = import.meta.env.VITE_API_URL;   <span class="com">// "https://api.example.com"</span>
+
+<span class="com">// ❌ NEVER: these WILL appear in your bundle for anyone to read</span>
+<span class="kw">const</span> key    = import.meta.env.VITE_STRIPE_SECRET_KEY;
+<span class="kw">const</span> dbPass = import.meta.env.VITE_DB_PASSWORD;
+
+<span class="com">// ✅ Secrets belong in your backend, fetched via authenticated API:
+// Frontend calls  GET /api/payment-intent  (authenticated request)
+// Backend uses    process.env.STRIPE_SECRET_KEY  (never exposed to browser)</span></code></pre>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>OWASP Risk</th>
+                            <th>Attack Scenario</th>
+                            <th>Defense</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>A03 — XSS</td>
+                            <td>Attacker injects <code>&lt;script&gt;</code> via user content</td>
+                            <td>React auto-escapes JSX. For raw HTML: DOMPurify. Add nonce-based CSP.</td>
+                        </tr>
+                        <tr>
+                            <td>A02 — Crypto Failure</td>
+                            <td>JWT stored in <code>localStorage</code> — stolen by XSS</td>
+                            <td>Store auth tokens in <code>httpOnly; Secure; SameSite=Strict</code> cookies. JS cannot
+                                read <code>httpOnly</code> cookies.</td>
+                        </tr>
+                        <tr>
+                            <td>A05 — Broken Access Control</td>
+                            <td>Hide admin route in React but skip server auth check</td>
+                            <td>Client-side route guards are UX only. Every API endpoint must validate authorization
+                                independently.</td>
+                        </tr>
+                        <tr>
+                            <td>A08 — Software Integrity</td>
+                            <td>Third-party CDN script is compromised</td>
+                            <td>Add <code>integrity="sha256-..."</code> SRI hash to all external scripts. Browser
+                                refuses to execute if hash doesn't match.</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+         DOCKER CONCEPTS
+    ══════════════════════════════════════════════════════════════ -->
+        <section id="docker-concepts">
+            <h2>Docker — What It Is and How It Works</h2>
+
+            <p>
+                A <strong>container</strong> is not a virtual machine. A VM emulates
+                an entire computer including the kernel. A container shares the host OS
+                kernel but isolates the filesystem, processes, and network. Containers
+                start in milliseconds, use MBs of RAM, and are perfectly reproducible.
+            </p>
+
+            <h3>Images vs Containers</h3>
+            <div class="compare">
+                <div class="compare-card">
+                    <h4>Docker Image</h4>
+                    <p>A read-only template. Like a class in OOP. Contains the filesystem snapshot: OS libs, your code,
+                        nginx binary. Stored in ECR.</p>
+                    <p>Built with <code>docker build</code>. Tagged with a version (<code>:abc12345</code>).</p>
+                </div>
+                <div class="compare-card">
+                    <h4>Docker Container</h4>
+                    <p>A running instance of an image. Like an object instance. Has its own writable layer, process
+                        space, and network interface.</p>
+                    <p>Created with <code>docker run</code>. In K8s, containers run inside Pods.</p>
+                </div>
+            </div>
+
+            <h3>How Docker Layers Work</h3>
+            <p>
+                A Dockerfile creates a <strong>layer</strong> for each instruction.
+                Layers are cached. When you rebuild, Docker only re-runs instructions
+                where the layer's input changed. This is why you copy
+                <code>package.json</code> and run <code>npm ci</code> <em>before</em>
+                copying the rest of your source — the deps layer stays cached unless
+                you change <code>package.json</code>.
+            </p>
+
+            <pre><span class="lang-label">Dockerfile — layer caching strategy explained</span><code"><span class="com"># Layer 1: base image — rarely changes, always cached</span>
+FROM node:20-alpine AS deps
+
+WORKDIR /app
+
+<span class="com"># Layer 2: ONLY package files — cached unless deps change
+# If you changed src/Button.tsx but not package.json,
+# this layer (and npm ci) is served from cache — FAST.</span>
+COPY package.json package-lock.json ./
+RUN npm ci --prefer-offline
+
+<span class="com"># Layer 3: source code — changes on every commit
+# This layer is never cached. That's fine — it's just a file copy.</span>
+COPY . .
+
+<span class="com"># Layer 4: run build — only executes if layer 3 changed</span>
+RUN npm run build
+
+<span class="com"># ── New stage: production image ──────────────────────────────
+# IMPORTANT: multi-stage means the node_modules and source code
+# from the builder stage are NEVER included in the final image.
+# Only dist/ is copied. Final image: ~25 MB instead of 1.1 GB.</span>
+FROM nginx:1.27-alpine AS production
+
+RUN rm /etc/nginx/conf.d/default.conf
+COPY nginx/nginx.conf /etc/nginx/conf.d/app.conf
+COPY --from=deps /app/dist /usr/share/nginx/html
+
+<span class="com"># Security: run as non-root user (uid 101 = nginx user in alpine image)</span>
+USER nginx
+EXPOSE 8080
+CMD ["nginx", "-g", "daemon off;"]</code></pre>
+
+            <div class="connect-box">
+                <div class="cb-title">⟶ How this image gets to ECR</div>
+                <p>CodeBuild runs <code>docker build</code> on this Dockerfile. It then calls
+                    <code>aws ecr get-login-password</code> (which uses the CodeBuild IAM role — no
+                    stored credentials) to get a temporary token. <code>docker login</code> uses that
+                    token. Then <code>docker push</code> uploads the image layers to ECR.
+                </p>
+                <p>The image is tagged with the git SHA (<code>:abc12345</code>) so you can always
+                    trace which commit produced which running pod.</p>
+            </div>
+
+            <h3>nginx.conf for a React SPA</h3>
+            <p>
+                The <code>try_files $uri $uri/ /index.html</code> directive is critical
+                for SPAs. When a user deep-links to <code>/dashboard/settings</code>,
+                nginx looks for a file called <code>dashboard/settings</code> (doesn't exist),
+                then falls back to <code>index.html</code>. React Router then reads the URL
+                and renders the correct component.
+            </p>
+
+            <pre><span class="lang-label">nginx/nginx.conf</span><code">server {
+    listen      8080;
+    server_name _;
+    root        /usr/share/nginx/html;
+    index       index.html;
+
+    <span class="com"># Gzip: compress JS/CSS before sending — saves ~60-70% bandwidth</span>
+    gzip            on;
+    gzip_types      text/plain text/css application/javascript
+                    application/json application/xml image/svg+xml;
+    gzip_min_length 256;
+    gzip_vary       on;   <span class="com"># adds Vary: Accept-Encoding header for CDN correctness</span>
+
+    <span class="com"># Hashed static assets: cache forever, browser won't recheck</span>
+    location ~* \.(js|css|woff2|avif|webp|png|jpg|svg)$ {
+        add_header Cache-Control "max-age=31536000, immutable";
+        try_files $uri =404;
+    }
+
+    <span class="com"># SPA root: no-cache + fallback to index.html for client-side routing</span>
+    location / {
+        add_header Cache-Control "no-cache, no-store, must-revalidate";
+        try_files $uri $uri/ /index.html;
+    }
+
+    <span class="com"># Healthcheck endpoint — K8s probes hit this to verify the pod is alive</span>
+    location /healthz {
+        access_log off;
+        return 200 "OK";
+        add_header Content-Type text/plain;
+    }
+
+    add_header X-Content-Type-Options "nosniff"  always;
+    add_header X-Frame-Options         "DENY"     always;
+}</code></pre>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+         DOCKER COMPOSE
+    ══════════════════════════════════════════════════════════════ -->
+        <section id="docker-compose">
+            <h2>Docker Compose — Local Full-Stack Development</h2>
+
+            <p>
+                Docker Compose is a tool to define and run <strong>multi-container
+                    applications</strong> with a single command. Instead of manually starting
+                a frontend server, an API server, and a database in three terminals,
+                one <code>docker compose up</code> starts everything with the correct
+                networking and dependencies.
+            </p>
+
+            <h3>How Containers Talk to Each Other</h3>
+            <p>
+                Compose creates a private network for all services in the same file.
+                Services find each other using their <strong>service name as hostname</strong>.
+                When the <code>ui</code> container makes a request to
+                <code>http://api:3001</code>, Docker resolves <code>api</code>
+                to the internal IP of the <code>api</code> container.
+                No IP addresses needed.
+            </p>
+
+            <pre><span class="lang-label">docker-compose.yml — annotated</span><code"><span class="ky">version</span>: <span class="vl">'3.9'</span>
+
+<span class="ky">services</span>:
+
+  <span class="ky">ui</span>:
+    <span class="ky">build</span>:
+      <span class="ky">context</span>: <span class="vl">.</span>
+      <span class="com"># Use "deps" stage (has node_modules) for dev, not the nginx prod stage</span>
+      <span class="ky">target</span>: <span class="vl">deps</span>
+    <span class="ky">command</span>: <span class="vl">npm run dev -- --host 0.0.0.0</span>
+    <span class="ky">volumes</span>:
+      <span class="com"># Mount src/ from host into container — changes appear instantly (HMR)</span>
+      - <span class="vl">./src:/app/src</span>
+      <span class="com"># Anonymous volume: keeps the container's node_modules separate from host.
+      # Without this, the host node_modules folder would overwrite the container's.</span>
+      - <span class="vl">/app/node_modules</span>
+    <span class="ky">ports</span>:
+      - <span class="vl">"5173:5173"</span>   <span class="com"># host:container — access at localhost:5173</span>
+    <span class="ky">environment</span>:
+      <span class="com"># "api" here is the Compose service name — Docker DNS resolves it</span>
+      - <span class="vl">VITE_API_URL=http://api:3001</span>
+    <span class="ky">depends_on</span>:
+      <span class="ky">api</span>:
+        <span class="ky">condition</span>: <span class="vl">service_healthy</span>   <span class="com"># wait until API passes health check</span>
+
+  <span class="ky">api</span>:
+    <span class="ky">build</span>: <span class="vl">./api</span>
+    <span class="ky">command</span>: <span class="vl">node --watch server.js</span>   <span class="com"># Node 20+ built-in watch mode</span>
+    <span class="ky">volumes</span>:
+      - <span class="vl">./api:/app</span>
+      - <span class="vl">/app/node_modules</span>
+    <span class="ky">ports</span>:
+      - <span class="vl">"3001:3001"</span>
+    <span class="ky">environment</span>:
+      <span class="com"># Service name "db" resolves to Postgres container inside Docker network</span>
+      - <span class="vl">DATABASE_URL=postgres://appuser:devpass@db:5432/appdb</span>
+    <span class="ky">healthcheck</span>:
+      <span class="ky">test</span>: <span class="vl">["CMD", "curl", "-f", "http://localhost:3001/health"]</span>
+      <span class="ky">interval</span>: <span class="vl">10s</span>
+      <span class="ky">timeout</span>:  <span class="vl">5s</span>
+      <span class="ky">retries</span>:  <span class="vl">3</span>
+    <span class="ky">depends_on</span>:
+      <span class="ky">db</span>:
+        <span class="ky">condition</span>: <span class="vl">service_healthy</span>
+
+  <span class="ky">db</span>:
+    <span class="ky">image</span>: <span class="vl">postgres:16-alpine</span>
+    <span class="ky">environment</span>:
+      POSTGRES_DB:       <span class="vl">appdb</span>
+      POSTGRES_USER:     <span class="vl">appuser</span>
+      POSTGRES_PASSWORD: <span class="vl">devpass</span>
+    <span class="ky">volumes</span>:
+      <span class="com"># Named volume persists DB data across container restarts</span>
+      - <span class="vl">pgdata:/var/lib/postgresql/data</span>
+    <span class="ky">healthcheck</span>:
+      <span class="ky">test</span>: <span class="vl">["CMD-SHELL", "pg_isready -U appuser"]</span>
+      <span class="ky">interval</span>: <span class="vl">5s</span>
+      <span class="ky">retries</span>:  <span class="vl">5</span>
+
+<span class="ky">volumes</span>:
+  <span class="ky">pgdata</span>:    <span class="com"># named volume — survives "docker compose down", deleted by "down -v"</span></code></pre>
+
+            <pre><span class="lang-label">Shell — common Compose commands</span><code"><span class="com"># Start everything (build if needed), stream logs</span>
+docker compose up --build
+
+<span class="com"># Run in background, then tail logs for one service</span>
+docker compose up -d
+docker compose logs -f ui
+
+<span class="com"># Run a one-off command in the ui container (e.g., run tests)</span>
+docker compose run --rm ui npm test
+
+<span class="com"># Stop and remove containers (keep volumes)</span>
+docker compose down
+
+<span class="com"># Stop and remove containers AND volumes (wipes DB data)</span>
+docker compose down -v</code></pre>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+         IAM — THE GLUE
+    ══════════════════════════════════════════════════════════════ -->
+        <section id="iam">
+            <h2>IAM — The Authentication Glue</h2>
+
+            <p>
+                IAM (Identity and Access Management) is the system that grants
+                AWS services permission to call other AWS services.
+                <strong>Understanding IAM is understanding how the pipeline works.</strong>
+                Every broken pipeline comes down to a missing IAM permission.
+            </p>
+
+            <h3>How IAM Roles Work (No Keys Required)</h3>
+            <p>
+                When CodeBuild runs your <code>buildspec.yml</code>, it assumes an
+                <strong>IAM service role</strong>. AWS automatically injects temporary
+                credentials (access key + secret + session token) into the build
+                environment via the EC2 Instance Metadata Service. The AWS CLI and SDK
+                automatically find and use these — you never handle keys manually.
+            </p>
+
+            <div class="diagram-wrap">
+                <figure>
+                    <svg viewBox="0 0 700 160" xmlns="http://www.w3.org/2000/svg" width="100%" height="160">
+                        <defs>
+                            <marker id="iam-a" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L7,3 z" fill="#34d399" />
+                            </marker>
+                        </defs>
+
+                        <rect x="10" y="50" width="120" height="60" rx="8" fill="#1a1d27" stroke="#a78bfa"
+                            stroke-width="1.5" />
+                        <text x="70" y="75" text-anchor="middle" fill="#a78bfa" font-size="11"
+                            font-weight="700">CodeBuild Job</text>
+                        <text x="70" y="91" text-anchor="middle" fill="#8892b0" font-size="9">runs buildspec.yml</text>
+                        <text x="70" y="104" text-anchor="middle" fill="#8892b0" font-size="9">aws cli commands</text>
+
+                        <line x1="130" y1="80" x2="158" y2="80" stroke="#34d399" stroke-width="1.5"
+                            marker-end="url(#iam-a)" />
+                        <text x="144" y="74" text-anchor="middle" fill="#34d399" font-size="8">assumes</text>
+
+                        <rect x="159" y="50" width="150" height="60" rx="8" fill="#1a1d27" stroke="#34d399"
+                            stroke-width="2" />
+                        <text x="234" y="72" text-anchor="middle" fill="#34d399" font-size="11" font-weight="700">IAM
+                            Service Role</text>
+                        <text x="234" y="87" text-anchor="middle" fill="#8892b0"
+                            font-size="9">arn:aws:iam::123:role/</text>
+                        <text x="234" y="99" text-anchor="middle" fill="#8892b0"
+                            font-size="9">CodeBuildServiceRole</text>
+                        <text x="234" y="111" text-anchor="middle" fill="#6c8ef7" font-size="9">auto-injects temp
+                            creds</text>
+
+                        <line x1="309" y1="80" x2="337" y2="80" stroke="#34d399" stroke-width="1.5"
+                            marker-end="url(#iam-a)" />
+                        <text x="323" y="74" text-anchor="middle" fill="#34d399" font-size="8">allows</text>
+
+                        <rect x="338" y="30" width="130" height="44" rx="7" fill="#1a1d27" stroke="#6c8ef7"
+                            stroke-width="1.5" />
+                        <text x="403" y="50" text-anchor="middle" fill="#6c8ef7" font-size="10"
+                            font-weight="700">ECR</text>
+                        <text x="403" y="65" text-anchor="middle" fill="#8892b0"
+                            font-size="9">ecr:GetAuthorizationToken</text>
+                        <text x="403" y="76" text-anchor="middle" fill="#8892b0" font-size="9">ecr:PutImage</text>
+
+                        <rect x="338" y="84" width="130" height="44" rx="7" fill="#1a1d27" stroke="#6c8ef7"
+                            stroke-width="1.5" />
+                        <text x="403" y="104" text-anchor="middle" fill="#6c8ef7" font-size="10"
+                            font-weight="700">S3</text>
+                        <text x="403" y="119" text-anchor="middle" fill="#8892b0" font-size="9">s3:GetObject
+                            (artifacts)</text>
+                        <text x="403" y="130" text-anchor="middle" fill="#8892b0" font-size="9">s3:PutObject</text>
+
+                        <line x1="309" y1="86" x2="338" y2="106" stroke="#34d399" stroke-width="1.5"
+                            marker-end="url(#iam-a)" />
+
+                        <rect x="490" y="50" width="140" height="60" rx="7" fill="#1a1d27" stroke="#a78bfa"
+                            stroke-width="1.5" />
+                        <text x="560" y="72" text-anchor="middle" fill="#a78bfa" font-size="10" font-weight="700">SSM /
+                            Secrets Mgr</text>
+                        <text x="560" y="87" text-anchor="middle" fill="#8892b0" font-size="9">ssm:GetParameter</text>
+                        <text x="560" y="99" text-anchor="middle" fill="#8892b0"
+                            font-size="9">secretsmanager:GetSecret</text>
+                        <text x="560" y="111" text-anchor="middle" fill="#8892b0"
+                            font-size="9">eks:DescribeCluster</text>
+
+                        <line x1="468" y1="80" x2="490" y2="80" stroke="#34d399" stroke-width="1.5"
+                            marker-end="url(#iam-a)" />
+                    </svg>
+                    <figcaption>Fig 3 — CodeBuild assumes IAM role; role has permissions for ECR, S3, SSM, EKS
+                    </figcaption>
+                </figure>
+            </div>
+
+            <h3>IAM Policy for CodeBuild Service Role</h3>
+            <pre><span class="lang-label">IAM Policy JSON</span><code">{
+  "Version": "2012-10-17",
+  "Statement": [
+    {
+      "Sid": "ECRAuth",
+      "Effect": "Allow",
+      "Action": ["ecr:GetAuthorizationToken"],
+      "Resource": "*"   <span class="com">// GetAuthorizationToken is account-level, not resource-level</span>
+    },
+    {
+      "Sid": "ECRPushPull",
+      "Effect": "Allow",
+      "Action": [
+        "ecr:BatchCheckLayerAvailability",
+        "ecr:GetDownloadUrlForLayer",
+        "ecr:BatchGetImage",
+        "ecr:InitiateLayerUpload",
+        "ecr:UploadLayerPart",
+        "ecr:CompleteLayerUpload",
+        "ecr:PutImage"
+      ],
+      "Resource": "arn:aws:ecr:us-east-1:123456789:repository/my-ui-app"
+    },
+    {
+      "Sid": "SSMConfig",
+      "Effect": "Allow",
+      "Action": ["ssm:GetParameters"],
+      "Resource": "arn:aws:ssm:us-east-1:123456789:parameter/myapp/*"
+    },
+    {
+      "Sid": "EKSAccess",
+      "Effect": "Allow",
+      "Action": ["eks:DescribeCluster"],
+      "Resource": "arn:aws:eks:us-east-1:123456789:cluster/my-cluster"
+    }
+  ]
+}</code></pre>
+
+            <h3>IRSA — IAM Roles for K8s Service Accounts</h3>
+            <p>
+                Inside EKS pods, you cannot use the node's IAM role for fine-grained
+                access — all pods on the node would share the same permissions.
+                <strong>IRSA</strong> (IAM Roles for Service Accounts) links a
+                Kubernetes <code>ServiceAccount</code> to an IAM role using OpenID
+                Connect (OIDC). The pod gets a projected JWT token that it exchanges
+                with AWS STS for temporary IAM credentials.
+            </p>
+
+            <pre><span class="lang-label">Setting up IRSA — step by step</span><code"><span class="com"># 1. Enable OIDC provider on EKS cluster (once per cluster)</span>
+eksctl utils associate-iam-oidc-provider \
+  --cluster my-cluster --region us-east-1 --approve
+
+<span class="com"># 2. Create IAM role with trust policy that allows the K8s service account</span>
+eksctl create iamserviceaccount \
+  --cluster   my-cluster \
+  --namespace production \
+  --name      ui-app-sa \
+  --attach-policy-arn arn:aws:iam::aws:policy/SecretsManagerReadWrite \
+  --approve
+
+<span class="com"># 3. Annotate the K8s ServiceAccount (eksctl does this automatically)</span>
+kubectl annotate serviceaccount ui-app-sa \
+  -n production \
+  eks.amazonaws.com/role-arn=arn:aws:iam::123456789:role/ui-app-irsa-role</code></pre>
+
+            <pre><span class="lang-label">k8s/serviceaccount.yaml</span><code"><span class="ky">apiVersion</span>: v1
+<span class="ky">kind</span>:       ServiceAccount
+<span class="ky">metadata</span>:
+  <span class="ky">name</span>:      ui-app-sa
+  <span class="ky">namespace</span>: production
+  <span class="ky">annotations</span>:
+    <span class="com"># This annotation is what links K8s SA to IAM role via OIDC</span>
+    <span class="ky">eks.amazonaws.com/role-arn</span>: <span class="vl">arn:aws:iam::123456789:role/ui-app-irsa-role</span></code></pre>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+         ECR
+    ══════════════════════════════════════════════════════════════ -->
+        <section id="ecr">
+            <h2>ECR — Elastic Container Registry</h2>
+
+            <p>
+                ECR is AWS's managed Docker image registry. It replaces Docker Hub for
+                private images and integrates natively with IAM — no separate registry
+                credentials to manage.
+            </p>
+
+            <h3>How CodeBuild Authenticates to ECR</h3>
+            <p>
+                ECR uses <strong>temporary authentication tokens</strong> (valid 12 hours).
+                You request one using your IAM credentials, then feed it to
+                <code>docker login</code>. The token is never stored permanently.
+            </p>
+
+            <pre><span class="lang-label">buildspec.yml — ECR login (no password ever hardcoded)</span><code"><span class="com"># This command uses the CodeBuild IAM role (auto-injected as env creds)
+# to call the ECR API and get a 12-hour base64-encoded password.
+# That password is piped directly into docker login — never stored.</span>
+aws ecr get-login-password --region us-east-1 | \
+  docker login \
+    --username AWS \
+    --password-stdin \
+    123456789.dkr.ecr.us-east-1.amazonaws.com
+
+<span class="com"># After login, docker push/pull works normally to this registry</span></code></pre>
+
+            <h3>Image Tagging Strategy</h3>
+            <pre><span class="lang-label">buildspec.yml — tagging</span><code"><span class="com"># Short git SHA — ties every image to exact source commit</span>
+IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c1-8)
+
+<span class="com"># Full ECR URI with tag</span>
+IMAGE_URI=123456789.dkr.ecr.us-east-1.amazonaws.com/my-ui-app:$IMAGE_TAG
+
+<span class="com"># Build with two tags: specific SHA + :latest for layer cache reference</span>
+docker build \
+  --cache-from 123456789.dkr.ecr.us-east-1.amazonaws.com/my-ui-app:latest \
+  -t $IMAGE_URI \
+  -t 123456789.dkr.ecr.us-east-1.amazonaws.com/my-ui-app:latest \
+  .
+
+docker push $IMAGE_URI
+docker push 123456789.dkr.ecr.us-east-1.amazonaws.com/my-ui-app:latest
+
+<span class="com"># Write the tag to a file — passed as artifact to the deploy stage</span>
+echo $IMAGE_TAG > image-tag.txt</code></pre>
+
+            <h3>How EKS Nodes Pull from ECR</h3>
+            <p>
+                EKS worker nodes run on EC2 instances with a node IAM role.
+                That role must have <code>ecr:GetAuthorizationToken</code> and
+                <code>ecr:BatchGetImage</code> permissions. The <strong>kubelet</strong>
+                (K8s agent on each node) uses this role to authenticate to ECR and
+                pull images when creating pods. You do not configure this per-pod —
+                it works at the node level automatically.
+            </p>
+
+            <pre><span class="lang-label">Node IAM Role — ECR Pull Policy</span><code">{
+  "Statement": [{
+    "Effect": "Allow",
+    "Action": [
+      "ecr:GetAuthorizationToken",
+      "ecr:BatchCheckLayerAvailability",
+      "ecr:GetDownloadUrlForLayer",
+      "ecr:BatchGetImage"
+    ],
+    "Resource": "*"
+  }]
+}</code></pre>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+         CODEBUILD DEEP DIVE
+    ══════════════════════════════════════════════════════════════ -->
+        <section id="codebuild">
+            <h2>AWS CodeBuild — Deep Dive</h2>
+
+            <p>
+                CodeBuild is a <strong>fully managed CI server</strong>. When triggered,
+                AWS launches a fresh build container (the compute environment),
+                downloads your source from S3 (the CodePipeline artifact), and
+                executes your <code>buildspec.yml</code> phases sequentially.
+                The container is destroyed after the build — every build starts clean.
+            </p>
+
+            <h3>buildspec.yml — Phase Anatomy</h3>
+            <p>
+                Each phase runs shell commands sequentially. If any command returns a
+                non-zero exit code, the phase fails and the pipeline stops.
+            </p>
+
+            <pre><span class="lang-label">buildspec.yml — complete annotated</span><code"><span class="ky">version</span>: <span class="vl">0.2</span>
+
+<span class="com"># ── Environment variables ─────────────────────────────────────
+# CodeBuild injects these before any phase runs.
+# parameter-store: fetches from AWS SSM Parameter Store (safe, audited)
+# secrets-manager: fetches from AWS Secrets Manager (auto-rotated)</span>
+<span class="ky">env</span>:
+  <span class="ky">variables</span>:
+    NODE_ENV: production
+    ECR_REGISTRY: <span class="vl">123456789.dkr.ecr.us-east-1.amazonaws.com</span>
+    ECR_REPO:     <span class="vl">my-ui-app</span>
+  <span class="ky">parameter-store</span>:
+    VITE_API_URL: <span class="vl">/myapp/prod/api-url</span>   <span class="com"># safe non-secret config</span>
+  <span class="ky">secrets-manager</span>:
+    SONAR_TOKEN:  <span class="vl">myapp/sonar-token</span>    <span class="com"># secret — never in env files</span>
+
+<span class="ky">phases</span>:
+
+  <span class="ky">install</span>:
+    <span class="com"># Declares which runtime version to use.
+    # CodeBuild's managed image includes Node LTS versions.</span>
+    <span class="ky">runtime-versions</span>:
+      <span class="ky">nodejs</span>: <span class="vl">20</span>
+    <span class="ky">commands</span>:
+      - echo "=== INSTALL ==="
+      <span class="com"># npm ci is stricter than npm install:
+      # - uses exact versions from package-lock.json
+      # - fails if lock file is out of sync
+      # - deletes node_modules first for clean install</span>
+      - npm ci --prefer-offline
+
+  <span class="ky">pre_build</span>:
+    <span class="ky">commands</span>:
+      - echo "=== PRE-BUILD: quality gates ==="
+      - npm run lint           <span class="com"># ESLint — code quality</span>
+      - npm run type-check     <span class="com"># tsc --noEmit — type safety</span>
+      - npm run test -- --coverage --ci
+        --coverageThreshold='{"global":{"lines":80}}'
+
+      <span class="com"># ECR login — uses IAM role, no password stored anywhere</span>
+      - aws ecr get-login-password --region us-east-1 |
+          docker login --username AWS --password-stdin $ECR_REGISTRY
+
+      <span class="com"># Derive image tag from git commit SHA (first 8 chars)</span>
+      - export IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c1-8)
+      - export IMAGE_URI=$ECR_REGISTRY/$ECR_REPO:$IMAGE_TAG
+
+  <span class="ky">build</span>:
+    <span class="ky">commands</span>:
+      - echo "=== BUILD: docker image ==="
+      <span class="com"># --cache-from pulls the :latest image from ECR before building.
+      # Docker reuses any unchanged layers from :latest — speeds up builds.
+      # The VITE_API_URL build-arg is public config — safe to bake into bundle.</span>
+      - docker build
+          --build-arg VITE_API_URL=$VITE_API_URL
+          --cache-from $ECR_REGISTRY/$ECR_REPO:latest
+          -t $IMAGE_URI
+          -t $ECR_REGISTRY/$ECR_REPO:latest
+          .
+
+  <span class="ky">post_build</span>:
+    <span class="ky">commands</span>:
+      - echo "=== POST-BUILD: scan + push ==="
+
+      <span class="com"># Trigger ECR image scan for OS CVEs before pushing</span>
+      - aws ecr start-image-scan
+          --repository-name $ECR_REPO
+          --image-id imageTag=$IMAGE_TAG
+      - aws ecr wait image-scan-complete
+          --repository-name $ECR_REPO
+          --image-id imageTag=$IMAGE_TAG
+
+      <span class="com"># Push both specific SHA tag and :latest</span>
+      - docker push $IMAGE_URI
+      - docker push $ECR_REGISTRY/$ECR_REPO:latest
+
+      <span class="com"># Write image tag to file — the deploy stage reads this to know which tag to deploy</span>
+      - echo $IMAGE_TAG > image-tag.txt
+      - printf '{"imageUri":"%s"}' $IMAGE_URI > imagedefinitions.json
+
+<span class="com"># Artifacts are zipped and stored in the CodePipeline S3 bucket.
+# The deploy stage downloads this zip and reads image-tag.txt.</span>
+<span class="ky">artifacts</span>:
+  <span class="ky">files</span>:
+    - image-tag.txt
+    - imagedefinitions.json
+    - helm/**           <span class="com"># include helm chart for deploy stage</span>
+
+<span class="com"># Cache node_modules in S3 — restored at the start of next build.
+# Reduces install time from ~60s to ~5s on cache hit.</span>
+<span class="ky">cache</span>:
+  <span class="ky">paths</span>:
+    - node_modules/**/*
+    - /root/.npm/**/*</code></pre>
+        </section>
+
+
+
+
+        <!-- ══════════════════════════════════════════════════════════
+         CODEPIPELINE
+    ══════════════════════════════════════════════════════════════ -->
+        <section id="codepipeline">
+            <h2>AWS CodePipeline — How It Orchestrates Everything</h2>
+
+            <p>
+                CodePipeline is the <strong>conductor</strong>. It does not build or deploy
+                anything itself — it watches a source, sequences stages, passes artifacts
+                between stages (via S3), and triggers CodeBuild projects or Lambda functions
+                at each stage.
+            </p>
+
+            <h3>How Stages Communicate via Artifacts</h3>
+            <p>
+                Every stage writes an <strong>artifact</strong> (a zip file) to an S3 bucket
+                that CodePipeline manages. The next stage downloads that zip and uses its
+                contents. This is how the build stage passes the <code>image-tag.txt</code>
+                file to the deploy stage.
+            </p>
+
+            <div class="pipe-flow">
+                <div class="pf-stage" style="border-color:#6c8ef7">
+                    <div class="pf-icon">📦</div>
+                    <div class="pf-name">Source</div>
+                    <div class="pf-sub">GitHub → S3 artifact</div>
+                </div>
+                <div class="pf-arrow">→</div>
+                <div class="pf-stage" style="border-color:#a78bfa">
+                    <div class="pf-icon">🔨</div>
+                    <div class="pf-name">Build</div>
+                    <div class="pf-sub">CodeBuild → image pushed, image-tag.txt</div>
+                </div>
+                <div class="pf-arrow">→</div>
+                <div class="pf-stage" style="border-color:#34d399">
+                    <div class="pf-icon">🧪</div>
+                    <div class="pf-name">Test</div>
+                    <div class="pf-sub">CodeBuild (E2E) → Playwright on staging URL</div>
+                </div>
+                <div class="pf-arrow">→</div>
+                <div class="pf-stage" style="border-color:#f59e0b">
+                    <div class="pf-icon">🚀</div>
+                    <div class="pf-name">Deploy Staging</div>
+                    <div class="pf-sub">CodeBuild reads image-tag.txt → helm upgrade</div>
+                </div>
+                <div class="pf-arrow">→</div>
+                <div class="pf-stage" style="border-color:#f87171">
+                    <div class="pf-icon">✋</div>
+                    <div class="pf-name">Approve</div>
+                    <div class="pf-sub">Manual gate → SNS notification</div>
+                </div>
+                <div class="pf-arrow">→</div>
+                <div class="pf-stage" style="border-color:#6c8ef7">
+                    <div class="pf-icon">🏭</div>
+                    <div class="pf-name">Deploy Prod</div>
+                    <div class="pf-sub">CodeBuild → helm upgrade prod</div>
+                </div>
+            </div>
+
+            <h3>Pipeline as Code with AWS CDK</h3>
+            <pre><span class="lang-label">cdk/pipeline.ts — full pipeline definition</span><code"><span class="kw">import</span> * <span class="kw">as</span> cdk      <span class="kw">from</span> <span class="str">'aws-cdk-lib'</span>;
+<span class="kw">import</span> * <span class="kw">as</span> cp       <span class="kw">from</span> <span class="str">'aws-cdk-lib/aws-codepipeline'</span>;
+<span class="kw">import</span> * <span class="kw">as</span> cpa      <span class="kw">from</span> <span class="str">'aws-cdk-lib/aws-codepipeline-actions'</span>;
+<span class="kw">import</span> * <span class="kw">as</span> cb       <span class="kw">from</span> <span class="str">'aws-cdk-lib/aws-codebuild'</span>;
+
+<span class="kw">const</span> sourceOutput = <span class="kw">new</span> cp.<span class="fn">Artifact</span>(<span class="str">'SourceArtifact'</span>);
+<span class="kw">const</span> buildOutput  = <span class="kw">new</span> cp.<span class="fn">Artifact</span>(<span class="str">'BuildArtifact'</span>);
+
+<span class="kw">const</span> pipeline = <span class="kw">new</span> cp.<span class="fn">Pipeline</span>(<span class="kw">this</span>, <span class="str">'UIPipeline'</span>, {
+  pipelineName: <span class="str">'my-ui-app'</span>,
+  stages: [
+
+    <span class="com">// Stage 1: Source — watches GitHub 'main' branch via CodeStar connection</span>
+    {
+      stageName: <span class="str">'Source'</span>,
+      actions: [<span class="kw">new</span> cpa.<span class="fn">CodeStarConnectionsSourceAction</span>({
+        actionName:     <span class="str">'GitHub_Source'</span>,
+        owner:          <span class="str">'my-org'</span>,
+        repo:           <span class="str">'my-ui-app'</span>,
+        branch:         <span class="str">'main'</span>,
+        connectionArn:  <span class="str">'arn:aws:codestar-connections:...'</span>,
+        output:         sourceOutput,
+      })],
+    },
+
+    <span class="com">// Stage 2: Build — CodeBuild reads sourceOutput, writes buildOutput (image-tag.txt etc.)</span>
+    {
+      stageName: <span class="str">'Build'</span>,
+      actions: [<span class="kw">new</span> cpa.<span class="fn">CodeBuildAction</span>({
+        actionName:   <span class="str">'Build_Test_Push'</span>,
+        project:      buildProject,    <span class="com">// CodeBuild project with privileged mode (Docker)</span>
+        input:        sourceOutput,    <span class="com">// downloaded as source in buildspec</span>
+        outputs:      [buildOutput],   <span class="com">// artifacts.files from buildspec → zipped → S3</span>
+      })],
+    },
+
+    <span class="com">// Stage 3: Deploy Staging — reads buildOutput to get image-tag.txt</span>
+    {
+      stageName: <span class="str">'DeployStaging'</span>,
+      actions: [<span class="kw">new</span> cpa.<span class="fn">CodeBuildAction</span>({
+        actionName: <span class="str">'Helm_Staging'</span>,
+        project:    deployProject,
+        input:      buildOutput,   <span class="com">// contains image-tag.txt and helm/ dir</span>
+        environmentVariables: {
+          ENVIRONMENT: { value: <span class="str">'staging'</span> },
+          CLUSTER:     { value: <span class="str">'my-cluster-staging'</span> },
+        },
+      })],
+    },
+
+    <span class="com">// Stage 4: Manual approval — pauses pipeline, notifies SNS topic</span>
+    {
+      stageName: <span class="str">'Approve'</span>,
+      actions: [<span class="kw">new</span> cpa.<span class="fn">ManualApprovalAction</span>({
+        actionName:       <span class="str">'Approve_Prod'</span>,
+        notificationTopic: snsTopic,
+        additionalInformation: <span class="str">'Verify staging at https://staging.example.com'</span>,
+      })],
+    },
+
+    <span class="com">// Stage 5: Deploy Prod — same as staging, different values file</span>
+    {
+      stageName: <span class="str">'DeployProd'</span>,
+      actions: [<span class="kw">new</span> cpa.<span class="fn">CodeBuildAction</span>({
+        actionName: <span class="str">'Helm_Prod'</span>,
+        project:    deployProject,
+        input:      buildOutput,
+        environmentVariables: {
+          ENVIRONMENT: { value: <span class="str">'prod'</span> },
+          CLUSTER:     { value: <span class="str">'my-cluster-prod'</span> },
+        },
+      })],
+    },
+  ],
+});</code></pre>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+         CLOUDFRONT + S3
+    ══════════════════════════════════════════════════════════════ -->
+        <section id="cloudfront">
+            <h2>CloudFront + S3 — CDN Delivery</h2>
+
+            <p>
+                CloudFront is a <strong>CDN (Content Delivery Network)</strong> with
+                400+ edge locations worldwide. When a user in Tokyo requests your
+                app, CloudFront serves it from its Tokyo edge — not your us-east-1
+                origin. This reduces latency dramatically.
+            </p>
+
+            <h3>How CloudFront Caching Works</h3>
+            <p>
+                CloudFront checks its edge cache first. On cache miss, it forwards
+                the request to the <strong>origin</strong> (S3 bucket or ALB).
+                The origin's <code>Cache-Control</code> response header tells
+                CloudFront how long to cache the response at the edge.
+                The next user in the same region gets the cached copy instantly.
+            </p>
+
+            <div class="diagram-wrap">
+                <figure>
+                    <svg viewBox="0 0 700 160" xmlns="http://www.w3.org/2000/svg" width="100%" height="160">
+                        <defs>
+                            <marker id="cf-a" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L7,3 z" fill="#6c8ef7" />
+                            </marker>
+                            <marker id="cf-b" markerWidth="7" markerHeight="7" refX="5" refY="3" orient="auto">
+                                <path d="M0,0 L0,6 L7,3 z" fill="#34d399" />
+                            </marker>
+                        </defs>
+
+                        <!-- User -->
+                        <rect x="10" y="56" width="80" height="48" rx="8" fill="#1a1d27" stroke="#6c8ef7"
+                            stroke-width="1.5" />
+                        <text x="50" y="76" text-anchor="middle" fill="#6c8ef7" font-size="20">👤</text>
+                        <text x="50" y="96" text-anchor="middle" fill="#8892b0" font-size="9">Tokyo user</text>
+
+                        <line x1="90" y1="80" x2="118" y2="80" stroke="#6c8ef7" stroke-width="1.5"
+                            marker-end="url(#cf-a)" />
+                        <text x="104" y="74" text-anchor="middle" fill="#6c8ef7" font-size="8">GET /</text>
+
+                        <!-- CF Edge -->
+                        <rect x="119" y="40" width="120" height="80" rx="8" fill="#1a1d27" stroke="#f59e0b"
+                            stroke-width="2" />
+                        <text x="179" y="65" text-anchor="middle" fill="#f59e0b" font-size="11"
+                            font-weight="700">CloudFront</text>
+                        <text x="179" y="80" text-anchor="middle" fill="#f59e0b" font-size="10" font-weight="700">Tokyo
+                            Edge</text>
+                        <text x="179" y="95" text-anchor="middle" fill="#8892b0" font-size="9">cache hit?</text>
+                        <text x="179" y="107" text-anchor="middle" fill="#34d399" font-size="9">→ instant
+                            response</text>
+                        <text x="179" y="118" text-anchor="middle" fill="#f87171" font-size="9">miss → fetch
+                            origin</text>
+
+                        <!-- Cache Hit path -->
+                        <line x1="119" y1="72" x2="91" y2="72" stroke="#34d399" stroke-width="1.5"
+                            marker-end="url(#cf-b)" />
+                        <text x="105" y="66" text-anchor="middle" fill="#34d399" font-size="8">cached!</text>
+
+                        <!-- Miss path to origin -->
+                        <line x1="239" y1="80" x2="279" y2="80" stroke="#f87171" stroke-width="1.5"
+                            marker-end="url(#cf-a)" />
+                        <text x="259" y="74" text-anchor="middle" fill="#f87171" font-size="8">cache miss</text>
+
+                        <!-- S3 Origin -->
+                        <rect x="280" y="56" width="110" height="48" rx="8" fill="#1a1d27" stroke="#6c8ef7"
+                            stroke-width="1.5" />
+                        <text x="335" y="76" text-anchor="middle" fill="#6c8ef7" font-size="11" font-weight="700">S3
+                            Origin</text>
+                        <text x="335" y="91" text-anchor="middle" fill="#8892b0" font-size="9">us-east-1</text>
+                        <text x="335" y="104" text-anchor="middle" fill="#8892b0" font-size="9">returns file +
+                            headers</text>
+
+                        <!-- S3 → CF -->
+                        <line x1="280" y1="88" x2="239" y2="88" stroke="#34d399" stroke-width="1.5"
+                            marker-end="url(#cf-b)" />
+                        <text x="260" y="104" text-anchor="middle" fill="#34d399" font-size="8">file +
+                            Cache-Control</text>
+                        <text x="260" y="115" text-anchor="middle" fill="#8892b0" font-size="8">CF caches + forwards to
+                            user</text>
+
+                        <!-- Cache-Control explanation -->
+                        <rect x="420" y="30" width="260" height="100" rx="8" fill="#22263a" stroke="#2e3350" />
+                        <text x="430" y="50" fill="#8892b0" font-size="10" font-weight="700">Cache-Control
+                            effects:</text>
+                        <text x="430" y="65" fill="#34d399" font-size="9">index.html: no-cache → CF always
+                            revalidates</text>
+                        <text x="430" y="80" fill="#6c8ef7" font-size="9">app-abc123.js: immutable → CF caches
+                            1yr</text>
+                        <text x="430" y="95" fill="#6c8ef7" font-size="9">hero-def456.avif: immutable → 1yr</text>
+                        <text x="430" y="110" fill="#f59e0b" font-size="9">Only invalidate /index.html on deploy</text>
+                        <text x="430" y="125" fill="#8892b0" font-size="9">Assets auto-busted by new hash
+                            filename</text>
+                    </svg>
+                    <figcaption>Fig 4 — CloudFront cache hit/miss flow and caching strategy</figcaption>
+                </figure>
+            </div>
+
+            <h3>CodeBuild Deploy Step — S3 + CloudFront Invalidation</h3>
+            <pre><span class="lang-label">buildspec-deploy-s3.yml</span><code"><span class="ky">post_build</span>:
+  <span class="ky">commands</span>:
+    <span class="com"># Upload hashed assets first — they can have long cache headers
+    # Exclude index.html from this sync (handled separately below)</span>
+    - aws s3 sync dist/ s3://$BUCKET_NAME/
+        --cache-control "max-age=31536000,immutable"
+        --exclude "index.html"
+        --delete          <span class="com"># remove assets that no longer exist in dist/</span>
+
+    <span class="com"># Upload index.html with strict no-cache
+    # This is the last step — ensures users get the new hashes only
+    # after all new assets are already uploaded</span>
+    - aws s3 cp dist/index.html s3://$BUCKET_NAME/index.html
+        --cache-control "no-cache,no-store,must-revalidate"
+        --content-type "text/html; charset=utf-8"
+
+    <span class="com"># Invalidate only index.html — NOT /* (wildcard costs per path)
+    # Assets are cache-busted by new hashes — no invalidation needed</span>
+    - aws cloudfront create-invalidation
+        --distribution-id $CF_DISTRIBUTION_ID
+        --paths "/index.html"</code></pre>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+         K8s CONCEPTS
+    ══════════════════════════════════════════════════════════════ -->
+        <section id="k8s-concepts">
+            <h2>Kubernetes — Concepts from the Ground Up</h2>
+
+            <p>
+                Kubernetes is a <strong>container orchestration platform</strong>.
+                You tell it "I want 3 copies of this Docker image running, each with
+                these environment variables and resource limits." K8s handles
+                scheduling them onto nodes, restarting crashed containers,
+                and scaling them up when CPU is high.
+            </p>
+
+            <h3>Core Objects You Must Know</h3>
+            <div class="concept-grid">
+                <div class="concept-card">
+                    <div class="cc-icon">🫛</div>
+                    <div class="cc-title">Pod</div>
+                    <div class="cc-desc">The smallest deployable unit. Contains one or more containers that share
+                        network and storage. You rarely create pods directly — Deployments manage them.</div>
+                </div>
+                <div class="concept-card">
+                    <div class="cc-icon">📋</div>
+                    <div class="cc-title">Deployment</div>
+                    <div class="cc-desc">Manages a set of identical pods. Declares desired state (replicas, image,
+                        strategy). K8s continuously reconciles actual state to match desired state.</div>
+                </div>
+                <div class="concept-card">
+                    <div class="cc-icon">🔌</div>
+                    <div class="cc-title">Service</div>
+                    <div class="cc-desc">A stable network endpoint for a set of pods. Pods come and go (restarts,
+                        scaling) but the Service IP stays constant. Other services talk to it via the Service name.
+                    </div>
+                </div>
+                <div class="concept-card">
+                    <div class="cc-icon">🚪</div>
+                    <div class="cc-title">Ingress</div>
+                    <div class="cc-desc">HTTP routing rules. "Route all traffic to app.example.com → Service
+                        my-ui-app-svc." On EKS, the AWS Load Balancer Controller reads Ingress objects and creates an
+                        ALB.</div>
+                </div>
+                <div class="concept-card">
+                    <div class="cc-icon">🗺️</div>
+                    <div class="cc-title">ConfigMap</div>
+                    <div class="cc-desc">Key-value store for non-secret config. Mounted into pods as environment
+                        variables or files. Change a ConfigMap and redeploy to update config without rebuilding the
+                        image.</div>
+                </div>
+                <div class="concept-card">
+                    <div class="cc-icon">🔐</div>
+                    <div class="cc-title">Secret</div>
+                    <div class="cc-desc">Like ConfigMap but for sensitive data (base64-encoded, not encrypted by
+                        default). For real security, use Secrets Store CSI Driver + AWS Secrets Manager.</div>
+                </div>
+                <div class="concept-card">
+                    <div class="cc-icon">📊</div>
+                    <div class="cc-title">HPA</div>
+                    <div class="cc-desc">Horizontal Pod Autoscaler. Watches CPU/memory metrics and automatically scales
+                        replicas up (traffic spike) or down (quiet hours). Works with the Deployment.</div>
+                </div>
+                <div class="concept-card">
+                    <div class="cc-icon">🛡️</div>
+                    <div class="cc-title">PodDisruptionBudget</div>
+                    <div class="cc-desc">Guarantees minimum availability during voluntary disruptions (rolling updates,
+                        node drains). Prevents K8s from killing all pods simultaneously.</div>
+                </div>
+            </div>
+
+            <h3>How Rolling Updates Work (Zero Downtime)</h3>
+            <p>
+                When you update a Deployment (new image tag), K8s performs a
+                <strong>rolling update</strong>: it creates a new pod, waits for its
+                readiness probe to pass, then terminates an old pod. It repeats until
+                all pods run the new version. With <code>maxUnavailable: 0</code>, old
+                pods are never terminated before new ones are ready.
+            </p>
+
+            <pre><span class="lang-label">k8s/deployment.yaml — annotated</span><code"><span class="ky">apiVersion</span>: apps/v1
+<span class="ky">kind</span>:       Deployment
+<span class="ky">metadata</span>:
+  <span class="ky">name</span>:      my-ui-app
+  <span class="ky">namespace</span>: production
+<span class="ky">spec</span>:
+  <span class="ky">replicas</span>: <span class="nm">3</span>   <span class="com"># K8s always maintains exactly 3 pods</span>
+
+  <span class="ky">strategy</span>:
+    <span class="ky">type</span>: RollingUpdate
+    <span class="ky">rollingUpdate</span>:
+      <span class="ky">maxSurge</span>:       <span class="nm">1</span>   <span class="com"># create 1 extra pod before killing any → briefly 4 pods</span>
+      <span class="ky">maxUnavailable</span>: <span class="nm">0</span>   <span class="com"># never have fewer than 3 ready pods</span>
+
+  <span class="ky">selector</span>:
+    <span class="ky">matchLabels</span>:
+      <span class="ky">app</span>: my-ui-app   <span class="com"># Service uses this same label to find pods</span>
+
+  <span class="ky">template</span>:
+    <span class="ky">metadata</span>:
+      <span class="ky">labels</span>:
+        <span class="ky">app</span>: my-ui-app
+    <span class="ky">spec</span>:
+
+      <span class="ky">serviceAccountName</span>: ui-app-sa   <span class="com"># links to IRSA role for Secrets Manager access</span>
+
+      <span class="ky">containers</span>:
+        - <span class="ky">name</span>:  ui
+          <span class="ky">image</span>: 123456789.dkr.ecr.us-east-1.amazonaws.com/my-ui-app:abc12345
+
+          <span class="ky">ports</span>:
+            - <span class="ky">containerPort</span>: <span class="nm">8080</span>   <span class="com"># must match nginx EXPOSE port</span>
+
+          <span class="ky">resources</span>:
+            <span class="ky">requests</span>:              <span class="com"># scheduler uses these to find a node with enough capacity</span>
+              <span class="ky">cpu</span>:    <span class="vl">"100m"</span>        <span class="com"># 100 millicores = 0.1 vCPU</span>
+              <span class="ky">memory</span>: <span class="vl">"128Mi"</span>
+            <span class="ky">limits</span>:                <span class="com"># container is throttled/killed if it exceeds these</span>
+              <span class="ky">cpu</span>:    <span class="vl">"500m"</span>
+              <span class="ky">memory</span>: <span class="vl">"256Mi"</span>
+
+          <span class="com"># livenessProbe: if this fails 3 times, K8s RESTARTS the container</span>
+          <span class="ky">livenessProbe</span>:
+            <span class="ky">httpGet</span>:
+              <span class="ky">path</span>: /healthz
+              <span class="ky">port</span>: <span class="nm">8080</span>
+            <span class="ky">initialDelaySeconds</span>: <span class="nm">10</span>   <span class="com"># wait for nginx to start</span>
+            <span class="ky">periodSeconds</span>:       <span class="nm">10</span>
+
+          <span class="com"># readinessProbe: if this fails, pod is REMOVED from Service (no traffic sent)
+          # This is what makes rolling updates safe — new pod only gets traffic when ready</span>
+          <span class="ky">readinessProbe</span>:
+            <span class="ky">httpGet</span>:
+              <span class="ky">path</span>: /healthz
+              <span class="ky">port</span>: <span class="nm">8080</span>
+            <span class="ky">initialDelaySeconds</span>: <span class="nm">3</span>
+            <span class="ky">periodSeconds</span>:       <span class="nm">5</span>
+
+          <span class="ky">securityContext</span>:
+            <span class="ky">runAsNonRoot</span>:             <span class="kw">true</span>    <span class="com"># reject if image user is root</span>
+            <span class="ky">runAsUser</span>:                <span class="nm">101</span>     <span class="com"># nginx user in alpine</span>
+            <span class="ky">readOnlyRootFilesystem</span>:   <span class="kw">true</span>    <span class="com"># container cannot write to its own filesystem</span>
+            <span class="ky">allowPrivilegeEscalation</span>: <span class="kw">false</span>   <span class="com"># cannot gain more privileges than parent process</span></code></pre>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+         EKS
+    ══════════════════════════════════════════════════════════════ -->
+        <section id="eks">
+            <h2>AWS EKS — Managed Kubernetes</h2>
+
+            <p>
+                EKS runs the Kubernetes <strong>control plane</strong> (API server, scheduler,
+                etcd) for you across multiple AZs. You only manage <strong>worker nodes</strong>
+                (EC2 instances or Fargate) where your pods actually run.
+                The big advantage: no patching the control plane, automatic version upgrades.
+            </p>
+
+            <h3>How CodeBuild Authenticates to EKS</h3>
+            <p>
+                EKS uses AWS IAM for authentication. When CodeBuild runs
+                <code>aws eks update-kubeconfig</code>, it calls the EKS API using its
+                IAM role, which returns a kubeconfig file. This kubeconfig contains a
+                command (<code>aws eks get-token</code>) that generates a temporary
+                bearer token for kubectl/helm to use.
+            </p>
+            <p>
+                But EKS also has a Kubernetes-level authorization layer. The IAM role must
+                be listed in the <strong>aws-auth ConfigMap</strong> for the K8s API to
+                grant it access.
+            </p>
+
+            <pre><span class="lang-label">Setting up CodeBuild → EKS access</span><code"><span class="com"># Step 1: Create EKS cluster</span>
+eksctl create cluster \
+  --name my-cluster-prod \
+  --region us-east-1 \
+  --nodegroup-name standard-workers \
+  --node-type t3.medium \
+  --nodes 3 --nodes-min 2 --nodes-max 10 \
+  --managed
+
+<span class="com"># Step 2: Add CodeBuild service role to aws-auth ConfigMap
+# This is what allows the CodeBuild role to call the K8s API</span>
+eksctl create iamidentitymapping \
+  --cluster   my-cluster-prod \
+  --region    us-east-1 \
+  --arn       arn:aws:iam::123456789:role/CodeBuildServiceRole \
+  --group     system:masters \    <span class="com"># full cluster admin (restrict in production)</span>
+  --username  codebuild-deployer
+
+<span class="com"># Step 3: CodeBuild uses this to update its local kubeconfig</span>
+aws eks update-kubeconfig \
+  --name   my-cluster-prod \
+  --region us-east-1
+<span class="com"># This writes ~/.kube/config — helm and kubectl use it automatically</span></code></pre>
+
+            <pre><span class="lang-label">aws-auth ConfigMap (what eksctl creates)</span><code"><span class="ky">apiVersion</span>: v1
+<span class="ky">kind</span>: ConfigMap
+<span class="ky">metadata</span>:
+  <span class="ky">name</span>:      aws-auth
+  <span class="ky">namespace</span>: kube-system
+<span class="ky">data</span>:
+  <span class="ky">mapRoles</span>: |
+    <span class="com"># EKS node group role — allows nodes to join the cluster</span>
+    - rolearn: arn:aws:iam::123456789:role/NodeGroupRole
+      username: system:node:{{EC2PrivateDNSName}}
+      groups:
+        - system:bootstrappers
+        - system:nodes
+
+    <span class="com"># CodeBuild deploy role — allows CI to run kubectl/helm</span>
+    - rolearn:  arn:aws:iam::123456789:role/CodeBuildServiceRole
+      username: codebuild-deployer
+      groups:
+        - system:masters   <span class="com"># in prod, use a restricted ClusterRole instead</span></code></pre>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+         K8s INGRESS + ALB
+    ══════════════════════════════════════════════════════════════ -->
+        <section id="k8s-ingress">
+            <h2>Ingress + AWS Load Balancer Controller</h2>
+
+            <p>
+                A K8s <strong>Service</strong> of type <code>ClusterIP</code> is only
+                reachable inside the cluster. To expose it to the internet, you need an
+                <strong>Ingress</strong> object. On EKS, the
+                <strong>AWS Load Balancer Controller</strong> (a K8s operator — a program
+                running as a pod) watches for Ingress objects and automatically creates
+                and configures an ALB to match.
+            </p>
+
+            <pre><span class="lang-label">k8s/service.yaml + ingress.yaml — annotated</span><code"><span class="com">---  Service: stable internal endpoint for the pods ---</span>
+<span class="ky">apiVersion</span>: v1
+<span class="ky">kind</span>: Service
+<span class="ky">metadata</span>:
+  <span class="ky">name</span>:      my-ui-app-svc
+  <span class="ky">namespace</span>: production
+<span class="ky">spec</span>:
+  <span class="ky">type</span>: ClusterIP   <span class="com"># internal only. ALB connects to pods directly (target-type: ip)</span>
+  <span class="ky">selector</span>:
+    <span class="ky">app</span>: my-ui-app   <span class="com"># selects pods with this label — same label as Deployment</span>
+  <span class="ky">ports</span>:
+    - <span class="ky">port</span>: <span class="nm">80</span>           <span class="com"># service listens on 80</span>
+      <span class="ky">targetPort</span>: <span class="nm">8080</span>  <span class="com"># forwards to container port 8080 (nginx)</span>
+
+<span class="com">---  Ingress: AWS LBC reads this and creates an ALB ---</span>
+<span class="ky">apiVersion</span>: networking.k8s.io/v1
+<span class="ky">kind</span>: Ingress
+<span class="ky">metadata</span>:
+  <span class="ky">name</span>:      my-ui-app-ingress
+  <span class="ky">namespace</span>: production
+  <span class="ky">annotations</span>:
+    <span class="com"># Tell LBC to create an internet-facing ALB (vs. internal)</span>
+    <span class="ky">kubernetes.io/ingress.class</span>:             alb
+    <span class="ky">alb.ingress.kubernetes.io/scheme</span>:        internet-facing
+    <span class="com"># Connect directly to pod IPs — better performance than node ports</span>
+    <span class="ky">alb.ingress.kubernetes.io/target-type</span>:   ip
+    <span class="com"># ACM certificate ARN for TLS — LBC provisions HTTPS listener automatically</span>
+    <span class="ky">alb.ingress.kubernetes.io/certificate-arn</span>: arn:aws:acm:us-east-1:123:cert/abc
+    <span class="com"># Use TLS 1.3 only policy</span>
+    <span class="ky">alb.ingress.kubernetes.io/ssl-policy</span>:    ELBSecurityPolicy-TLS13-1-2-2021-06
+    <span class="com"># Create both HTTP (redirect) and HTTPS listeners</span>
+    <span class="ky">alb.ingress.kubernetes.io/listen-ports</span>:  '[{"HTTPS":443},{"HTTP":80}]'
+    <span class="com"># Redirect HTTP → HTTPS</span>
+    <span class="ky">alb.ingress.kubernetes.io/actions.ssl-redirect</span>: >
+      {"Type":"redirect","RedirectConfig":{"Protocol":"HTTPS","StatusCode":"HTTP_301"}}
+<span class="ky">spec</span>:
+  <span class="ky">rules</span>:
+    - <span class="ky">host</span>: app.example.com
+      <span class="ky">http</span>:
+        <span class="ky">paths</span>:
+          - <span class="ky">path</span>: /
+            <span class="ky">pathType</span>: Prefix
+            <span class="ky">backend</span>:
+              <span class="ky">service</span>:
+                <span class="ky">name</span>: my-ui-app-svc
+                <span class="ky">port</span>:
+                  <span class="ky">number</span>: <span class="nm">80</span></code></pre>
+
+            <div class="connect-box">
+                <div class="cb-title">⟶ The full connection: User → CloudFront → ALB → K8s pods</div>
+                <p><strong>1.</strong> User requests <code>https://app.example.com/dashboard</code></p>
+                <p><strong>2.</strong> DNS points to CloudFront distribution. CloudFront checks cache — miss → forwards
+                    to ALB origin.</p>
+                <p><strong>3.</strong> ALB receives request. Checks rules → routes to target group (pods with label
+                    <code>app=my-ui-app</code>).
+                </p>
+                <p><strong>4.</strong> ALB picks a pod IP (registered by AWS LBC), sends HTTP to port 8080.</p>
+                <p><strong>5.</strong> nginx receives the request. <code>try_files</code> falls back to
+                    <code>index.html</code>. Response flows back.
+                </p>
+                <p><strong>6.</strong> CloudFront caches the response (if Cache-Control allows). Returns to user.</p>
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+         HELM CONCEPTS
+    ══════════════════════════════════════════════════════════════ -->
+        <section id="helm-concepts">
+            <h2>Helm — What It Is and Why You Need It</h2>
+
+            <p>
+                Without Helm, you maintain separate YAML files for staging and production.
+                When you add a feature (new env var, new resource limit), you must update
+                both files. With Helm, you have <strong>one set of templates</strong>
+                with placeholder variables (<code>{{ .Values.image.tag }}</code>),
+                and separate values files per environment.
+            </p>
+
+            <h3>Helm Architecture</h3>
+            <div class="compare">
+                <div class="compare-card">
+                    <h4>Without Helm</h4>
+                    <ul>
+                        <li><code>staging/deployment.yaml</code></li>
+                        <li><code>staging/service.yaml</code></li>
+                        <li><code>staging/ingress.yaml</code></li>
+                        <li><code>prod/deployment.yaml</code> (duplicate)</li>
+                        <li><code>prod/service.yaml</code> (duplicate)</li>
+                        <li>Every change must be made in all copies</li>
+                    </ul>
+                </div>
+                <div class="compare-card">
+                    <h4>With Helm</h4>
+                    <ul>
+                        <li><code>templates/deployment.yaml</code> (one template)</li>
+                        <li><code>templates/service.yaml</code></li>
+                        <li><code>templates/ingress.yaml</code></li>
+                        <li><code>values.yaml</code> (defaults)</li>
+                        <li><code>values-staging.yaml</code> (overrides)</li>
+                        <li><code>values-prod.yaml</code> (overrides)</li>
+                    </ul>
+                </div>
+            </div>
+
+            <h3>Chart Directory Structure Explained</h3>
+            <pre><span class="lang-label">helm/my-ui-app/  — chart structure</span><code">my-ui-app/
+├── Chart.yaml            <span class="com"># Chart metadata: name, version, description</span>
+├── values.yaml           <span class="com"># DEFAULT values — used when no override is specified</span>
+├── values-staging.yaml   <span class="com"># Staging overrides — fewer replicas, staging domain</span>
+├── values-prod.yaml      <span class="com"># Production overrides — more replicas, prod domain</span>
+└── templates/
+    ├── _helpers.tpl       <span class="com"># Named template partials (like functions) shared across templates</span>
+    ├── deployment.yaml    <span class="com"># Uses {{ .Values.image.tag }}, {{ .Values.replicaCount }}, etc.</span>
+    ├── service.yaml
+    ├── ingress.yaml
+    ├── hpa.yaml
+    ├── configmap.yaml     <span class="com"># Non-secret env vars passed to pods</span>
+    └── pdb.yaml           <span class="com"># PodDisruptionBudget — min pods available during updates</span></code></pre>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+         HELM CHART DEEP DIVE
+    ══════════════════════════════════════════════════════════════ -->
+        <section id="helm-chart">
+            <h2>Helm Chart — Deep Dive</h2>
+
+            <pre><span class="lang-label">Chart.yaml</span><code"><span class="ky">apiVersion</span>: v2
+<span class="ky">name</span>:        my-ui-app
+<span class="ky">description</span>: React SPA on Nginx, deployed to Kubernetes
+<span class="ky">type</span>:        application    <span class="com"># "application" or "library" (shared helpers)</span>
+<span class="ky">version</span>:     1.3.0          <span class="com"># chart version — bump when you change templates/structure</span>
+<span class="ky">appVersion</span>:  <span class="vl">"3.1.0"</span>         <span class="com"># app version — informational, shown in helm list</span></code></pre>
+
+            <pre><span class="lang-label">values.yaml — default values with inline docs</span><code"><span class="ky">image</span>:
+  <span class="ky">repository</span>: 123456789.dkr.ecr.us-east-1.amazonaws.com/my-ui-app
+  <span class="ky">tag</span>:        latest   <span class="com"># overridden by CI with --set image.tag=$IMAGE_TAG</span>
+  <span class="ky">pullPolicy</span>: Always   <span class="com"># Always pull even if tag already exists on node (important for :latest)</span>
+
+<span class="ky">replicaCount</span>: <span class="nm">2</span>   <span class="com"># dev/staging default. Overridden in values-prod.yaml</span>
+
+<span class="ky">resources</span>:
+  <span class="ky">requests</span>:
+    <span class="ky">cpu</span>:    <span class="vl">"100m"</span>
+    <span class="ky">memory</span>: <span class="vl">"128Mi"</span>
+  <span class="ky">limits</span>:
+    <span class="ky">cpu</span>:    <span class="vl">"500m"</span>
+    <span class="ky">memory</span>: <span class="vl">"256Mi"</span>
+
+<span class="ky">ingress</span>:
+  <span class="ky">enabled</span>:        <span class="kw">true</span>
+  <span class="ky">host</span>:           app.example.com
+  <span class="ky">certificateArn</span>: arn:aws:acm:us-east-1:123456789:certificate/abc
+
+<span class="ky">hpa</span>:
+  <span class="ky">enabled</span>:         <span class="kw">true</span>
+  <span class="ky">minReplicas</span>:     <span class="nm">2</span>
+  <span class="ky">maxReplicas</span>:     <span class="nm">10</span>
+  <span class="ky">targetCPU</span>:       <span class="nm">70</span>   <span class="com"># scale out when pods average 70% CPU</span>
+
+<span class="ky">env</span>:
+  <span class="ky">VITE_API_URL</span>: <span class="vl">"https://api.example.com"</span></code></pre>
+
+            <pre><span class="lang-label">values-prod.yaml — production overrides only</span><code"><span class="ky">replicaCount</span>: <span class="nm">5</span>   <span class="com"># more capacity for prod traffic</span>
+
+<span class="ky">image</span>:
+  <span class="ky">tag</span>: PLACEHOLDER   <span class="com"># always overridden by --set image.tag=$IMAGE_TAG in CI</span>
+
+<span class="ky">resources</span>:
+  <span class="ky">requests</span>:
+    <span class="ky">cpu</span>:    <span class="vl">"200m"</span>   <span class="com"># higher baseline for prod traffic</span>
+    <span class="ky">memory</span>: <span class="vl">"256Mi"</span>
+
+<span class="ky">hpa</span>:
+  <span class="ky">minReplicas</span>: <span class="nm">5</span>
+  <span class="ky">maxReplicas</span>: <span class="nm">50</span></code></pre>
+
+            <pre><span class="lang-label">templates/deployment.yaml — Go template syntax</span><code"><span class="ky">apiVersion</span>: apps/v1
+<span class="ky">kind</span>: Deployment
+<span class="ky">metadata</span>:
+  <span class="com"># _helpers.tpl defines "my-ui-app.fullname" as a named template:
+  # {{- define "my-ui-app.fullname" -}} {{ .Release.Name }}-{{ .Chart.Name }} {{- end }}</span>
+  <span class="ky">name</span>: {{ include "my-ui-app.fullname" . }}
+  <span class="ky">namespace</span>: {{ .Release.Namespace }}
+  <span class="ky">labels</span>:
+    {{- include "my-ui-app.labels" . | nindent 4 }}
+    <span class="com"># nindent adds 4 spaces of indentation to multi-line output</span>
+<span class="ky">spec</span>:
+  <span class="ky">replicas</span>: {{ .Values.replicaCount }}   <span class="com"># reads from values.yaml / override file</span>
+  <span class="ky">template</span>:
+    <span class="ky">metadata</span>:
+      <span class="ky">labels</span>:
+        {{- include "my-ui-app.selectorLabels" . | nindent 8 }}
+      <span class="ky">annotations</span>:
+        <span class="com"># This checksum forces a pod restart when the configmap changes.
+        # Without this, pods would keep running with stale config.</span>
+        <span class="ky">checksum/config</span>: {{ include (print $.Template.BasePath "/configmap.yaml") . | sha256sum }}
+    <span class="ky">spec</span>:
+      <span class="ky">containers</span>:
+        - <span class="ky">name</span>: {{ .Chart.Name }}
+          <span class="ky">image</span>: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          <span class="ky">imagePullPolicy</span>: {{ .Values.image.pullPolicy }}
+          <span class="ky">resources</span>:
+            {{- toYaml .Values.resources | nindent 12 }}
+            <span class="com"># toYaml converts the Go struct to YAML string; nindent indents it</span>
+          <span class="ky">env</span>:
+            {{- range $k, $v := .Values.env }}
+            - <span class="ky">name</span>:  {{ $k }}
+              <span class="ky">value</span>: {{ $v | quote }}   <span class="com"># quote wraps in "" to handle special chars</span>
+            {{- end }}</code></pre>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+         HELM DEPLOY & ROLLBACK
+    ══════════════════════════════════════════════════════════════ -->
+        <section id="helm-deploy">
+            <h2>Helm Deploy, Upgrade &amp; Rollback</h2>
+
+            <h3>The helm upgrade --install Command Explained</h3>
+            <p>
+                <code>helm upgrade --install</code> is the idempotent deploy command.
+                If the release does not exist, it installs it. If it does, it upgrades it.
+                You always use this in CI — never separate install and upgrade commands.
+            </p>
+
+            <pre><span class="lang-label">buildspec-deploy.yml — Helm deploy step</span><code"><span class="ky">build</span>:
+  <span class="ky">commands</span>:
+    <span class="com"># Update kubeconfig to point kubectl/helm at the right EKS cluster
+    # Uses CodeBuild IAM role (auto-injected) — no stored credentials</span>
+    - aws eks update-kubeconfig
+        --name   $CLUSTER_NAME
+        --region us-east-1
+
+    <span class="com"># Read the image tag that the Build stage wrote to image-tag.txt
+    # CodePipeline passed it as an artifact to this stage</span>
+    - IMAGE_TAG=$(cat image-tag.txt)
+
+    <span class="com"># Lint the chart first — catches YAML errors before touching the cluster</span>
+    - helm lint helm/my-ui-app
+
+    <span class="com"># Dry-run: render templates + validate against K8s API (--dry-run=server)
+    # Does NOT apply anything. Useful for debugging template rendering.</span>
+    - helm upgrade --dry-run --install my-ui-app helm/my-ui-app
+        --namespace   $NAMESPACE
+        --create-namespace
+        -f helm/my-ui-app/values.yaml
+        -f helm/my-ui-app/values-$ENVIRONMENT.yaml
+        --set image.tag=$IMAGE_TAG
+
+    <span class="com"># Actual deploy:
+    # --atomic:   if any pod fails to start, auto-rollback to previous release
+    # --timeout:  maximum wait time for pods to become ready
+    # --wait:     block until all pods pass readiness probe before returning</span>
+    - helm upgrade --install my-ui-app helm/my-ui-app
+        --namespace   $NAMESPACE
+        --create-namespace
+        -f helm/my-ui-app/values.yaml
+        -f helm/my-ui-app/values-$ENVIRONMENT.yaml
+        --set image.tag=$IMAGE_TAG
+        --atomic
+        --timeout 5m
+        --wait</code></pre>
+
+            <h3>Helm Release History and Rollback</h3>
+            <pre><span class="lang-label">Shell — Helm operations</span><code"><span class="com"># See all past releases with status and image tag</span>
+helm history my-ui-app -n production
+<span class="com"># REVISION  STATUS     DESCRIPTION
+# 14        deployed   Upgrade complete
+# 13        superseded Upgrade complete
+# 12        superseded Upgrade complete</span>
+
+<span class="com"># Instant rollback to previous release (revision 13)
+# Helm re-applies the YAML from revision 13 — K8s does a rolling update back</span>
+helm rollback my-ui-app 13 --namespace production --wait
+
+<span class="com"># Get current values for a release (what image.tag is actually running?)</span>
+helm get values my-ui-app -n production
+
+<span class="com"># See the rendered YAML that Helm applied (useful for debugging)</span>
+helm get manifest my-ui-app -n production</code></pre>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+         FULL PIPELINE FLOW
+    ══════════════════════════════════════════════════════════════ -->
+        <section id="pipeline-flow">
+            <h2>Step-by-Step Pipeline — Every Command, Every Connection</h2>
+
+            <p>
+                This is the complete walkthrough from developer keystroke to user seeing
+                the update. Every command that runs, every authentication that happens,
+                every handoff between services.
+            </p>
+
+            <div class="steps">
+
+                <div class="step">
+                    <div>
+                        <div class="step-num">1</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-body">
+                        <h3>Developer pushes to main branch</h3>
+                        <p>
+                            A pre-commit hook (husky) runs <code>lint-staged</code> locally first —
+                            catching issues before they reach CI. On push, GitHub validates
+                            branch protection rules (CI must pass on PR before merge).
+                        </p>
+                        <pre><span class="lang-label">Local pre-commit hooks (.husky/pre-commit)</span><code">npx lint-staged     <span class="com"># runs ESLint + Prettier on staged files only</span>
+npx tsc --noEmit    <span class="com"># TypeScript check — no output files</span></code></pre>
+                        <div class="flow-annotation">
+                            <div class="fa-label">Connection: Git → CodePipeline</div>
+                            A push to <code>main</code> triggers a <strong>CodeStar Connection webhook</strong>
+                            from GitHub to CodePipeline. This connection is an OAuth token stored in AWS
+                            (not in your code). CodePipeline's IAM service role has
+                            <code>codestar-connections:UseConnection</code> permission.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div>
+                        <div class="step-num">2</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-body">
+                        <h3>CodePipeline: Source Stage</h3>
+                        <p>
+                            CodePipeline downloads the repository zip at the current commit
+                            and uploads it to the pipeline's artifact S3 bucket.
+                            This zip is the <strong>SourceArtifact</strong> — the input to the Build stage.
+                        </p>
+                        <div class="flow-annotation">
+                            <div class="fa-label">What happens in S3</div>
+                            Artifact: <code>s3://codepipeline-us-east-1-123456789/my-ui-app/SourceArtif/...</code> (zip
+                            of repo at HEAD)
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div>
+                        <div class="step-num">3</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-body">
+                        <h3>CodeBuild: Install + Test</h3>
+                        <p>
+                            CodePipeline triggers the CodeBuild project, passing it the S3
+                            artifact path. CodeBuild downloads the zip, extracts it, restores
+                            the node_modules cache from S3, then runs the install phase.
+                        </p>
+                        <pre><span class="lang-label">Runs inside CodeBuild VM</span><code">npm ci --prefer-offline   <span class="com"># installs exact versions from package-lock.json</span>
+npm run lint              <span class="com"># ESLint — non-zero exit fails the build</span>
+npm run type-check        <span class="com"># tsc --noEmit</span>
+npm run test -- --coverage --ci
+  --coverageThreshold='{"global":{"lines":80}}'  <span class="com"># fail if below 80%</span></code></pre>
+                        <div class="flow-annotation">
+                            <div class="fa-label">Authentication</div>
+                            CodeBuild automatically has AWS credentials from its IAM service role via the
+                            EC2 Metadata Service. The <code>aws</code> CLI and SDK use these without any
+                            configuration. No access keys, no secrets in env files.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div>
+                        <div class="step-num">4</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-body">
+                        <h3>CodeBuild: Docker Build + ECR Push</h3>
+                        <p>
+                            CodeBuild is configured with <strong>Privileged mode</strong> enabled
+                            (required for Docker daemon). It fetches the ECR auth token using the IAM
+                            role, builds the multi-stage Docker image, and pushes it tagged with the
+                            git SHA.
+                        </p>
+                        <pre><span class="lang-label">buildspec.yml — build + push commands</span><code"><span class="com"># Get temporary ECR token via IAM role — valid 12 hours</span>
+aws ecr get-login-password --region us-east-1 | \
+  docker login --username AWS --password-stdin 123456789.dkr.ecr.us-east-1.amazonaws.com
+
+<span class="com"># Derive 8-char SHA tag from CodeBuild env variable</span>
+IMAGE_TAG=$(echo $CODEBUILD_RESOLVED_SOURCE_VERSION | cut -c1-8)
+<span class="com"># CODEBUILD_RESOLVED_SOURCE_VERSION = full git commit SHA, auto-injected by AWS</span>
+
+IMAGE_URI=123456789.dkr.ecr.us-east-1.amazonaws.com/my-ui-app:$IMAGE_TAG
+
+<span class="com"># Build: --cache-from pulls :latest from ECR to reuse unchanged layers</span>
+docker build \
+  --build-arg VITE_API_URL=$VITE_API_URL \
+  --cache-from 123456789.dkr.ecr.us-east-1.amazonaws.com/my-ui-app:latest \
+  -t $IMAGE_URI \
+  -t 123456789.dkr.ecr.us-east-1.amazonaws.com/my-ui-app:latest \
+  .
+
+<span class="com"># Push both tags to ECR</span>
+docker push $IMAGE_URI
+docker push 123456789.dkr.ecr.us-east-1.amazonaws.com/my-ui-app:latest
+
+<span class="com"># Write tag to file — this file travels as an artifact to the deploy stage</span>
+echo $IMAGE_TAG > image-tag.txt</code></pre>
+                        <div class="flow-annotation">
+                            <div class="fa-label">How CodePipeline passes image-tag.txt to next stage</div>
+                            The <code>artifacts</code> block in buildspec.yml lists files to zip.
+                            CodeBuild uploads this zip to S3 as <strong>BuildArtifact</strong>.
+                            The Deploy stage CodeBuild project receives this zip as its input and can
+                            read <code>image-tag.txt</code> from it.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div>
+                        <div class="step-num">5</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-body">
+                        <h3>CodeBuild: Deploy to Staging (helm upgrade)</h3>
+                        <p>
+                            The deploy CodeBuild project receives the BuildArtifact, reads
+                            <code>image-tag.txt</code>, authenticates to the staging EKS cluster,
+                            and runs <code>helm upgrade --install</code>.
+                        </p>
+                        <pre><span class="lang-label">buildspec-deploy.yml — deploy to staging</span><code"><span class="com"># Authenticate to staging EKS cluster
+# This writes ~/.kube/config using the CodeBuild IAM role.
+# The CodeBuild role ARN must be in the cluster's aws-auth ConfigMap.</span>
+aws eks update-kubeconfig \
+  --name   my-cluster-staging \
+  --region us-east-1
+
+<span class="com"># Read the image tag from the artifact file</span>
+IMAGE_TAG=$(cat image-tag.txt)
+
+<span class="com"># Deploy with Helm
+# -f: merge values in order: defaults ← staging overrides
+# --set: highest priority — overrides anything in values files</span>
+helm upgrade --install my-ui-app helm/my-ui-app \
+  --namespace   staging \
+  --create-namespace \
+  -f helm/my-ui-app/values.yaml \
+  -f helm/my-ui-app/values-staging.yaml \
+  --set image.tag=$IMAGE_TAG \
+  --atomic \     <span class="com"># rolls back automatically if pods don't become ready</span>
+  --timeout 5m \
+  --wait         <span class="com"># blocks until all pods pass readiness probe</span></code></pre>
+                        <div class="flow-annotation">
+                            <div class="fa-label">How K8s pulls the image from ECR</div>
+                            When Helm creates the Deployment and pods start, the kubelet on each node
+                            calls <code>aws ecr get-authorization-token</code> using the <strong>node's
+                                IAM instance role</strong> (not the pod's). This role must have
+                            <code>ecr:GetAuthorizationToken</code> and <code>ecr:BatchGetImage</code>.
+                            kubelet caches the token and pulls layers from ECR via HTTPS.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div>
+                        <div class="step-num">6</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-body">
+                        <h3>CodeBuild: Run E2E Tests on Staging</h3>
+                        <p>
+                            A separate CodeBuild project (or a post-deploy step) runs Playwright
+                            against the staging URL. If tests fail, the pipeline stops here —
+                            the broken build never reaches production.
+                        </p>
+                        <pre><span class="lang-label">buildspec-e2e.yml</span><code"><span class="ky">phases</span>:
+  <span class="ky">install</span>:
+    <span class="ky">runtime-versions</span>:
+      <span class="ky">nodejs</span>: <span class="nm">20</span>
+    <span class="ky">commands</span>:
+      - npm ci
+      - npx playwright install --with-deps chromium   <span class="com"># install browser binary</span>
+
+  <span class="ky">build</span>:
+    <span class="ky">commands</span>:
+      <span class="com"># STAGING_URL is set as a CodeBuild environment variable for this project</span>
+      - PLAYWRIGHT_BASE_URL=$STAGING_URL npx playwright test
+          --reporter=junit
+          --output-dir=test-results
+
+<span class="ky">reports</span>:
+  <span class="ky">e2e-report</span>:
+    <span class="ky">files</span>: [<span class="vl">'test-results/*.xml'</span>]
+    <span class="ky">file-format</span>: JUNITXML   <span class="com"># CodeBuild shows pass/fail counts in console</span></code></pre>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div>
+                        <div class="step-num">7</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-body">
+                        <h3>CodePipeline: Manual Approval</h3>
+                        <p>
+                            The pipeline pauses. An SNS notification is sent to the engineering
+                            team (email/Slack). A senior engineer reviews staging, then approves
+                            via the AWS Console or CLI.
+                        </p>
+                        <pre><span class="lang-label">Shell — approve via CLI</span><code"><span class="com"># List pending approvals</span>
+aws codepipeline get-pipeline-state --name my-ui-app \
+  --query "stageStates[?stageName=='Approve'].actionStates[0].latestExecution.token" \
+  --output text
+
+<span class="com"># Approve (provide the token from above)</span>
+aws codepipeline put-approval-result \
+  --pipeline-name my-ui-app \
+  --stage-name    Approve \
+  --action-name   Approve_Prod \
+  --token         $APPROVAL_TOKEN \
+  --result '{"summary":"Staging verified, approved for prod","status":"Approved"}'</code></pre>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div>
+                        <div class="step-num">8</div>
+                        <div class="step-line"></div>
+                    </div>
+                    <div class="step-body">
+                        <h3>CodeBuild: Deploy to Production (same flow, different cluster)</h3>
+                        <p>
+                            Exactly the same Helm command as staging, but targeting the
+                            production EKS cluster with the production values file.
+                            Same image tag that passed staging — no rebuild.
+                        </p>
+                        <pre><span class="lang-label">buildspec-deploy.yml — prod deploy</span><code"><span class="com"># Same script, different env variables set by CodePipeline</span>
+aws eks update-kubeconfig --name my-cluster-prod --region us-east-1
+
+IMAGE_TAG=$(cat image-tag.txt)   <span class="com"># same SHA that was tested on staging</span>
+
+helm upgrade --install my-ui-app helm/my-ui-app \
+  --namespace   production \
+  --create-namespace \
+  -f helm/my-ui-app/values.yaml \
+  -f helm/my-ui-app/values-prod.yaml \
+  --set image.tag=$IMAGE_TAG \
+  --atomic --timeout 5m --wait</code></pre>
+                        <div class="flow-annotation">
+                            <div class="fa-label">What happens inside K8s during the upgrade</div>
+                            Helm renders the templates with the new image.tag. K8s API server accepts the
+                            updated Deployment spec. The ReplicaSet controller starts creating new pods.
+                            Each new pod: kubelet pulls the new image from ECR, starts nginx, passes
+                            readiness probe. Once ready, kube-proxy updates iptables rules to route
+                            traffic to the new pod. Old pod is then gracefully terminated (SIGTERM →
+                            30s grace → SIGKILL). Repeats until all pods are updated.
+                        </div>
+                    </div>
+                </div>
+
+                <div class="step">
+                    <div>
+                        <div class="step-num">9</div>
+                    </div>
+                    <div class="step-body">
+                        <h3>CloudFront Invalidation (S3 deploys only)</h3>
+                        <p>
+                            For container-based deploys (K8s), CloudFront forwards to ALB which
+                            already serves the new pods — no invalidation needed.
+                            For S3+CloudFront deploys, invalidate only <code>/index.html</code>
+                            after uploading new assets.
+                        </p>
+                        <pre><span class="lang-label">Shell</span><code"><span class="com"># Upload hashed assets (forever cache) first</span>
+aws s3 sync dist/ s3://$BUCKET/ \
+  --cache-control "max-age=31536000,immutable" \
+  --exclude "index.html" --delete
+
+<span class="com"># Upload index.html last (no-cache)</span>
+aws s3 cp dist/index.html s3://$BUCKET/index.html \
+  --cache-control "no-cache,no-store"
+
+<span class="com"># Only index.html needs invalidation — assets have new names (new hash)</span>
+aws cloudfront create-invalidation \
+  --distribution-id $CF_DIST_ID \
+  --paths "/index.html"</code></pre>
+                    </div>
+                </div>
+
+            </div>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+         AUTH CHAIN
+    ══════════════════════════════════════════════════════════════ -->
+        <section id="auth-chain">
+            <h2>Authentication at Every Step — Complete Reference</h2>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Step</th>
+                            <th>Who authenticates</th>
+                            <th>To what</th>
+                            <th>Mechanism</th>
+                            <th>Config required</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>1. Trigger</td>
+                            <td>GitHub</td>
+                            <td>CodePipeline</td>
+                            <td>CodeStar Connection (OAuth)</td>
+                            <td>One-time CodeStar connection setup in console</td>
+                        </tr>
+                        <tr>
+                            <td>2. Source download</td>
+                            <td>CodePipeline</td>
+                            <td>S3 artifact bucket</td>
+                            <td>Pipeline's IAM service role</td>
+                            <td>Pipeline role has <code>s3:PutObject</code> on artifact bucket</td>
+                        </tr>
+                        <tr>
+                            <td>3. Build trigger</td>
+                            <td>CodePipeline</td>
+                            <td>CodeBuild project</td>
+                            <td>IAM: pipeline role has <code>codebuild:StartBuild</code></td>
+                            <td>Pipeline role policy includes CodeBuild permissions</td>
+                        </tr>
+                        <tr>
+                            <td>4. ECR login</td>
+                            <td>CodeBuild</td>
+                            <td>ECR</td>
+                            <td><code>aws ecr get-login-password</code> via CodeBuild IAM role</td>
+                            <td>CodeBuild service role has <code>ecr:GetAuthorizationToken</code></td>
+                        </tr>
+                        <tr>
+                            <td>5. ECR push</td>
+                            <td>Docker (CodeBuild)</td>
+                            <td>ECR repository</td>
+                            <td>Token from step 4 (12h expiry)</td>
+                            <td>CodeBuild role has <code>ecr:PutImage</code> on repo ARN</td>
+                        </tr>
+                        <tr>
+                            <td>6. K8s access</td>
+                            <td>CodeBuild (kubectl/helm)</td>
+                            <td>EKS API server</td>
+                            <td><code>aws eks update-kubeconfig</code> → IAM bearer token</td>
+                            <td>CodeBuild role ARN in EKS <code>aws-auth</code> ConfigMap</td>
+                        </tr>
+                        <tr>
+                            <td>7. Helm deploy</td>
+                            <td>Helm → K8s API</td>
+                            <td>EKS API server</td>
+                            <td>kubeconfig generated in step 6</td>
+                            <td>K8s RBAC: CodeBuild mapped to <code>system:masters</code> (or custom ClusterRole)</td>
+                        </tr>
+                        <tr>
+                            <td>8. Image pull</td>
+                            <td>kubelet (node)</td>
+                            <td>ECR</td>
+                            <td>Node IAM instance role (auto)</td>
+                            <td>Node group role has <code>AmazonEC2ContainerRegistryReadOnly</code> policy</td>
+                        </tr>
+                        <tr>
+                            <td>9. Secrets access</td>
+                            <td>Pod (app)</td>
+                            <td>Secrets Manager</td>
+                            <td>IRSA: K8s ServiceAccount → IAM role via OIDC</td>
+                            <td>SA annotated with IAM role ARN; OIDC provider set up on EKS</td>
+                        </tr>
+                        <tr>
+                            <td>10. User traffic</td>
+                            <td>CloudFront</td>
+                            <td>ALB (origin)</td>
+                            <td>HTTPS — TLS cert from ACM</td>
+                            <td>ACM cert ARN in CF distribution or Ingress annotation</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+        </section>
+
+
+
+        <!-- ══════════════════════════════════════════════════════════
+         ENV STRATEGY
+    ══════════════════════════════════════════════════════════════ -->
+        <section id="env-strategy">
+            <h2>Environment Strategy</h2>
+
+            <h3>Branch → Environment Mapping</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Branch</th>
+                            <th>Environment</th>
+                            <th>K8s Namespace</th>
+                            <th>Deploy</th>
+                            <th>Approval</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><code>feature/*</code></td>
+                            <td><span class="badge badge-blue">preview</span></td>
+                            <td><code>preview-pr-{number}</code></td>
+                            <td>Auto on PR open (ephemeral)</td>
+                            <td>None</td>
+                        </tr>
+                        <tr>
+                            <td><code>main</code></td>
+                            <td><span class="badge badge-yellow">staging</span></td>
+                            <td><code>staging</code></td>
+                            <td>Auto on merge</td>
+                            <td>None (after E2E pass)</td>
+                        </tr>
+                        <tr>
+                            <td><code>main</code></td>
+                            <td><span class="badge badge-red">production</span></td>
+                            <td><code>production</code></td>
+                            <td>Manual approval required</td>
+                            <td>Senior engineer</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <h3>Ephemeral Preview Environments</h3>
+            <p>
+                For each PR, create a temporary K8s namespace, deploy the PR's image,
+                expose it on a unique subdomain, and destroy it when the PR is closed.
+                This lets reviewers test the actual running app, not just read code.
+            </p>
+            <pre><span class="lang-label">Shell — create + destroy preview env</span><code"><span class="com"># On PR open: deploy to preview-pr-42 namespace</span>
+NAMESPACE="preview-pr-${PR_NUMBER}"
+helm upgrade --install "pr-${PR_NUMBER}" helm/my-ui-app \
+  --namespace $NAMESPACE --create-namespace \
+  -f helm/my-ui-app/values-preview.yaml \
+  --set image.tag=$IMAGE_TAG \
+  --set ingress.host="pr-${PR_NUMBER}.preview.example.com"
+
+<span class="com"># On PR close: delete namespace (removes all K8s resources)</span>
+kubectl delete namespace $NAMESPACE</code></pre>
+
+            <h3>Feature Flags — Decouple Deploy from Release</h3>
+            <p>
+                Feature flags let you deploy code to production but control who sees it.
+                You ship a feature behind a flag that is off for 100% of users.
+                Then gradually roll it out: 1% → 10% → 50% → 100%.
+                If issues appear, flip the flag off instantly — no rollback needed.
+            </p>
+            <pre><span class="lang-label">React — LaunchDarkly feature flag</span><code"><span class="kw">import</span> { useFlags } <span class="kw">from</span> <span class="str">'launchdarkly-react-client-sdk'</span>;
+
+<span class="kw">export function</span> <span class="fn">CheckoutButton</span>() {
+  <span class="com">// Flag value comes from LD server — not baked into bundle</span>
+  <span class="kw">const</span> { newCheckoutFlow } = <span class="fn">useFlags</span>();
+
+  <span class="kw">return</span> newCheckoutFlow
+    ? <span class="tc">&lt;CheckoutV2 /&gt;</span>   <span class="com">// new flow — enabled for 5% of users</span>
+    : <span class="tc">&lt;CheckoutV1 /&gt;</span>;  <span class="com">// old flow — 95% of users</span>
+}</code></pre>
+        </section>
+
+        <!-- ══════════════════════════════════════════════════════════
+         MONITORING
+    ══════════════════════════════════════════════════════════════ -->
+        <section id="monitoring">
+            <h2>Monitoring &amp; Observability</h2>
+
+            <p>
+                Observability means being able to answer "what is happening to my app
+                right now?" without needing to add new instrumentation. You need three
+                signal types: <strong>metrics</strong> (numbers over time),
+                <strong>logs</strong> (events), and <strong>traces</strong> (request paths).
+            </p>
+
+            <h3>Real User Monitoring — Web Vitals</h3>
+            <p>
+                <code>web-vitals</code> measures Core Web Vitals <em>from real user
+                    browsers</em>. You send these to your backend and build dashboards.
+                A spike in LCP after a deploy tells you the new build is slower.
+            </p>
+            <pre><span class="lang-label">TypeScript — vitals.ts</span><code"><span class="kw">import</span> { onCLS, onLCP, onINP, onFCP, onTTFB, type Metric } <span class="kw">from</span> <span class="str">'web-vitals'</span>;
+
+<span class="kw">function</span> <span class="fn">sendMetric</span>({ name, value, id, navigationType }: Metric) {
+  <span class="fn">fetch</span>(<span class="str">'/api/rum'</span>, {
+    method:  <span class="str">'POST'</span>,
+    headers: { <span class="str">'Content-Type'</span>: <span class="str">'application/json'</span> },
+    <span class="com">// keepalive: survives page navigation — important for unload events</span>
+    keepalive: <span class="kw">true</span>,
+    body: JSON.<span class="fn">stringify</span>({
+      name,
+      value:          <span class="fn">Math.round</span>(value),
+      id,
+      navigationType,
+      url:            location.href,
+      release:        import.meta.env.VITE_GIT_SHA,  <span class="com">// know which deploy</span>
+    }),
+  });
+}
+
+<span class="fn">onLCP</span>(sendMetric);   <span class="com">// Largest Contentful Paint</span>
+<span class="fn">onINP</span>(sendMetric);   <span class="com">// Interaction to Next Paint</span>
+<span class="fn">onCLS</span>(sendMetric);   <span class="com">// Cumulative Layout Shift</span>
+<span class="fn">onFCP</span>(sendMetric);   <span class="com">// First Contentful Paint</span>
+<span class="fn">onTTFB</span>(sendMetric);  <span class="com">// Time to First Byte</span></code></pre>
+
+            <h3>Error Monitoring with Sentry</h3>
+            <pre><span class="lang-label">main.tsx — Sentry init</span><code"><span class="kw">import</span> * <span class="kw">as</span> Sentry <span class="kw">from</span> <span class="str">'@sentry/react'</span>;
+
+Sentry.<span class="fn">init</span>({
+  dsn:         import.meta.env.VITE_SENTRY_DSN,
+  environment: import.meta.env.VITE_ENV,            <span class="com">// staging / production</span>
+  release:     import.meta.env.VITE_GIT_SHA,        <span class="com">// git SHA injected by CodeBuild</span>
+  integrations: [
+    Sentry.<span class="fn">browserTracingIntegration</span>(),           <span class="com">// automatic route/API tracing</span>
+    Sentry.<span class="fn">replayIntegration</span>({
+      maskAllText:  <span class="kw">true</span>,                          <span class="com">// mask PII in session replays</span>
+      blockAllMedia: <span class="kw">true</span>,
+    }),
+  ],
+  tracesSampleRate:    <span class="nm">0.1</span>,   <span class="com">// trace 10% of sessions</span>
+  replaysOnErrorSampleRate: <span class="nm">1.0</span>, <span class="com">// replay 100% of sessions with errors</span>
+});</code></pre>
+
+            <h3>K8s Alerts — CloudWatch Container Insights</h3>
+            <pre><span class="lang-label">Shell — create CloudWatch alarms</span><code"><span class="com"># Alert if pods average CPU > 80% for 5 minutes (scale out may be too slow)</span>
+aws cloudwatch put-metric-alarm \
+  --alarm-name    "ui-pod-cpu-high" \
+  --namespace     ContainerInsights \
+  --metric-name   pod_cpu_utilization \
+  --dimensions    Name=Namespace,Value=production \
+                  Name=PodName,Value=my-ui-app \
+  --period        300 \
+  --statistic     Average \
+  --threshold     80 \
+  --comparison-operator GreaterThanThreshold \
+  --evaluation-periods  2 \
+  --alarm-actions arn:aws:sns:us-east-1:123456789:engineering-alerts
+
+<span class="com"># Alert if pod restarts spike (OOMKilled, crash loops)</span>
+aws cloudwatch put-metric-alarm \
+  --alarm-name    "ui-pod-restarts" \
+  --namespace     ContainerInsights \
+  --metric-name   pod_number_of_container_restarts \
+  --dimensions    Name=Namespace,Value=production \
+  --period        300 \
+  --statistic     Sum \
+  --threshold     5 \
+  --comparison-operator GreaterThanThreshold \
+  --evaluation-periods  1 \
+  --alarm-actions arn:aws:sns:us-east-1:123456789:engineering-alerts</code></pre>
+
+            <h3>Observability Stack — What to Watch</h3>
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Signal</th>
+                            <th>Tool</th>
+                            <th>Key Metrics</th>
+                            <th>Alert Threshold</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>Frontend RUM</td>
+                            <td>web-vitals → custom endpoint → CloudWatch</td>
+                            <td>LCP p75, INP p75, CLS</td>
+                            <td>LCP &gt; 2.5s, INP &gt; 200ms</td>
+                        </tr>
+                        <tr>
+                            <td>JS Errors</td>
+                            <td>Sentry</td>
+                            <td>Error rate, new issues, release regressions</td>
+                            <td>Error rate increases &gt;20% after deploy</td>
+                        </tr>
+                        <tr>
+                            <td>Container metrics</td>
+                            <td>CloudWatch Container Insights</td>
+                            <td>Pod CPU/memory, restart count</td>
+                            <td>CPU &gt; 80%, restarts &gt; 5/5min</td>
+                        </tr>
+                        <tr>
+                            <td>HTTP</td>
+                            <td>ALB Access Logs → Athena</td>
+                            <td>5xx rate, p99 latency, req/sec</td>
+                            <td>5xx rate &gt; 1%</td>
+                        </tr>
+                        <tr>
+                            <td>CDN</td>
+                            <td>CloudFront Standard Logs → S3</td>
+                            <td>Cache hit ratio, origin response time</td>
+                            <td>Cache hit ratio drops below 80%</td>
+                        </tr>
+                        <tr>
+                            <td>Synthetic</td>
+                            <td>CloudWatch Canaries (Puppeteer)</td>
+                            <td>Availability, screenshot on failure</td>
+                            <td>Any failure from any region</td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="callout tip">
+                <span class="icon">✅</span>
+                <div class="body">
+                    <p>
+                        <strong>Golden rule for deploy safety:</strong> After every production
+                        deploy, watch your error rate in Sentry and your 5xx rate in ALB
+                        logs for 15 minutes. If either spikes, run
+                        <code>helm rollback my-ui-app 0 -n production</code>
+                        (rollback to previous release) immediately — do not wait for root cause
+                        analysis when users are affected.
+                    </p>
+                </div>
+            </div>
+        </section>
+        </main>
+    </div>
+
+        <script>
+            (function () {
+                const bar = document.getElementById('progress-bar');
+                const links = document.querySelectorAll('nav a');
+                const sections = document.querySelectorAll('section[id]');
+
+                function onScroll() {
+                    const scrolled = window.scrollY;
+                    const total = document.documentElement.scrollHeight - window.innerHeight;
+                    bar.style.width = (total > 0 ? (scrolled / total) * 100 : 0) + '%';
+
+                    let current = '';
+                    sections.forEach(s => { if (window.scrollY >= s.offsetTop - 110) current = s.id; });
+                    links.forEach(a => {
+                        a.classList.toggle('active', a.getAttribute('href') === '#' + current);
+                    });
+                }
+
+                window.addEventListener('scroll', onScroll, { passive: true });
+                onScroll();
+            })();
+        </script>
+
+</body>
+
+</html>

@@ -1,0 +1,294 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Senior React / Next.js Interview Questions</title>
+<style>
+  :root { --bg:#f6f8fb; --card:#fff; --text:#172033; --muted:#5f6b7a; --accent:#2563eb; --border:#dfe5ee; }
+  * { box-sizing:border-box; }
+  body { margin:0; font-family:Inter,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif; background:var(--bg); color:var(--text); line-height:1.55; }
+  header { background:#111827; color:white; padding:42px 24px; }
+  header .wrap, main { max-width:1100px; margin:auto; }
+  h1 { margin:0 0 8px; font-size:clamp(28px,4vw,42px); }
+  header p { margin:0; color:#cbd5e1; font-size:17px; }
+  main { padding:28px 20px 60px; }
+  .toolbar { display:flex; gap:12px; flex-wrap:wrap; margin-bottom:24px; position:sticky; top:0; background:rgba(246,248,251,.95); padding:12px 0; z-index:2; }
+  input { flex:1; min-width:220px; padding:12px 14px; border:1px solid var(--border); border-radius:10px; font-size:15px; }
+  button { border:0; border-radius:10px; padding:11px 16px; background:var(--accent); color:#fff; cursor:pointer; font-weight:600; }
+  button.secondary { background:#475569; }
+  section { background:var(--card); border:1px solid var(--border); border-radius:14px; margin:16px 0; overflow:hidden; box-shadow:0 2px 8px rgba(15,23,42,.04); }
+  .section-head { padding:20px 22px; border-bottom:1px solid var(--border); }
+  .section-head h2 { margin:0; font-size:21px; }
+  .questions { padding:4px 22px 18px; }
+  .q { padding:15px 0; border-bottom:1px solid #edf0f5; }
+  .q:last-child { border-bottom:0; }
+  .q strong { display:block; margin-bottom:5px; font-size: 16px; color: #0f172a; }
+  .q p { margin:6px 0; color:var(--muted); font-size: 15px; }
+  .q pre { background: #1e293b; color: #e2e8f0; padding: 12px; border-radius: 8px; overflow-x: auto; font-size: 13.5px; margin: 10px 0; border: 1px solid #334155; }
+  .q code { font-family: ui-monospace, SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
+  .tag { display:inline-block; margin-top:8px; padding:3px 8px; border-radius:999px; background:#eff6ff; color:#1d4ed8; font-size:12px; font-weight:700; }
+  .note { display: block; margin-top: 8px; font-size: 13.5px; color: #475569; font-style: italic; background: #f8fafc; padding: 8px 12px; border-left: 3px solid #cbd5e1; }
+  .count { color:var(--muted); font-size:14px; margin-left:auto; }
+  .toolbar-row { display:flex; align-items:center; width:100%; gap:12px; }
+  footer { text-align:center; color:var(--muted); padding:30px; font-size:13px; }
+  @media print {
+    .toolbar { display:none; }
+    body { background:white; }
+    section { break-inside:avoid; box-shadow:none; }
+    header { background:white; color:#111; padding:20px 0; }
+    header p { color:#555; }
+    .q pre { background: #f1f5f9; color: #000; border: 1px solid #cbd5e1; }
+  }
+</style>
+</head>
+<body>
+<header>
+  <div class="wrap">
+    <h1>Senior React / Next.js Interview Questions</h1>
+    <p>Production-focused interview preparation covering architecture, performance, security, testing, TypeScript, SSR and large-scale e-commerce.</p>
+  </div>
+</header>
+
+<main>
+  <div class="toolbar">
+    <div class="toolbar-row">
+      <input id="search" type="search" placeholder="Search questions, topics, keywords..." oninput="filterQuestions()">
+      <button onclick="window.print()">Print / Save PDF</button>
+      <button class="secondary" onclick="clearSearch()">Clear</button>
+      <span class="count" id="count"></span>
+    </div>
+  </div>
+
+  <div id="content"></div>
+</main>
+
+<footer>Senior Frontend Engineering Interview Guide • React / Next.js • Production Scenarios</footer>
+
+<script>
+// Data structure: [Question, Answer, Tag, Optional_HTML_For_Code_Or_Notes]
+const sections = [
+{
+title:"1. React / Next.js Questions & Architecture",
+qs:[
+  ["When choosing a build tool for an enterprise-level React app, how do you evaluate Vite versus Create React App (CRA)?", "CRA is essentially deprecated, relies heavily on Webpack, and suffers from slow build times in large applications. Vite leverages native ES modules and esbuild for lightning-fast HMR and cold starts. For enterprise apps requiring stability and speed, Vite is the modern standard.", "Architecture", "<span class='note'>Tip: Mention that migrating from CRA to Vite usually involves updating environment variables (VITE_ instead of REACT_APP_) and moving index.html to the root.</span>"],
+  ["Explain React reconciliation and why keys matter.", "React compares the new element tree with the previous one and uses element type + key identity to decide what can be reused. Stable keys preserve component state; array indexes are risky when items can be inserted/reordered.", "Core React", "<pre><code>// Good: Stable unique IDs\n&lt;List&gt;\n  {items.map(item => &lt;Row key={item.id} item={item} /&gt;)}\n&lt;/List&gt;</code></pre>"],
+  ["When would you choose SSR, SSG, ISR or CSR in Next.js?", "Choose based on freshness, personalization, SEO and cacheability. SSG/ISR fit mostly public content; SSR fits request-specific content; CSR fits highly interactive browser-driven views.", "Next.js", ""],
+  ["What happens from a browser request until a Next.js page becomes interactive?", "Request reaches the server/CDN, route/data are resolved, HTML is rendered, streamed if applicable, browser parses HTML, then React hydrates Client Components and attaches event handlers.", "Architecture", ""],
+  ["How do Server Components differ from Client Components?", "Server Components execute on the server and can access server-side resources without shipping their implementation to the browser. Client Components are required for state, effects, event handlers and browser APIs.", "RSC", "<pre><code>// boundary example\nimport { ServerData } from './api';\nimport InteractiveCart from './InteractiveCart'; // 'use client' component\n\nexport default async function ProductPage() {\n  const data = await ServerData();\n  return &lt;InteractiveCart initialData={data} /&gt;;\n}</code></pre>"],
+  ["How would you structure a large Next.js application?", "Prefer feature/domain boundaries over a giant components folder. Separate UI, domain logic, data access and shared primitives; use route groups/layouts where useful.", "Architecture", ""],
+  ["How would you prevent unnecessary client JavaScript?", "Keep non-interactive UI on the server, dynamically import heavy client features, avoid broad 'use client' boundaries and measure bundles.", "Performance", ""]
+]
+},
+{
+title:"2. Real Production Scenarios",
+qs:[
+  ["Your Playwright UI tests pass in the dev container, but fail with 401 API errors when running in AWS CodeBuild for the production environment. What causes this?", "This usually indicates missing, mismatched, or expired environment variables (like API keys or Auth tokens) in the CodeBuild production configuration. It can also stem from strict CORS policies, VPC restrictions, or WAF rules blocking automated headless browser traffic in production but not in dev.", "Troubleshooting", "<span class='note'>Action: Check the AWS Systems Manager Parameter Store or Secrets Manager attached to the prod CodeBuild role. Verify if the backend relies on cookies that aren't being seeded in the prod test setup.</span>"],
+  ["A search page sends too many API requests while users type. How would you fix it?", "Combine debouncing, AbortController for request cancellation, and caching. useDeferredValue can keep the UI responsive but does not debounce network requests on its own.", "Performance", "<pre><code>useEffect(() => {\n  const controller = new AbortController();\n  fetch(`/api/search?q=${query}`, { signal: controller.signal })\n    .then(res => res.json())\n    .then(setData);\n\n  return () => controller.abort(); // Cancels previous request\n}, [query]);</code></pre>"],
+  ["A production React page becomes slow only for some users. How do you investigate?", "Start with RUM and segment by device, browser, route, release and geography. Then correlate Web Vitals, JS errors, network timing and backend traces.", "Debugging", ""],
+  ["Users report that the cart occasionally loses items. What would you investigate?", "Look for race conditions between tabs, optimistic updates, local storage writes, API responses and login/cart merge operations. Define the authoritative source and reconciliation rules.", "E-commerce", "<span class='note'>Use React 18's useSyncExternalStore to safely subscribe to a global cart state across components to prevent UI tearing.</span>"],
+  ["A release causes a sudden bundle-size increase. How do you debug it?", "Compare bundle reports before/after the release, identify the dependency/chunk responsible, then inspect imports and dynamic boundaries.", "Performance", ""],
+  ["An API is slow but backend latency is normal. What frontend causes could explain it?", "The browser may be suffering from waterfalls, duplicate requests, DNS/TLS/connection setup, cache misses, serialization or expensive response processing.", "Production", ""]
+]
+},
+{
+title:"3. SSR & Streaming SSR Troubleshooting",
+qs:[
+  ["What is Streaming SSR and when does it improve UX?", "The server can send completed portions of HTML progressively instead of waiting for the entire page. Suspense boundaries allow slow sections to stream later.", "SSR", ""],
+  ["A streamed page has a fast shell but poor LCP. What would you check?", "Identify the actual LCP element first. Then inspect whether it is blocked by data, images, fonts, CSS, client JS or a late Suspense boundary.", "Performance", ""],
+  ["Why can SSR still be slow when HTML arrives quickly?", "Streaming can produce an early shell while expensive server work, data fetching, hydration or client-side rendering remains. TTFB, FCP and LCP measure different stages.", "SSR", ""],
+  ["How would you debug intermittent SSR failures?", "Add request IDs and structured logs, trace upstream calls, capture route and deployment version, and distinguish server exceptions from client hydration failures.", "Debugging", ""]
+]
+},
+{
+title:"4. Hydration Mismatch Debugging",
+qs:[
+  ["What causes hydration mismatch?", "The server HTML and the first client render must agree. Problems include Date/random values, browser-only APIs, locale differences, unstable data and conditional rendering based on window.", "Hydration", ""],
+  ["How would you debug a production-only hydration mismatch?", "Capture the exact route/data/release, inspect React hydration warnings, isolate the component tree and compare server output with the first client render.", "Debugging", ""],
+  ["When is suppressHydrationWarning appropriate?", "Only when a known, intentional one-level difference is acceptable. It is not a substitute for finding the underlying mismatch.", "React", ""],
+  ["How can browser APIs safely be used with SSR?", "Do not access window/document/localStorage during server rendering. Put browser-only work in a Client Component and usually inside useEffect when it depends on mount.", "SSR", ""]
+]
+},
+{
+title:"5. React Server Components Architecture Decisions",
+qs:[
+  ["When should a component remain a Server Component?", "Keep data-heavy, static or non-interactive UI on the server when possible. This can reduce browser JS and keep secrets/server-only data out of the client.", "RSC", ""],
+  ["When must a component become a Client Component?", "Use 'use client' when the component needs state, event handlers, effects or browser APIs.", "RSC", ""],
+  ["How do you decide where to place the Server/Client boundary?", "Put the boundary as low as practical. A parent becoming Client can pull more of its dependency tree into the client bundle.", "Architecture", ""],
+  ["What are common RSC mistakes?", "Making large page trees client components, duplicating fetching, passing excessive data, and misunderstanding server/client caching.", "RSC", ""]
+]
+},
+{
+title:"6. Design System Implementation",
+qs:[
+  ["How would you build a design system for multiple teams?", "Start with design tokens, accessible primitives, composable components, documentation, versioning and governance. Separate visual consistency from product-specific composition.", "Design System", ""],
+  ["How do you prevent a design system becoming too restrictive?", "Favor composition and escape hatches over hundreds of boolean props. Provide primitives and clear extension points.", "Architecture", ""],
+  ["How do you handle breaking component changes?", "Use semantic versioning, deprecation windows, migration guides, codemods and visual regression tests.", "Governance", ""],
+  ["How do you build accessibility into the system?", "Bake keyboard navigation, focus handling, semantic HTML and ARIA behavior into primitives rather than relying on every product team to remember them.", "Accessibility", ""]
+]
+},
+{
+title:"7. Micro-frontends with Module Federation",
+qs:[
+  ["How do you implement Module Federation in a Vite-based application?", "Use the `@originjs/vite-plugin-federation` plugin. You define exposed components in the host's config and declare remotes in the consumer application. This allows independent deployments while sharing dependencies.", "Micro-frontends", "<pre><code>// vite.config.ts (Host)\nimport federation from '@originjs/vite-plugin-federation';\n\nexport default {\n  plugins: [\n    federation({\n      name: 'host_app',\n      filename: 'remoteEntry.js',\n      exposes: {\n        './Button': './src/components/Button.tsx'\n      },\n      shared: ['react', 'react-dom']\n    })\n  ]\n}</code></pre>"],
+  ["What if a remote micro-frontend fails to load in production?", "The host application must implement Error Boundaries and graceful degradation. Use dynamic imports wrapped in React.lazy and Suspense to isolate the failure.", "Resilience", "<pre><code>const RemoteWidget = React.lazy(() => import('remoteApp/Widget').catch(() => {\n  return { default: () => &lt;FallbackUI /&gt; };\n}));</code></pre>"],
+  ["When is a micro-frontend architecture justified?", "Use it when organizational/team boundaries and independent deployment benefits outweigh runtime, dependency and operational complexity.", "Architecture", ""],
+  ["How does Module Federation work conceptually?", "Independently built applications expose or consume modules at runtime, allowing separate deployment while sharing selected dependencies.", "Module Federation", ""],
+  ["How would you share React and common dependencies safely?", "Use shared/singleton configuration carefully, align compatible versions and define ownership for shared libraries.", "Module Federation", ""],
+  ["How would you manage authentication?", "Prefer a platform-level session/auth contract rather than every micro-frontend inventing its own token flow. Authorization must remain server-side.", "Security", ""]
+]
+},
+{
+title:"8. Testing Pyramid — Unit, Integration, E2E",
+qs:[
+  ["What belongs in unit vs integration tests?", "Unit tests validate isolated business logic. Integration tests validate meaningful component/module boundaries. E2E validates critical real user journeys.", "Testing", ""],
+  ["Why not rely heavily on E2E?", "E2E tests are slower, more expensive and more environment-dependent. Keep the E2E layer focused on high-value journeys.", "Testing", ""],
+  ["How do you avoid flaky tests?", "Use deterministic data, stable locators, proper async waiting and isolated state. Never use arbitrary sleep as synchronization.", "Testing", ""],
+  ["How do you test network behavior?", "Mock at the network boundary for deterministic tests while keeping a smaller set of tests against real integration environments.", "Testing", ""]
+]
+},
+{
+title:"9. Playwright Enterprise Scenarios",
+qs:[
+  ["How do you configure Playwright to run tests in parallel across different product suites (e.g., CFII Portfolio/Index Security, CFII Index Summary, CFII Security Analytics)?", "Configure Playwright to run fully parallel at the project or file level. You can pass environment variables or configure Projects to parameterize the target product suite so worker processes execute them concurrently without test data collisions.", "E2E Testing", "<pre><code>// playwright.config.ts\nimport { defineConfig } from '@playwright/test';\nexport default defineConfig({\n  fullyParallel: true, // Run all tests in parallel\n  projects: [\n    { name: 'CFII Security', use: { baseURL: '.../security' } },\n    { name: 'CFII Summary', use: { baseURL: '.../summary' } },\n    { name: 'CFII Analytics', use: { baseURL: '.../analytics' } }\n  ],\n});</code></pre>"],
+  ["How do you mock API calls effectively in Playwright?", "Playwright's `page.route` handles network interception, allowing you to mock responses for edge cases or speed up specific test suites.", "Playwright", "<pre><code>await page.route('**/api/data-extract', async route => {\n  const json = { status: 'success', items: [...] };\n  await route.fulfill({ json });\n});</code></pre>"],
+  ["How would you structure Playwright for a large enterprise app?", "Use fixtures, reusable authentication state, domain-focused page/component helpers, stable locators and independent test data.", "Playwright", ""],
+  ["How do you debug a flaky Playwright test?", "Use trace viewer, screenshots, video and network logs. Determine whether the cause is timing, test data, environment or an actual product race.", "Debugging", ""],
+  ["How do you test authentication efficiently?", "Keep a small number of true login tests and reuse authenticated browser state for most scenarios where appropriate.", "Playwright", ""],
+  ["How would you run Playwright reliably in CI?", "Parallelize/shard safely, isolate test data, retain artifacts, retry cautiously and report failures by environment/build.", "CI/CD", ""]
+]
+},
+{
+title:"10. Advanced TypeScript",
+qs:[
+  ["How would you model API state safely to avoid impossible states?", "Use discriminated unions so invalid combinations (like having both an error and successful data simultaneously) are impossible to represent at compile time.", "TypeScript", "<pre><code>type AsyncState&lt;T&gt; = \n  | { status: 'idle' | 'loading' }\n  | { status: 'success'; data: T }\n  | { status: 'error'; error: Error };\n\n// TypeScript forces you to check status before accessing 'data'</code></pre>"],
+  ["What does the `infer` keyword do in conditional types?", "It introduces a type variable inside a conditional type so TypeScript can extract and utilize information from another type dynamically.", "TypeScript", "<pre><code>// Extracts the resolved type of a Promise\ntype AwaitedValue&lt;T&gt; = T extends Promise&lt;infer R&gt; ? R : T;\n// Promise&lt;string&gt; becomes string</code></pre>"],
+  ["Explain Generics with a real React use case.", "Generics preserve relationships between inputs and outputs instead of replacing everything with any.", "TypeScript", ""],
+  ["What are Mapped Types?", "They iterate over keys of an existing type to create a transformed type.", "TypeScript", ""],
+  ["What are Conditional Types?", "They select one type or another based on a compile-time relationship.", "TypeScript", ""]
+]
+},
+{
+title:"11. Performance Optimization Cases",
+qs:[
+  ["A dashboard has excessive re-renders. How do you investigate?", "Profile before changing code. Check state ownership, context breadth, unstable props and expensive render calculations.", "Performance", ""],
+  ["When should you use memo, useMemo and useCallback?", "Use them when measured work or referential equality makes them valuable. They are optimization tools, not default architecture.", "React", ""],
+  ["How would you optimize 10,000 rows?", "Use virtualization/windowing, pagination where appropriate, stable row rendering and efficient data access.", "Performance", ""],
+  ["How do you improve Core Web Vitals?", "For LCP optimize critical content/assets; for INP reduce long main-thread tasks and unnecessary JS; for CLS reserve layout space.", "Web Vitals", ""],
+  ["How would you optimize a large bundle?", "Analyze chunks, remove unnecessary dependencies, split heavy features, lazy-load routes/components and verify tree-shaking.", "Bundling", ""]
+]
+},
+{
+title:"12. Security — CSP, XSS, CSRF, Auth",
+qs:[
+  ["How does XSS happen in React?", "React escapes normal text interpolation, but unsafe HTML, direct DOM APIs, vulnerable dependencies or unsafe URL handling can introduce risk.", "Security", ""],
+  ["What is CSP?", "Content Security Policy restricts where scripts and other resources can load from and can reduce the impact of injection vulnerabilities.", "CSP", ""],
+  ["What is CSRF and how do you defend against it?", "CSRF abuses ambient browser credentials such as cookies to trigger unwanted state-changing requests. Defenses include SameSite cookies, CSRF tokens and Origin/Referer validation.", "CSRF", ""],
+  ["How would you design frontend authentication securely?", "Keep authorization decisions on the server. Prefer secure session/cookie patterns where appropriate, minimize token exposure and protect sensitive mutations.", "Auth", ""],
+  ["How would you secure a Next.js application in production?", "Use security headers, dependency scanning, input validation, server-side authorization, secret management and least privilege.", "Security", ""]
+]
+},
+{
+title:"13. Redux Toolkit Architecture",
+qs:[
+  ["How would you structure Redux Toolkit in a large app?", "Organize by feature/domain, colocate slice/selectors/tests and avoid a single global file containing every reducer.", "Redux", ""],
+  ["Redux vs local state?", "Global business state should be shared deliberately; ephemeral UI state such as a dropdown open flag usually belongs locally.", "State Architecture", ""],
+  ["How do you avoid Redux becoming a dumping ground?", "Do not store derived values or every server response blindly. Define ownership, use selectors and separate server cache from client UI state.", "Architecture", ""],
+  ["How do you handle async operations?", "Use createAsyncThunk for explicit async workflows and RTK Query for server data/cache use cases.", "Redux", ""]
+]
+},
+{
+title:"14. React 19 Hooks",
+qs:[
+  ["What problem does useActionState solve?", "It helps manage the result/pending state of actions, particularly form and mutation workflows.", "React 19", ""],
+  ["When would you use useOptimistic?", "When the UI should immediately reflect an expected mutation result while the real operation is pending.", "React 19", ""],
+  ["What is use()?", "use can read supported resources such as promises and context during rendering, integrating with Suspense patterns.", "React 19", ""],
+  ["How do Actions change form handling?", "React provides a more direct model for async submissions, pending state and action results.", "React 19", ""]
+]
+},
+{
+title:"15. Concurrent React",
+qs:[
+  ["What does Concurrent React mean?", "React can schedule rendering work by priority and can interrupt non-urgent rendering so urgent interactions remain responsive.", "Concurrent React", ""],
+  ["What is startTransition useful for?", "Mark updates as non-urgent so React can prioritize urgent interactions such as typing or clicking.", "Concurrent React", ""],
+  ["How does useDeferredValue help search UIs?", "It lets an expensive result tree consume a deferred version of a value while the immediate input remains responsive.", "Performance", ""],
+  ["Why doesn't concurrency make JavaScript execution faster?", "A long synchronous task still blocks the main thread. Concurrency lets React schedule its own rendering work better.", "React", ""]
+]
+},
+{
+title:"16. Large-Scale E-commerce Case Studies",
+qs:[
+  ["Design the frontend architecture for a large e-commerce platform.", "Separate catalog/search/PDP/cart/checkout/account/recommendations/CMS/experimentation concerns. Use server rendering/caching for public pages and client state only where interaction requires it.", "System Design", ""],
+  ["How would you design a multi-tab cart?", "Use a single external store abstraction with persistence and cross-tab events, then reconcile with the server when authentication/cart state changes.", "E-commerce", ""],
+  ["How would you handle a flash-sale product page?", "Cache aggressively at the edge, protect origin services, separate inventory correctness from display caching, and degrade non-critical features.", "Scale", ""],
+  ["How would you design checkout for reliability?", "Use server-authoritative pricing/inventory, idempotent order/payment operations, explicit order state transitions and safe retries.", "Payments", ""],
+  ["How would you build search for millions of products?", "Use a dedicated search/indexing system, pagination, filtering/faceting, relevance ranking and caching. Frontend should cancel obsolete searches and avoid flooding the backend.", "Search", ""],
+  ["How do you prevent stale price/inventory during checkout?", "The server must revalidate price and inventory at the critical commit step. Client values are hints for UX, never the final authority.", "Consistency", ""],
+  ["How would you monitor an enterprise e-commerce frontend?", "Combine RUM, errors, API latency, Web Vitals, business funnels and release correlation.", "Observability", ""],
+  ["A campaign causes frontend API traffic to spike 10x. What do you do?", "Identify the highest-volume endpoints, enable caching/deduplication, protect critical APIs, reduce polling and degrade non-essential features.", "Incident Response", ""]
+]
+}
+];
+
+function render(data = sections) {
+  const root = document.getElementById("content");
+  root.innerHTML = "";
+  let total = 0;
+  
+  data.forEach((s) => {
+    const sec = document.createElement("section");
+    
+    const head = document.createElement("div");
+    head.className = "section-head";
+    head.innerHTML = `<h2>${s.title}</h2>`;
+    
+    const qs = document.createElement("div");
+    qs.className = "questions";
+    
+    s.qs.forEach((q, i) => {
+      total++;
+      const item = document.createElement("div");
+      item.className = "q";
+      
+      const question = `<strong>${i + 1}. ${q[0]}</strong>`;
+      const answer = `<p>${q[1]}</p>`;
+      const tag = `<span class="tag">${q[2]}</span>`;
+      const extra = q[3] ? q[3] : '';
+      
+      item.innerHTML = `${question}${answer}${extra}${tag}`;
+      qs.appendChild(item);
+    });
+    
+    sec.append(head, qs);
+    root.appendChild(sec);
+  });
+  
+  document.getElementById("count").textContent = `${total} questions`;
+}
+
+function filterQuestions() {
+  const term = document.getElementById("search").value.toLowerCase().trim();
+  if(!term) return render();
+  
+  const filtered = sections.map(s => ({
+    ...s,
+    qs: s.qs.filter(q => 
+      q[0].toLowerCase().includes(term) || 
+      q[1].toLowerCase().includes(term) || 
+      s.title.toLowerCase().includes(term)
+    )
+  })).filter(s => s.qs.length);
+  
+  render(filtered);
+}
+
+function clearSearch() { 
+  document.getElementById("search").value = ""; 
+  render(); 
+}
+
+// Initial render
+render();
+</script>
+</body>
+</html>

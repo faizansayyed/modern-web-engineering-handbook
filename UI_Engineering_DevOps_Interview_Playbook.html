@@ -1,0 +1,1381 @@
+<!doctype html>
+<html lang="en" data-theme="light">
+
+<head>
+    <meta charset="utf-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1">
+    <title>UI Engineering DevOps Interview Playbook: 60 Questions</title>
+    <style>
+        :root {
+            --bg: #f5f7fb;
+            --panel: #fff;
+            --text: #172033;
+            --muted: #667085;
+            --line: #dce3ed;
+            --accent: #2563eb;
+            --soft: #edf4ff;
+            --code: #0b1220;
+            --codeText: #e5edf8;
+            --shadow: 0 8px 28px rgb(15 23 42/.09)
+        }
+
+        html[data-theme=dark] {
+            --bg: #07111f;
+            --panel: #0f1c2e;
+            --text: #e7eef8;
+            --muted: #a0aec0;
+            --line: #29405f;
+            --accent: #60a5fa;
+            --soft: #142944;
+            --code: #030812;
+            --codeText: #e5edf8;
+            --shadow: 0 8px 28px rgb(0 0 0/.32)
+        }
+
+        * {
+            box-sizing: border-box
+        }
+
+        html {
+            scroll-behavior: smooth;
+            scroll-padding-top: 82px
+        }
+
+        body {
+            margin: 0;
+            background: var(--bg);
+            color: var(--text);
+            font: 16px/1.65 Inter, system-ui, -apple-system, "Segoe UI", sans-serif
+        }
+
+        .top {
+            position: sticky;
+            top: 0;
+            z-index: 20;
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 12px 18px;
+            background: color-mix(in srgb, var(--panel) 92%, transparent);
+            border-bottom: 1px solid var(--line);
+            backdrop-filter: blur(12px)
+        }
+
+        .brand {
+            font-weight: 800;
+            white-space: nowrap
+        }
+
+        .search {
+            flex: 1;
+            max-width: 760px;
+            padding: 11px 14px;
+            border: 1px solid var(--line);
+            border-radius: 11px;
+            background: var(--panel);
+            color: var(--text);
+            outline: none
+        }
+
+        .search:focus {
+            border-color: var(--accent);
+            box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 20%, transparent)
+        }
+
+        button {
+            border: 1px solid var(--line);
+            border-radius: 10px;
+            background: var(--panel);
+            color: var(--text);
+            padding: 9px 12px;
+            cursor: pointer
+        }
+
+        .layout {
+            display: grid;
+            grid-template-columns: 290px minmax(0, 1fr);
+            max-width: 1500px;
+            margin: auto
+        }
+
+        .side {
+            position: sticky;
+            top: 66px;
+            height: calc(100vh - 66px);
+            overflow: auto;
+            padding: 22px 16px;
+            background: var(--panel);
+            border-right: 1px solid var(--line)
+        }
+
+        .side h3 {
+            font-size: .8rem;
+            text-transform: uppercase;
+            letter-spacing: .12em;
+            color: var(--muted)
+        }
+
+        .side a {
+            display: block;
+            padding: 7px 9px;
+            border-radius: 8px;
+            color: var(--muted);
+            text-decoration: none;
+            font-size: .92rem
+        }
+
+        .side a:hover,
+        .side a.active {
+            background: var(--soft);
+            color: var(--accent)
+        }
+
+        main {
+            min-width: 0;
+            padding: 34px clamp(18px, 4vw, 62px) 80px
+        }
+
+        .hero {
+            padding: clamp(28px, 5vw, 55px);
+            border-radius: 24px;
+            color: #fff;
+            background: linear-gradient(135deg, #1d4ed8, #6d28d9);
+            box-shadow: var(--shadow)
+        }
+
+        .hero h1 {
+            margin: 0 0 10px;
+            font-size: clamp(2rem, 5vw, 4rem);
+            line-height: 1.06
+        }
+
+        .hero p {
+            max-width: 900px;
+            color: #e9edff
+        }
+
+        .stats {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+            margin-top: 18px
+        }
+
+        .stat {
+            padding: 7px 11px;
+            border: 1px solid rgb(255 255 255/.25);
+            border-radius: 999px;
+            background: rgb(255 255 255/.12)
+        }
+
+        section {
+            margin-top: 46px
+        }
+
+        section>h2 {
+            padding-bottom: 10px;
+            border-bottom: 2px solid var(--line)
+        }
+
+        details.card {
+            margin: 15px 0;
+            border: 1px solid var(--line);
+            border-radius: 15px;
+            background: var(--panel);
+            box-shadow: var(--shadow);
+            overflow: hidden
+        }
+
+        summary {
+            cursor: pointer;
+            list-style: none;
+            padding: 18px 20px;
+            font-weight: 750
+        }
+
+        summary::-webkit-details-marker {
+            display: none
+        }
+
+        summary:before {
+            content: '+';
+            display: inline-grid;
+            place-items: center;
+            width: 27px;
+            height: 27px;
+            margin-right: 10px;
+            border-radius: 8px;
+            background: var(--soft);
+            color: var(--accent)
+        }
+
+        details[open] summary:before {
+            content: '−'
+        }
+
+        .body {
+            padding: 0 22px 22px 59px
+        }
+
+        .label {
+            margin: 15px 0 3px;
+            color: var(--accent);
+            font-weight: 800
+        }
+
+        .body p {
+            margin: 4px 0 12px
+        }
+
+        .num {
+            color: var(--muted);
+            font-weight: 700
+        }
+
+        pre {
+            position: relative;
+            overflow: auto;
+            padding: 18px;
+            border-radius: 11px;
+            background: var(--code);
+            color: var(--codeText)
+        }
+
+        code {
+            font-family: Consolas, "Liberation Mono", monospace
+        }
+
+        .copy {
+            position: absolute;
+            right: 8px;
+            top: 8px;
+            background: #172033;
+            color: #dbeafe;
+            border-color: #334155;
+            padding: 5px 8px
+        }
+
+        .tok-comment {
+            color: #8291a8
+        }
+
+        .tok-command {
+            color: #7dd3fc
+        }
+
+        .tok-flag {
+            color: #fcd34d
+        }
+
+        mark {
+            background: #fde68a;
+            color: #111827;
+            border-radius: 3px
+        }
+
+        .hidden {
+            display: none !important
+        }
+
+        .empty {
+            display: none;
+            text-align: center;
+            padding: 48px;
+            color: var(--muted)
+        }
+
+        .count {
+            margin-left: auto;
+            color: var(--muted)
+        }
+
+        .back {
+            position: fixed;
+            right: 20px;
+            bottom: 20px;
+            display: none;
+            background: var(--accent);
+            color: #fff;
+            border: 0;
+            border-radius: 50%;
+            width: 46px;
+            height: 46px
+        }
+
+        .menu {
+            display: none
+        }
+
+        @media(max-width:860px) {
+            .brand {
+                display: none
+            }
+
+            .layout {
+                display: block
+            }
+
+            .side {
+                display: none
+            }
+
+            .side.open {
+                display: block;
+                position: fixed;
+                inset: 65px 0 0;
+                z-index: 19;
+                height: auto
+            }
+
+            .menu {
+                display: block
+            }
+
+            .body {
+                padding-left: 20px
+            }
+
+            .count {
+                display: none
+            }
+        }
+
+        @media print {
+
+            .top,
+            .side,
+            .back,
+            .copy {
+                display: none !important
+            }
+
+            .layout {
+                display: block
+            }
+
+            main {
+                padding: 0
+            }
+
+            details.card {
+                box-shadow: none;
+                break-inside: avoid
+            }
+
+            details:not([open])>*:not(summary) {
+                display: block
+            }
+        }
+    </style>
+</head>
+
+<body>
+    <header class="top"><button id="menu" class="menu" aria-label="Open navigation">☰</button>
+        <div class="brand">UI DevOps Playbook</div><input id="search" class="search" type="search"
+            placeholder="Search all 60 questions, scenarios, answers, commands…" aria-label="Search"><button
+            id="clear">Clear</button><span id="count" class="count">60 / 60 questions</span><button id="theme"
+            aria-label="Toggle dark mode">🌙</button>
+    </header>
+    <div class="layout">
+        <aside class="side">
+            <h3>Navigation</h3><a href="#section-1">1. Frontend Optimization</a><a href="#section-2">2. Web
+                Security</a><a href="#section-3">3. Docker</a><a href="#section-4">4. Kubernetes</a><a
+                href="#section-5">5. AWS CI/CD</a><a href="#section-6">6. Helm and Release Management</a><a
+                href="#section-7">7. End-to-End Incidents</a><a href="#section-8">8. Quick Whiteboard Prompts</a><a
+                href="#section-9">9. Topic-First Technical Questions</a><a href="#section-10">10. Command-Level Rapid
+                Fire</a>
+        </aside>
+        <main>
+            <div class="hero">
+                <h1>UI Engineering DevOps Interview Playbook</h1>
+                <p>All 60 questions covering frontend optimization, web security, Docker, Kubernetes, AWS CI/CD, Helm,
+                    incident response, architecture concepts, and production commands.</p>
+                <div class="stats"><span class="stat">60 questions</span><span class="stat">10 sections</span><span
+                        class="stat">Unique scenarios</span><span class="stat">Searchable</span></div>
+            </div>
+            <div id="empty" class="empty">
+                <h2>No matching questions</h2>
+                <p>Try a broader term such as cache, security, Kubernetes, or rollback.</p>
+            </div>
+            <section id="section-1">
+                <h2>1. Frontend Optimization</h2>
+                <details class="card"
+                    data-search="your react app has a good lighthouse score in lab tests, but real users in india report slow first load. how do you investigate and fix this? lab: lcp ~1.8s on us broadband. real users: lcp p75 ~4.2s on mid-tier android. app served via global cdn. difference between synthetic and real user monitoring; prioritizing fixes by user impact. start with rum data, not lighthouse. segment web vitals by country, device class, network type, and browser. check whether users in india hit the nearest cdn pop and whether the regional cache-hit ratio is low. correlate lcp with connection setup and image download time. if lcp is image-dominant, use avif/webp variants, responsive srcset, explicit dimensions, and fetchpriority=high for the hero. if javascript parse time is high, add route-level splitting, remove heavy polyfills, tree-shake ui libraries, and defer non-critical third-party scripts. hashed js/css should be immutable, while index.html should be no-cache. re-measure p75 lcp and inp after each change.">
+                    <summary><span class="num">Q1.</span> Your React app has a good Lighthouse score in lab tests, but
+                        real users in India report slow first load. How do you investigate and fix this?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Lab: LCP ~1.8s on US broadband. Real users: LCP p75 ~4.2s on mid-tier Android. App served via
+                            global CDN.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Difference between synthetic and real user monitoring; prioritizing fixes by user impact.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Start with RUM data, not Lighthouse. Segment Web Vitals by country, device class, network
+                            type, and browser. Check whether users in India hit the nearest CDN POP and whether the
+                            regional cache-hit ratio is low. Correlate LCP with connection setup and image download
+                            time. If LCP is image-dominant, use AVIF/WebP variants, responsive srcset, explicit
+                            dimensions, and fetchpriority=high for the hero. If JavaScript parse time is high, add
+                            route-level splitting, remove heavy polyfills, tree-shake UI libraries, and defer
+                            non-critical third-party scripts. Hashed JS/CSS should be immutable, while index.html should
+                            be no-cache. Re-measure p75 LCP and INP after each change.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="a team asks to preload every javascript chunk to make everything fast. should you do it? spa with 18 chunks; team proposes preload tags for all chunks in head. browser prioritization and network contention. no. preloading everything promotes non-critical resources and makes them compete with the lcp image, critical css, and initial-route javascript. preload only first-render dependencies such as the entry chunk, route-critical chunk, above-the-fold font, and lcp media. use prefetch for likely next-route chunks. validate through the devtools priority column and compare lcp and tbt.">
+                    <summary><span class="num">Q2.</span> A team asks to preload every JavaScript chunk to make
+                        everything fast. Should you do it?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>SPA with 18 chunks; team proposes preload tags for all chunks in head.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Browser prioritization and network contention.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>No. Preloading everything promotes non-critical resources and makes them compete with the LCP
+                            image, critical CSS, and initial-route JavaScript. Preload only first-render dependencies
+                            such as the entry chunk, route-critical chunk, above-the-fold font, and LCP media. Use
+                            prefetch for likely next-route chunks. Validate through the DevTools priority column and
+                            compare LCP and TBT.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="after adding a design system, bundle size increased from 300kb to 1.2mb gzipped. how do you reduce it without rewriting the app? large component imports; startup cpu cost increased. bundle analysis and practical remediation. run a bundle analyzer and inspect parsed size, not only gzip. replace barrel imports with supported path imports, use the esm build, enable sideeffects-aware tree shaking, remove duplicate dependency versions, and lazy-load rare components such as chart editors, date pickers, and rich-text tools. import icons individually and load only required locales. add a ci bundle budget. transfer reduction is only half the goal because parse and execution cost on low-end devices can dominate.">
+                    <summary><span class="num">Q3.</span> After adding a design system, bundle size increased from 300KB
+                        to 1.2MB gzipped. How do you reduce it without rewriting the app?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Large component imports; startup CPU cost increased.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Bundle analysis and practical remediation.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Run a bundle analyzer and inspect parsed size, not only gzip. Replace barrel imports with
+                            supported path imports, use the ESM build, enable sideEffects-aware tree shaking, remove
+                            duplicate dependency versions, and lazy-load rare components such as chart editors, date
+                            pickers, and rich-text tools. Import icons individually and load only required locales. Add
+                            a CI bundle budget. Transfer reduction is only half the goal because parse and execution
+                            cost on low-end devices can dominate.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="your app has random inp spikes during typing in a search box. how do you debug and fix it? users report input lag after large result sets load; inp p95 is unstable. main-thread scheduling and event-loop understanding. profile long tasks around input events. determine whether synchronous filtering, expensive render trees, forced layout, or third-party work causes the delay. capture each keystroke immediately and move heavy work to requestidlecallback, a web worker, or incremental scheduling. debounce network calls, virtualize results, memoize rows, and avoid layout reads after dom writes. in react, isolate the controlled input from the large parent tree. verify the inp distribution, not only its average.">
+                    <summary><span class="num">Q4.</span> Your app has random INP spikes during typing in a search box.
+                        How do you debug and fix it?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Users report input lag after large result sets load; INP p95 is unstable.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Main-thread scheduling and event-loop understanding.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Profile long tasks around input events. Determine whether synchronous filtering, expensive
+                            render trees, forced layout, or third-party work causes the delay. Capture each keystroke
+                            immediately and move heavy work to requestIdleCallback, a Web Worker, or incremental
+                            scheduling. Debounce network calls, virtualize results, memoize rows, and avoid layout reads
+                            after DOM writes. In React, isolate the controlled input from the large parent tree. Verify
+                            the INP distribution, not only its average.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="your cdn hit ratio is 45 percent for static assets and origin cost is increasing. what is wrong? static assets use hashed filenames, but origin fetches remain high. cache-key design and cache-control strategy. check cache-key explosion. query strings, cookies, and unnecessary headers can create unique keys. static assets generally need a path-only key. apply cache-control: max-age=31536000, immutable to hashed assets and ensure reverse proxies do not add no-cache. check compression variants and frequent deploy churn. keep index.html short-lived while hashed assets remain long-lived.">
+                    <summary><span class="num">Q5.</span> Your CDN hit ratio is 45 percent for static assets and origin
+                        cost is increasing. What is wrong?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Static assets use hashed filenames, but origin fetches remain high.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Cache-key design and cache-control strategy.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Check cache-key explosion. Query strings, cookies, and unnecessary headers can create unique
+                            keys. Static assets generally need a path-only key. Apply Cache-Control: max-age=31536000,
+                            immutable to hashed assets and ensure reverse proxies do not add no-cache. Check compression
+                            variants and frequent deploy churn. Keep index.html short-lived while hashed assets remain
+                            long-lived.</p>
+                    </div>
+                </details>
+            </section>
+            <section id="section-2">
+                <h2>2. Web Security</h2>
+                <details class="card"
+                    data-search="a pentest reports reflected xss on your search page. what is your immediate and long-term fix plan? a query parameter is rendered into the dom for highlighting; the proof of concept executes alert(). incident response and defense in depth. immediately encode output so user input is text, not html, and remove unsafe rendering paths. if highlighting needs markup, sanitize with a strict allowlist. tighten csp with nonce-based scripts, add malicious-payload regression tests, audit innerhtml, dangerouslysetinnerhtml and template-injection sinks, add security linting, and centralize safe component utilities. xss is usually a process failure, not merely a one-line defect.">
+                    <summary><span class="num">Q6.</span> A pentest reports reflected XSS on your search page. What is
+                        your immediate and long-term fix plan?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>A query parameter is rendered into the DOM for highlighting; the proof of concept executes
+                            alert().</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Incident response and defense in depth.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Immediately encode output so user input is text, not HTML, and remove unsafe rendering paths.
+                            If highlighting needs markup, sanitize with a strict allowlist. Tighten CSP with nonce-based
+                            scripts, add malicious-payload regression tests, audit innerHTML, dangerouslySetInnerHTML
+                            and template-injection sinks, add security linting, and centralize safe component utilities.
+                            XSS is usually a process failure, not merely a one-line defect.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="why is storing jwt in localstorage risky, and what would you use instead? current authentication stores its access token in localstorage. threat modeling and browser security boundaries. localstorage is readable by javascript, so xss can exfiltrate and replay a token. prefer httponly, secure, samesite cookies for session tokens, paired with samesite policy, csrf tokens for unsafe methods, and origin checks. keep access tokens short-lived and rotate refresh tokens server-side. cookies reduce token read theft but do not eliminate xss impact, so csp and output encoding remain necessary.">
+                    <summary><span class="num">Q7.</span> Why is storing JWT in localStorage risky, and what would you
+                        use instead?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Current authentication stores its access token in localStorage.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Threat modeling and browser security boundaries.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>localStorage is readable by JavaScript, so XSS can exfiltrate and replay a token. Prefer
+                            HttpOnly, Secure, SameSite cookies for session tokens, paired with SameSite policy, CSRF
+                            tokens for unsafe methods, and Origin checks. Keep access tokens short-lived and rotate
+                            refresh tokens server-side. Cookies reduce token read theft but do not eliminate XSS impact,
+                            so CSP and output encoding remain necessary.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="your security team wants strict csp, but product uses third-party analytics and tag manager. how do you implement csp without breaking tracking? multiple external scripts and existing inline scripts. practical csp rollout. begin with report-only and collect violations. replace unsafe inline scripts with per-response nonce-based script tags, move inline event handlers to javascript listeners, explicitly allow only required vendor domains, and use subresource integrity where possible. remove unknown dependencies, then enforce after violation volume is understood. csp rollout also requires vendor governance and stakeholder alignment.">
+                    <summary><span class="num">Q8.</span> Your security team wants strict CSP, but product uses
+                        third-party analytics and tag manager. How do you implement CSP without breaking tracking?
+                    </summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Multiple external scripts and existing inline scripts.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Practical CSP rollout.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Begin with Report-Only and collect violations. Replace unsafe inline scripts with
+                            per-response nonce-based script tags, move inline event handlers to JavaScript listeners,
+                            explicitly allow only required vendor domains, and use Subresource Integrity where possible.
+                            Remove unknown dependencies, then enforce after violation volume is understood. CSP rollout
+                            also requires vendor governance and stakeholder alignment.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="api requests fail in the browser but work in postman. the cors issue appears only in production. how do you fix it? browser presents a preflight failure; postman succeeds. correct understanding of cors scope. cors is browser-enforced, so postman success does not validate browser policy. inspect options. with credentials, access-control-allow-origin must exactly match the requesting origin and cannot be wildcard. permit the actual methods and headers, add vary: origin for dynamic origin handling, and ensure cdn or proxy layers preserve cors headers on error responses.">
+                    <summary><span class="num">Q9.</span> API requests fail in the browser but work in Postman. The CORS
+                        issue appears only in production. How do you fix it?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Browser presents a preflight failure; Postman succeeds.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Correct understanding of CORS scope.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>CORS is browser-enforced, so Postman success does not validate browser policy. Inspect
+                            OPTIONS. With credentials, Access-Control-Allow-Origin must exactly match the requesting
+                            origin and cannot be wildcard. Permit the actual methods and headers, add Vary: Origin for
+                            dynamic origin handling, and ensure CDN or proxy layers preserve CORS headers on error
+                            responses.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="you must consume a third-party cdn script for business-critical chat. how do you reduce supply-chain risk? external script required; security is concerned about cdn compromise. supply-chain controls. use subresource integrity and an exact version url, restrict csp script-src, and avoid floating latest. monitor unexpected outbound behavior, isolate the chat in an iframe on a separate origin where feasible, and keep a feature-flag kill switch for rapid disablement.">
+                    <summary><span class="num">Q10.</span> You must consume a third-party CDN script for
+                        business-critical chat. How do you reduce supply-chain risk?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>External script required; security is concerned about CDN compromise.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Supply-chain controls.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Use Subresource Integrity and an exact version URL, restrict CSP script-src, and avoid
+                            floating latest. Monitor unexpected outbound behavior, isolate the chat in an iframe on a
+                            separate origin where feasible, and keep a feature-flag kill switch for rapid disablement.
+                        </p>
+                    </div>
+                </details>
+            </section>
+            <section id="section-3">
+                <h2>3. Docker</h2>
+                <details class="card"
+                    data-search="why should a frontend app use multi-stage docker builds? current image is a 900mb node image serving static files. runtime minimization and attack-surface reduction. use node only in the build stage, then copy dist into a minimal nginx or caddy runtime. this reduces registry transfer, cold-start cost, and cve surface and excludes development tooling. production serves immutable static output rather than a development server.">
+                    <summary><span class="num">Q11.</span> Why should a frontend app use multi-stage Docker builds?
+                    </summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Current image is a 900MB Node image serving static files.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Runtime minimization and attack-surface reduction.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Use Node only in the build stage, then copy dist into a minimal Nginx or Caddy runtime. This
+                            reduces registry transfer, cold-start cost, and CVE surface and excludes development
+                            tooling. Production serves immutable static output rather than a development server.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="docker builds are slow in ci. what optimizations do you apply? build time increased from 4 to 14 minutes. layer-cache strategy. copy lockfiles first, install dependencies, then copy source. use buildkit and remote cache, avoid broad copy early, keep .dockerignore strict, separate stable from frequently changing dependencies, use targeted workspace installation in monorepos, and warm from the last successful image. measure cache-hit and per-layer timing.">
+                    <summary><span class="num">Q12.</span> Docker builds are slow in CI. What optimizations do you
+                        apply?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Build time increased from 4 to 14 minutes.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Layer-cache strategy.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Copy lockfiles first, install dependencies, then copy source. Use BuildKit and remote cache,
+                            avoid broad COPY early, keep .dockerignore strict, separate stable from frequently changing
+                            dependencies, use targeted workspace installation in monorepos, and warm from the last
+                            successful image. Measure cache-hit and per-layer timing.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="why is running an nginx container as root risky, and how do you run non-root safely? security scan flags the root process. container hardening. use a non-root uid, read-only root filesystem, and drop unnecessary capabilities. bind internally to a high port such as 8080, with service or ingress exposing 80/443. provide explicit writable mounts for required temp, cache, or log paths. enforce runasnonroot through kubernetes securitycontext.">
+                    <summary><span class="num">Q13.</span> Why is running an Nginx container as root risky, and how do
+                        you run non-root safely?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Security scan flags the root process.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Container hardening.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Use a non-root UID, read-only root filesystem, and drop unnecessary capabilities. Bind
+                            internally to a high port such as 8080, with Service or Ingress exposing 80/443. Provide
+                            explicit writable mounts for required temp, cache, or log paths. Enforce runAsNonRoot
+                            through Kubernetes securityContext.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="your docker plus nginx spa returns 404 when refreshing /orders/123. why? client-side navigation works, but refresh fails. spa server fallback. a refresh asks the server for /orders/123 as a real path. configure try_files $uri $uri/ /index.html so application routes fall back to the shell, while keeping static-asset paths strict. if a cdn fronts the origin, verify its error mapping as well.">
+                    <summary><span class="num">Q14.</span> Your Docker plus Nginx SPA returns 404 when refreshing
+                        /orders/123. Why?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Client-side navigation works, but refresh fails.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>SPA server fallback.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>A refresh asks the server for /orders/123 as a real path. Configure try_files $uri $uri/
+                            /index.html so application routes fall back to the shell, while keeping static-asset paths
+                            strict. If a CDN fronts the origin, verify its error mapping as well.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="how do you prevent secret leakage in docker builds? the team passes api tokens as arg and commits the dockerfile. build-time secret handling. do not embed secrets through arg or env because image history and layers can expose them. use buildkit secret mounts, avoid echoing values, exclude .env files with .dockerignore, and obtain runtime secrets from an orchestrator or secret manager. inspect image history and scanning results to verify absence.">
+                    <summary><span class="num">Q15.</span> How do you prevent secret leakage in Docker builds?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>The team passes API tokens as ARG and commits the Dockerfile.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Build-time secret handling.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Do not embed secrets through ARG or ENV because image history and layers can expose them. Use
+                            BuildKit secret mounts, avoid echoing values, exclude .env files with .dockerignore, and
+                            obtain runtime secrets from an orchestrator or secret manager. Inspect image history and
+                            scanning results to verify absence.</p>
+                    </div>
+                </details>
+            </section>
+            <section id="section-4">
+                <h2>4. Kubernetes</h2>
+                <details class="card"
+                    data-search="explain readiness probe versus liveness probe with a real outage example. a new release caused intermittent 502s during rollout. probe semantics and rollout safety. readiness controls traffic eligibility; failure leaves the pod running but removes it from Service endpoints. liveness controls restart behavior. if readiness returns 200 before assets are ready, the load balancer can route traffic prematurely. make readiness represent real serving state, add a startup probe for slow boot, and tune delay, timeout, and failure thresholds.">
+                    <summary><span class="num">Q16.</span> Explain readiness probe versus liveness probe with a real
+                        outage example.</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>A new release caused intermittent 502s during rollout.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Probe semantics and rollout safety.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Readiness controls traffic eligibility; the pod stays running but is removed from Service endpoints when readiness fails. Liveness controls restart behavior. If readiness returns 200 before
+                            assets are ready, the load balancer can route traffic prematurely. Make readiness represent
+                            real serving state, add a startup probe for slow boot, and tune delay, timeout, and failure
+                            thresholds.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="your frontend pods are oomkilled during traffic spikes. how do you solve it? pods restart every few minutes and memory rises with traffic. resource management and autoscaling. inspect memory profiles, events, sidecars, requests, and limits. set realistic requests for scheduling and limits for safety. scale before saturation through hpa using appropriate metrics. review nginx workers, caching, logging, and sidecar pressure. validate p95 memory and restart counts after changes.">
+                    <summary><span class="num">Q17.</span> Your frontend pods are OOMKilled during traffic spikes. How
+                        do you solve it?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Pods restart every few minutes and memory rises with traffic.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Resource management and autoscaling.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Inspect memory profiles, events, sidecars, requests, and limits. Set realistic requests for
+                            scheduling and limits for safety. Scale before saturation through HPA using appropriate
+                            metrics. Review Nginx workers, caching, logging, and sidecar pressure. Validate p95 memory
+                            and restart counts after changes.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="why use a poddisruptionbudget for frontend apps? a node upgrade drained multiple pods and availability dipped. availability during voluntary disruptions. a pdb constrains voluntary eviction so enough replicas remain available during maintenance or autoscaler scale-down. with three replicas and minavailable two, kubernetes preserves at least two when honoring the budget. combine it with topology spreading for zone resilience.">
+                    <summary><span class="num">Q18.</span> Why use a PodDisruptionBudget for frontend apps?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>A node upgrade drained multiple pods and availability dipped.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Availability during voluntary disruptions.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>A PDB constrains voluntary eviction so enough replicas remain available during maintenance or
+                            autoscaler scale-down. With three replicas and minAvailable two, Kubernetes preserves at
+                            least two when honoring the budget. Combine it with topology spreading for zone resilience.
+                        </p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="a cluster has many namespaces. how do you isolate dev and production securely? dev and production share an eks cluster. multi-tenant governance. use namespace separation with scoped rbac, networkpolicies, quotas, namespace-specific secrets, and iam mapping. admission policies can enforce security contexts and trusted image sources. ci identities for dev must not deploy to production. strongly regulated environments may justify separate clusters.">
+                    <summary><span class="num">Q19.</span> A cluster has many namespaces. How do you isolate dev and
+                        production securely?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Dev and production share an EKS cluster.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Multi-tenant governance.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Use namespace separation with scoped RBAC, NetworkPolicies, quotas, namespace-specific
+                            secrets, and IAM mapping. Admission policies can enforce security contexts and trusted image
+                            sources. CI identities for dev must not deploy to production. Strongly regulated
+                            environments may justify separate clusters.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="you see high latency at ingress although pods are healthy. what do you inspect? alb p95 latency increased while pod cpu remains normal. end-to-end request-path analysis. trace cloudfront edge time, alb target-response time, pod latency, and downstream calls. inspect keepalive, tls, cross-zone traffic, target health thresholds, and slow start. confirm static assets are using the intended cdn policy. correlate logs and metrics rather than assuming the pod is the bottleneck.">
+                    <summary><span class="num">Q20.</span> You see high latency at ingress although pods are healthy.
+                        What do you inspect?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>ALB p95 latency increased while pod CPU remains normal.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>End-to-end request-path analysis.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Trace CloudFront edge time, ALB target-response time, pod latency, and downstream calls.
+                            Inspect keepalive, TLS, cross-zone traffic, target health thresholds, and slow start.
+                            Confirm static assets are using the intended CDN policy. Correlate logs and metrics rather
+                            than assuming the pod is the bottleneck.</p>
+                    </div>
+                </details>
+            </section>
+            <section id="section-5">
+                <h2>5. AWS CI/CD</h2>
+                <details class="card"
+                    data-search="explain exactly how codepipeline passes data from build to deploy. build creates an image-tag file needed by deploy. artifact-flow literacy. codebuild writes files declared in buildspec artifacts. they are uploaded as an artifact to the pipeline s3 bucket. deploy declares that artifact as input, receives it in its workspace, reads image-tag.txt, and passes it to helm. the exact tested image is promoted rather than rebuilt.">
+                    <summary><span class="num">Q21.</span> Explain exactly how CodePipeline passes data from Build to
+                        Deploy.</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Build creates an image-tag file needed by Deploy.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Artifact-flow literacy.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>CodeBuild writes files declared in buildspec artifacts. They are uploaded as an artifact to
+                            the pipeline S3 bucket. Deploy declares that artifact as input, receives it in its
+                            workspace, reads image-tag.txt, and passes it to Helm. The exact tested image is promoted
+                            rather than rebuilt.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="why use immutable image tags such as git sha instead of latest in production? the team deploys latest and cannot reproduce a rollback target. release traceability and determinism. latest is mutable and ambiguous. git sha or digest references tie runtime to source and make deployment and rollback reproducible. record image digest and commit metadata. latest may help cache workflows but should not identify a production release.">
+                    <summary><span class="num">Q22.</span> Why use immutable image tags such as Git SHA instead of
+                        latest in production?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>The team deploys latest and cannot reproduce a rollback target.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Release traceability and determinism.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>latest is mutable and ambiguous. Git SHA or digest references tie runtime to source and make
+                            deployment and rollback reproducible. Record image digest and commit metadata. latest may
+                            help cache workflows but should not identify a production release.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="codebuild can push to ecr but helm deploy to eks is unauthorized. why? ecr permissions are correct, but kubectl is denied. aws iam authentication versus kubernetes rbac. ecr and eks authorization are separate. eks:describecluster does not grant kubernetes actions. use an eks access entry to grant the codebuild role cluster access, then bind a least-privilege role or clusterrole, then validate with kubectl auth can-i. avoid system:masters and scope deploy identities by namespace.">
+                    <summary><span class="num">Q23.</span> CodeBuild can push to ECR but Helm deploy to EKS is
+                        unauthorized. Why?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>ECR permissions are correct, but kubectl is denied.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>AWS IAM authentication versus Kubernetes RBAC.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>ECR and EKS authorization are separate. eks:DescribeCluster does not grant Kubernetes
+                            actions. Use an EKS Access Entry to grant the CodeBuild role cluster access; this is the AWS-recommended alternative to aws-auth ConfigMap mappings. Then bind a least-privilege Role or
+                            ClusterRole, then validate with kubectl auth can-i. Avoid system:masters and scope deploy
+                            identities by namespace.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="the pipeline fails intermittently on monday mornings because of build queue time. how do you stabilize it? build starts are delayed during peak commits. ci capacity planning and reliability. inspect concurrent build quotas and compute capacity. separate fast-fail checks from heavy jobs, prioritize critical branches, consider reserved capacity, cache dependencies, shard tests, and retry transient network failures only. publish and alert on queue latency.">
+                    <summary><span class="num">Q24.</span> The pipeline fails intermittently on Monday mornings because
+                        of build queue time. How do you stabilize it?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Build starts are delayed during peak commits.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>CI capacity planning and reliability.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Inspect concurrent build quotas and compute capacity. Separate fast-fail checks from heavy
+                            jobs, prioritize critical branches, consider reserved capacity, cache dependencies, shard
+                            tests, and retry transient network failures only. Publish and alert on queue latency.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="cloudfront serves old index.html after deploy even though invalidation runs. what causes it? assets update, but the shell remains stale for some users. cdn versus browser and service-worker caching. check browser cache, intermediary cache, invalidation path, and service worker. index.html should be no-cache or no-store, and both / and /index.html may require matching treatment. inspect the affected browser response headers to identify the actual cache source.">
+                    <summary><span class="num">Q25.</span> CloudFront serves old index.html after deploy even though
+                        invalidation runs. What causes it?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Assets update, but the shell remains stale for some users.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>CDN versus browser and service-worker caching.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Check browser cache, intermediary cache, invalidation path, and service worker. index.html
+                            should be no-cache or no-store, and both / and /index.html may require matching treatment.
+                            Inspect the affected browser response headers to identify the actual cache source.</p>
+                    </div>
+                </details>
+            </section>
+            <section id="section-6">
+                <h2>6. Helm and Release Management</h2>
+                <details class="card"
+                    data-search="why does helm upgrade sometimes not restart pods after a configuration change? configmap updated; pods still use old config. declarative reconciliation. a configmap change does not restart pods if the deployment pod template is unchanged. add a checksum annotation derived from configmap content so the pod template changes and a rollout starts. a mounted file refresh also does not guarantee the application rereads it.">
+                    <summary><span class="num">Q26.</span> Why does helm upgrade sometimes not restart pods after a
+                        configuration change?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>ConfigMap updated; pods still use old config.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Declarative reconciliation.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>A ConfigMap change does not restart pods if the Deployment pod template is unchanged. Add a
+                            checksum annotation derived from ConfigMap content so the pod template changes and a rollout
+                            starts. A mounted file refresh also does not guarantee the application rereads it.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="how do you design values files to avoid configuration drift across environments? staging and production values diverged unpredictably. configuration architecture discipline. keep chart defaults minimal and environment overlays limited to true deltas. validate types and required keys with values.schema.json. avoid full copied values files. render and diff each environment in ci, and track chart version separately from app version.">
+                    <summary><span class="num">Q27.</span> How do you design values files to avoid configuration drift
+                        across environments?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Staging and production values diverged unpredictably.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Configuration architecture discipline.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Keep chart defaults minimal and environment overlays limited to true deltas. Validate types
+                            and required keys with values.schema.json. Avoid full copied values files. Render and diff
+                            each environment in CI, and track chart version separately from app version.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="a helm release failed midway. what does --atomic actually do? new pods failed readiness and the team expects automatic recovery. helm failure and rollback behavior. with --atomic, helm automatically enables --wait. for an upgrade that fails or times out, helm rolls back to the last successful revision; for a first-time install, it uninstalls the failed release. rollback or uninstall can also fail if the cluster is unhealthy. reliable probes, practical timeouts, and release observability are still required.">
+                    <summary><span class="num">Q28.</span> A Helm release failed midway. What does --atomic actually do?
+                    </summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>New pods failed readiness and the team expects automatic recovery.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Helm failure and rollback behavior.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>With --atomic, Helm automatically enables --wait. For an upgrade that fails or times out, Helm rolls back to the last
+                            successful revision; for a first-time install, it uninstalls the failed release. Rollback or uninstall can also fail if the cluster is
+                            unhealthy. Reliable probes, practical timeouts, and release observability are still
+                            required.</p>
+                    </div>
+                </details>
+            </section>
+            <section id="section-7">
+                <h2>7. End-to-End Incidents</h2>
+                <details class="card"
+                    data-search="deployment succeeded but users see a blank production screen. what is your first-principles triage plan? pipeline green, index.html returns 200, and a js chunk returns 404. cross-layer troubleshooting. trace the missing chunk. determine whether new html references an asset that was not uploaded or old html references a deleted asset. verify deployment order, running image tag or s3 objects, cdn cache headers, invalidation, and service-worker state. restore service with a known-good release, then enforce an atomic asset-first and shell-last release pattern.">
+                    <summary><span class="num">Q29.</span> Deployment succeeded but users see a blank production screen.
+                        What is your first-principles triage plan?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Pipeline green, index.html returns 200, and a JS chunk returns 404.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Cross-layer troubleshooting.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Trace the missing chunk. Determine whether new HTML references an asset that was not uploaded
+                            or old HTML references a deleted asset. Verify deployment order, running image tag or S3
+                            objects, CDN cache headers, invalidation, and service-worker state. Restore service with a
+                            known-good release, then enforce an atomic asset-first and shell-last release pattern.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="all api calls suddenly return 401 after a ui-only release. what likely went wrong? login appears successful, but protected api calls fail; backend is unchanged. authentication integration reasoning. inspect browser request headers and cookies. compare the new build&#x27;s credentials mode, cookie domain and samesite assumptions, api-origin environment variable, cors handling of authorization, and runtime configuration. add a post-deploy canary that authenticates and calls a protected endpoint before promotion.">
+                    <summary><span class="num">Q30.</span> All API calls suddenly return 401 after a UI-only release.
+                        What likely went wrong?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Login appears successful, but protected API calls fail; backend is unchanged.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Authentication integration reasoning.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Inspect browser request headers and cookies. Compare the new build&#x27;s credentials mode,
+                            cookie domain and SameSite assumptions, API-origin environment variable, CORS handling of
+                            Authorization, and runtime configuration. Add a post-deploy canary that authenticates and
+                            calls a protected endpoint before promotion.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="how would you design a safe progressive rollout for a risky frontend change? a checkout redesign affects a revenue-critical flow. deployment-strategy maturity. place the change behind a feature flag, enable it for internal users, then gradually expose cohorts by region or device. watch conversion, errors, inp, and payment failures. keep two rollback layers: disable the flag immediately and roll back the release if needed. add synthetic checkout canaries and guardrails that disable exposure when thresholds breach.">
+                    <summary><span class="num">Q31.</span> How would you design a safe progressive rollout for a risky
+                        frontend change?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>A checkout redesign affects a revenue-critical flow.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Deployment-strategy maturity.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Place the change behind a feature flag, enable it for internal users, then gradually expose
+                            cohorts by region or device. Watch conversion, errors, INP, and payment failures. Keep two
+                            rollback layers: disable the flag immediately and roll back the release if needed. Add
+                            synthetic checkout canaries and guardrails that disable exposure when thresholds breach.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="you must reduce monthly infrastructure cost by 30 percent without hurting ux. where do you optimize first? aws transfer, compute, and ci costs are rising. cost-performance tradeoffs. rank cost drivers. improve cloudfront hit ratio, reduce asset bytes and egress, right-size kubernetes requests and limits, tune hpa baseline replicas, filter redundant ci builds, and cache dependencies. target expensive end-to-end tests by change type. protect slos by tracking p75 web vitals and error budgets during optimization.">
+                    <summary><span class="num">Q32.</span> You must reduce monthly infrastructure cost by 30 percent
+                        without hurting UX. Where do you optimize first?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>AWS transfer, compute, and CI costs are rising.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Cost-performance tradeoffs.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Rank cost drivers. Improve CloudFront hit ratio, reduce asset bytes and egress, right-size
+                            Kubernetes requests and limits, tune HPA baseline replicas, filter redundant CI builds, and
+                            cache dependencies. Target expensive end-to-end tests by change type. Protect SLOs by
+                            tracking p75 Web Vitals and error budgets during optimization.</p>
+                    </div>
+                </details>
+            </section>
+            <section id="section-8">
+                <h2>8. Quick Whiteboard Prompts</h2>
+                <details class="card"
+                    data-search="draw the complete authentication chain from git push to pod secret read. whiteboard identity-flow exercise. identity boundaries across ci, aws, eks, nodes, and pods. include github to codepipeline through aws codeconnections (formerly codestar connections), codepipeline iam role to codebuild, codebuild role access to ecr token and ssm/secrets, eks api mapping, node role for ecr pull, and irsa with oidc for pod-level aws access.">
+                    <summary><span class="num">Q33.</span> Draw the complete authentication chain from Git push to pod
+                        secret read.</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Whiteboard identity-flow exercise.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Identity boundaries across CI, AWS, EKS, nodes, and pods.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Include GitHub to CodePipeline through AWS CodeConnections (formerly CodeStar Connections), CodePipeline IAM role to CodeBuild,
+                            CodeBuild role access to ECR token and SSM/Secrets, EKS API mapping, node role for ECR pull,
+                            and IRSA with OIDC for pod-level AWS access.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="explain why immutable asset caching and a no-cache index strategy work together. whiteboard cache model. content-addressed asset delivery. hash-based filenames guarantee content identity, immutable avoids revalidation, index.html points at the new hashes, and only the mutable index needs short caching or invalidation.">
+                    <summary><span class="num">Q34.</span> Explain why immutable asset caching and a no-cache index
+                        strategy work together.</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Whiteboard cache model.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Content-addressed asset delivery.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Hash-based filenames guarantee content identity, immutable avoids revalidation, index.html
+                            points at the new hashes, and only the mutable index needs short caching or invalidation.
+                        </p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="show rollback options ranked by response speed. whiteboard incident-response exercise. rollback layers and blast-radius reduction. feature flag off is fastest, followed by traffic or canary reversal, helm rollback to a prior release, and finally a full pipeline redeploy of a previous commit.">
+                    <summary><span class="num">Q35.</span> Show rollback options ranked by response speed.</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Whiteboard incident-response exercise.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Rollback layers and blast-radius reduction.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Feature flag off is fastest, followed by traffic or canary reversal, Helm rollback to a prior
+                            release, and finally a full pipeline redeploy of a previous commit.</p>
+                    </div>
+                </details>
+            </section>
+            <section id="section-9">
+                <h2>9. Topic-First Technical Questions</h2>
+                <details class="card"
+                    data-search="explain the difference between csr, ssr, ssg, and isr. pure concept question. rendering architecture and route-level selection. csr renders primarily in the browser and is common for interactive authenticated apps. ssr renders per request and can improve initial html and seo with greater server cost. ssg pre-renders at build time for cdn delivery. isr serves static pages with controlled regeneration. choose per route: marketing often ssg/isr, authenticated shells often csr, and dynamic seo pages often ssr.">
+                    <summary><span class="num">Q36.</span> Explain the difference between CSR, SSR, SSG, and ISR.
+                    </summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Pure concept question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Rendering architecture and route-level selection.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>CSR renders primarily in the browser and is common for interactive authenticated apps. SSR
+                            renders per request and can improve initial HTML and SEO with greater server cost. SSG
+                            pre-renders at build time for CDN delivery. ISR serves static pages with controlled
+                            regeneration. Choose per route: marketing often SSG/ISR, authenticated shells often CSR, and
+                            dynamic SEO pages often SSR.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="what is the exact difference between code splitting, tree shaking, and minification? pure build-pipeline question. separating frequently confused optimizations. code splitting controls chunk boundaries and load timing. tree shaking removes unused exports from an es-module graph. minification rewrites each output into a shorter equivalent. they complement one another. measure transfer size and parse/execute cost.">
+                    <summary><span class="num">Q37.</span> What is the exact difference between code splitting, tree
+                        shaking, and minification?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Pure build-pipeline question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Separating frequently confused optimizations.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Code splitting controls chunk boundaries and load timing. Tree shaking removes unused exports
+                            from an ES-module graph. Minification rewrites each output into a shorter equivalent. They
+                            complement one another. Measure transfer size and parse/execute cost.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="why do hashed filenames make immutable caching safe? pure caching question. cache invalidation model. a content hash changes when bytes change, so the url identifies a specific version. that url can be cached for a year with immutable because new content receives a new url. index.html remains mutable because it points to the current hashes.">
+                    <summary><span class="num">Q38.</span> Why do hashed filenames make immutable caching safe?
+                    </summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Pure caching question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Cache invalidation model.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>A content hash changes when bytes change, so the URL identifies a specific version. That URL
+                            can be cached for a year with immutable because new content receives a new URL. index.html
+                            remains mutable because it points to the current hashes.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="how do http/2 and http/3 change frontend asset-loading strategy? pure networking question. protocol effects on bundling. http/2 multiplexes requests on one connection, while http/3 uses quic to reduce connection setup and improve loss recovery on unstable networks. extreme concatenation and domain sharding are less useful, but excessive chunking can still hurt scheduling, parsing, and execution. balance granularity with runtime cost and use priority hints selectively.">
+                    <summary><span class="num">Q39.</span> How do HTTP/2 and HTTP/3 change frontend asset-loading
+                        strategy?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Pure networking question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Protocol effects on bundling.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>HTTP/2 multiplexes requests on one connection, while HTTP/3 uses QUIC to reduce connection
+                            setup and improve loss recovery on unstable networks. Extreme concatenation and domain
+                            sharding are less useful, but excessive chunking can still hurt scheduling, parsing, and
+                            execution. Balance granularity with runtime cost and use priority hints selectively.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="explain csp nonce versus hash versus allowlist. pure browser-security question. practical csp design. a nonce is random per response and authorizes matching inline blocks, fitting dynamic pages. a hash authorizes an exact static inline block. a source allowlist permits scripts from selected origins but does not independently control inline execution. strong policies combine strict sources with nonces or hashes and avoid unsafe-inline and unsafe-eval.">
+                    <summary><span class="num">Q40.</span> Explain CSP nonce versus hash versus allowlist.</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Pure browser-security question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Practical CSP design.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>A nonce is random per response and authorizes matching inline blocks, fitting dynamic pages.
+                            A hash authorizes an exact static inline block. A source allowlist permits scripts from
+                            selected origins but does not independently control inline execution. Strong policies
+                            combine strict sources with nonces or hashes and avoid unsafe-inline and unsafe-eval.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="what is same-origin policy and how is it different from cors? pure web-security question. core browser security model. same-origin policy is the browser&#x27;s default restriction on cross-origin reads. cors is a server opt-in protocol that relaxes that restriction for selected origins. cors governs browser exposure of a response; it does not replace authentication or apply to server-to-server calls.">
+                    <summary><span class="num">Q41.</span> What is same-origin policy and how is it different from CORS?
+                    </summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Pure web-security question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Core browser security model.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Same-origin policy is the browser&#x27;s default restriction on cross-origin reads. CORS is a
+                            server opt-in protocol that relaxes that restriction for selected origins. CORS governs
+                            browser exposure of a response; it does not replace authentication or apply to
+                            server-to-server calls.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="why should ci use npm ci instead of npm install? pure build-reproducibility question. deterministic dependency installation. npm ci installs exactly from package-lock.json, removes existing node_modules, and fails when package.json and the lockfile disagree. npm install can update resolution and lock data. ci should favor repeatability and auditability.">
+                    <summary><span class="num">Q42.</span> Why should CI use npm ci instead of npm install?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Pure build-reproducibility question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Deterministic dependency installation.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>npm ci installs exactly from package-lock.json, removes existing node_modules, and fails when
+                            package.json and the lockfile disagree. npm install can update resolution and lock data. CI
+                            should favor repeatability and auditability.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="explain docker image layers and why instruction order matters. pure container-build question. layer cache internals. each dockerfile instruction creates an immutable layer. cache reuse depends on the instruction and relevant inputs. put stable operations such as dependency installation before volatile source copy so source edits do not invalidate every expensive layer.">
+                    <summary><span class="num">Q43.</span> Explain Docker image layers and why instruction order
+                        matters.</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Pure container-build question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Layer cache internals.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Each Dockerfile instruction creates an immutable layer. Cache reuse depends on the
+                            instruction and relevant inputs. Put stable operations such as dependency installation
+                            before volatile source copy so source edits do not invalidate every expensive layer.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="what does kubernetes desired state mean in practice? pure orchestration question. controller reconciliation. objects declare a target such as three replicas with image v1.2.4. controllers compare observed state with that target and create, replace, or update resources. operate through declarative manifests or helm so source of truth and cluster state remain aligned.">
+                    <summary><span class="num">Q44.</span> What does Kubernetes desired state mean in practice?
+                    </summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Pure orchestration question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Controller reconciliation.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Objects declare a target such as three replicas with image v1.2.4. Controllers compare
+                            observed state with that target and create, replace, or update resources. Operate through
+                            declarative manifests or Helm so source of truth and cluster state remain aligned.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="what is the difference between deployment, statefulset, and daemonset? pure workload-controller question. controller choice. deployment manages interchangeable stateless replicas and is the usual frontend choice. statefulset provides stable identity, order, and persistent storage. daemonset ensures a pod on every selected node and is common for node agents.">
+                    <summary><span class="num">Q45.</span> What is the difference between Deployment, StatefulSet, and
+                        DaemonSet?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Pure workload-controller question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Controller choice.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Deployment manages interchangeable stateless replicas and is the usual frontend choice.
+                            StatefulSet provides stable identity, order, and persistent storage. DaemonSet ensures a pod
+                            on every selected node and is common for node agents.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="why is readiness usually more important than liveness for zero-downtime frontend releases? pure release-safety question. traffic eligibility versus restart policy. readiness decides whether a new pod receives production traffic. if it succeeds before the app can serve its assets or configuration, users receive errors. liveness only decides whether a running container should restart.">
+                    <summary><span class="num">Q46.</span> Why is readiness usually more important than liveness for
+                        zero-downtime frontend releases?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Pure release-safety question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Traffic eligibility versus restart policy.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Readiness decides whether a new pod receives production traffic. If it succeeds before the
+                            app can serve its assets or configuration, users receive errors. Liveness only decides
+                            whether a running container should restart.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="explain hpa decision flow and common anti-patterns. pure autoscaling question. metrics-based scaling mechanics. hpa reads metrics, compares observed values with targets, computes replica count, and applies stabilization and scaling policies. anti-patterns include absent resource requests, too-low minimum replicas, unsuitable lagging metrics, and startup time longer than the traffic-burst window.">
+                    <summary><span class="num">Q47.</span> Explain HPA decision flow and common anti-patterns.</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Pure autoscaling question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Metrics-based scaling mechanics.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>HPA reads metrics, compares observed values with targets, computes replica count, and applies
+                            stabilization and scaling policies. Anti-patterns include absent resource requests, too-low
+                            minimum replicas, unsuitable lagging metrics, and startup time longer than the traffic-burst
+                            window.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="what does helm template rendering order and value precedence look like? pure helm question. operational correctness. helm starts with chart values.yaml, merges -f files from left to right, then applies --set and --set-string at highest precedence. templates receive the merged values plus release and chart context. named templates in _helpers.tpl support reuse.">
+                    <summary><span class="num">Q48.</span> What does Helm template rendering order and value precedence
+                        look like?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Pure Helm question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Operational correctness.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Helm starts with chart values.yaml, merges -f files from left to right, then applies --set
+                            and --set-string at highest precedence. Templates receive the merged Values plus Release and
+                            Chart context. Named templates in _helpers.tpl support reuse.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="when should you use helm rollback versus redeploying a previous commit? pure incident-response question. rollback tradeoffs. use helm rollback when the failure is deployment-level and the prior stored release is known-good. redeploy a previous commit when chart compatibility changed, release history is unreliable, or external dependencies make the prior rendered state insufficient. restore service first and investigate second.">
+                    <summary><span class="num">Q49.</span> When should you use Helm rollback versus redeploying a
+                        previous commit?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Pure incident-response question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Rollback tradeoffs.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Use Helm rollback when the failure is deployment-level and the prior stored release is
+                            known-good. Redeploy a previous commit when chart compatibility changed, release history is
+                            unreliable, or external dependencies make the prior rendered state insufficient. Restore
+                            service first and investigate second.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="explain how codebuild and codepipeline differ in responsibility. pure aws ci/cd question. workflow versus execution planes. codebuild runs commands in isolated compute and emits logs and artifacts. codepipeline orchestrates stages, artifacts, approvals, and integrations. keep workflow logic visible in pipeline stages rather than burying all orchestration in build scripts.">
+                    <summary><span class="num">Q50.</span> Explain how CodeBuild and CodePipeline differ in
+                        responsibility.</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Pure AWS CI/CD question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Workflow versus execution planes.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>CodeBuild runs commands in isolated compute and emits logs and artifacts. CodePipeline
+                            orchestrates stages, artifacts, approvals, and integrations. Keep workflow logic visible in
+                            pipeline stages rather than burying all orchestration in build scripts.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="why should production deploy use the tested artifact instead of rebuilding? pure supply-chain question. build-once, deploy-many discipline. a deploy-time rebuild can drift because registries, environments, flags, or transitive dependencies change. promoting the exact tested artifact preserves binary integrity, traceability, and reliable rollback.">
+                    <summary><span class="num">Q51.</span> Why should production deploy use the tested artifact instead
+                        of rebuilding?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Pure supply-chain question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Build-once, deploy-many discipline.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>A deploy-time rebuild can drift because registries, environments, flags, or transitive
+                            dependencies change. Promoting the exact tested artifact preserves binary integrity,
+                            traceability, and reliable rollback.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="explain cloudfront cache-key design for spas. pure cdn question. cache policy design. include only dimensions that change the response. static assets usually require the path only; unnecessary cookies, headers, and query strings fragment cache. separate behaviors for hashed assets, html shell, and dynamic api paths.">
+                    <summary><span class="num">Q52.</span> Explain CloudFront cache-key design for SPAs.</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Pure CDN question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Cache policy design.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Include only dimensions that change the response. Static assets usually require the path
+                            only; unnecessary cookies, headers, and query strings fragment cache. Separate behaviors for
+                            hashed assets, HTML shell, and dynamic API paths.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="what is irsa and why is it better than node iam role access for pods? pure cloud-security question. least-privilege workload identity. irsa maps kubernetes service accounts to iam roles through oidc. each workload receives narrowly scoped permissions and clearer audit identity. a shared node role gives pods broader common access and increases blast radius.">
+                    <summary><span class="num">Q53.</span> What is IRSA and why is it better than node IAM role access
+                        for pods?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Pure cloud-security question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Least-privilege workload identity.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>IRSA maps Kubernetes service accounts to IAM roles through OIDC. Each workload receives
+                            narrowly scoped permissions and clearer audit identity. A shared node role gives pods
+                            broader common access and increases blast radius.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="what are mandatory production hardening controls for a frontend container workload? pure security-baseline question. layered defense maturity. run as non-root, prefer a read-only root filesystem, drop capabilities, pin digests or immutable tags, limit egress, trust only approved registries, scan images, and set requests and limits. add tls and waf at ingress and csp, secure headers, and dependency governance at the app layer.">
+                    <summary><span class="num">Q54.</span> What are mandatory production hardening controls for a
+                        frontend container workload?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Pure security-baseline question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Layered defense maturity.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Run as non-root, prefer a read-only root filesystem, drop capabilities, pin digests or
+                            immutable tags, limit egress, trust only approved registries, scan images, and set requests
+                            and limits. Add TLS and WAF at ingress and CSP, secure headers, and dependency governance at
+                            the app layer.</p>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="how do you choose between s3 plus cloudfront and a containerized frontend on eks? pure platform-choice question. cost and operational reasoning. choose s3 plus cloudfront for static delivery without runtime server logic because it is simpler and cheaper. choose eks when runtime processing, custom middleware, cluster governance, or network controls justify the operational cost. decide through requirements, team skills, release model, and total cost.">
+                    <summary><span class="num">Q55.</span> How do you choose between S3 plus CloudFront and a
+                        containerized frontend on EKS?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Pure platform-choice question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Cost and operational reasoning.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Choose S3 plus CloudFront for static delivery without runtime server logic because it is
+                            simpler and cheaper. Choose EKS when runtime processing, custom middleware, cluster
+                            governance, or network controls justify the operational cost. Decide through requirements,
+                            team skills, release model, and total cost.</p>
+                    </div>
+                </details>
+            </section>
+            <section id="section-10">
+                <h2>10. Command-Level Rapid Fire</h2>
+                <details class="card"
+                    data-search="what command validates kubernetes rbac permissions for a deploy role before rollout? command question. preflight authorization validation. use kubectl auth can-i with the verb, resource, namespace, and impersonated identity.">
+                    <summary><span class="num">Q56.</span> What command validates Kubernetes RBAC permissions for a
+                        deploy role before rollout?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Command question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Preflight authorization validation.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Use kubectl auth can-i with the verb, resource, namespace, and impersonated identity.</p>
+                        <pre><code class="language-bash">kubectl auth can-i patch deployments -n production --as=system:serviceaccount:ci:deployer</code></pre>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="what command shows the exact image digest running in production pods? command question. runtime artifact verification. read containerstatuses.imageid rather than relying on mutable tags.">
+                    <summary><span class="num">Q57.</span> What command shows the exact image digest running in
+                        production pods?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Command question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Runtime artifact verification.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Read containerStatuses.imageID rather than relying on mutable tags.</p>
+                        <pre><code class="language-bash">kubectl get pods -n production -l app=my-ui -o jsonpath=&quot;{range .items[*]}{.metadata.name}{&#x27; =&gt; &#x27;}{.status.containerStatuses[0].imageID}{&#x27;\n&#x27;}{end}&quot;</code></pre>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="what command reveals the helm-applied manifest active for a release? command question. rendered release inspection. use helm get manifest to compare stored rendered resources with chart expectations.">
+                    <summary><span class="num">Q58.</span> What command reveals the Helm-applied manifest active for a
+                        release?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Command question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Rendered release inspection.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Use helm get manifest to compare stored rendered resources with chart expectations.</p>
+                        <pre><code class="language-bash">helm get manifest my-ui -n production</code></pre>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="what command quickly traces cloudfront cache behavior from the client side? command question. cdn response-header inspection. use curl -i and inspect x-cache, age, cache-control, etag, and cf-ray.">
+                    <summary><span class="num">Q59.</span> What command quickly traces CloudFront cache behavior from
+                        the client side?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Command question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>CDN response-header inspection.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Use curl -I and inspect x-cache, age, cache-control, etag, and cf-ray.</p>
+                        <pre><code class="language-bash">curl -I https://app.example.com/assets/app.abc123.js</code></pre>
+                    </div>
+                </details>
+                <details class="card"
+                    data-search="which command confirms ecr image scan findings for a specific tag? command question. automated vulnerability governance. describe scan findings for the immutable release tag and enforce your severity policy in ci.">
+                    <summary><span class="num">Q60.</span> Which command confirms ECR image scan findings for a specific
+                        tag?</summary>
+                    <div class="body">
+                        <div class="label">Scenario</div>
+                        <p>Command question.</p>
+                        <div class="label">What the interviewer is testing</div>
+                        <p>Automated vulnerability governance.</p>
+                        <div class="label">Strong in-depth answer</div>
+                        <p>Describe scan findings for the immutable release tag and enforce your severity policy in CI.
+                        </p>
+                        <pre><code class="language-bash">aws ecr describe-image-scan-findings --repository-name my-ui --image-id imageTag=abc12345</code></pre>
+                    </div>
+                </details>
+            </section>
+        </main>
+    </div><button class="back" aria-label="Back to top">↑</button>
+    <script>
+        const root = document.documentElement, theme = document.querySelector('#theme'), search = document.querySelector('#search'), cards = [...document.querySelectorAll('.card')], sections = [...document.querySelectorAll('main section')], count = document.querySelector('#count'), empty = document.querySelector('#empty');
+        function setTheme(v) { root.dataset.theme = v; theme.textContent = v === 'dark' ? '☀️' : '🌙'; localStorage.setItem('playbook-theme', v) } setTheme(localStorage.getItem('playbook-theme') || (matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light')); theme.onclick = () => setTheme(root.dataset.theme === 'dark' ? 'light' : 'dark');
+        function filter() { const q = search.value.trim().toLowerCase(); let n = 0; cards.forEach(c => { const yes = !q || c.dataset.search.includes(q); c.classList.toggle('hidden', !yes); if (yes) { n++; if (q) c.open = true } }); sections.forEach(s => s.classList.toggle('hidden', !s.querySelector('.card:not(.hidden)'))); count.textContent = n + ' / 60 questions'; empty.style.display = n ? 'none' : 'block' } search.addEventListener('input', filter); document.querySelector('#clear').onclick = () => { search.value = ''; filter(); search.focus() };
+        document.querySelectorAll('pre').forEach(pre => { let code = pre.querySelector('code'); let t = code.innerHTML; t = t.replace(/(^|\s)(#.*)$/gm, '$1<span class="tok-comment">$2</span>').replace(/\b(kubectl|helm|curl|aws|npm|docker)\b/g, '<span class="tok-command">$1</span>').replace(/(^|\s)(--[\w-]+)/g, '$1<span class="tok-flag">$2</span>'); code.innerHTML = t; let b = document.createElement('button'); b.className = 'copy'; b.textContent = 'Copy'; b.onclick = async () => { await navigator.clipboard.writeText(code.innerText); b.textContent = 'Copied'; setTimeout(() => b.textContent = 'Copy', 1000) }; pre.appendChild(b) });
+        const side = document.querySelector('.side'); document.querySelector('#menu').onclick = () => side.classList.toggle('open'); document.querySelectorAll('.side a').forEach(a => a.onclick = () => side.classList.remove('open')); const topBtn = document.querySelector('.back'); addEventListener('scroll', () => topBtn.style.display = scrollY > 700 ? 'block' : 'none'); topBtn.onclick = () => scrollTo({ top: 0, behavior: 'smooth' }); addEventListener('keydown', e => { if (e.key === '/' && document.activeElement !== search) { e.preventDefault(); search.focus() } });
+        const links = [...document.querySelectorAll('.side a')]; const io = new IntersectionObserver(es => es.forEach(e => { if (e.isIntersecting) links.forEach(a => a.classList.toggle('active', a.hash === '#' + e.target.id)) }), { rootMargin: '-20% 0px -70%' }); sections.forEach(s => io.observe(s));
+    </script>
+</body>
+
+</html>

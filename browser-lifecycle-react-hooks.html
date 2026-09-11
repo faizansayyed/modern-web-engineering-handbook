@@ -1,0 +1,323 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Browser Lifecycle + React Hooks — Complete Guide</title>
+<style>
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, sans-serif; background: #f8fafc; color: #1e293b; line-height: 1.7; padding: 2rem 1rem; }
+  .container { max-width: 800px; margin: 0 auto; }
+  h1 { font-size: 1.75rem; margin-bottom: 0.5rem; }
+  .subtitle { color: #64748b; font-size: 0.9375rem; margin-bottom: 2rem; }
+
+  h2 { font-size: 1.25rem; margin: 2rem 0 0.75rem; padding-bottom: 0.5rem; border-bottom: 2px solid #e2e8f0; }
+  h3 { font-size: 1.05rem; margin: 1.5rem 0 0.5rem; color: #334155; }
+  p { margin-bottom: 0.75rem; }
+
+  .timeline { display: flex; flex-direction: column; gap: 0; position: relative; padding-left: 28px; margin: 1.5rem 0; }
+  .timeline::before { content: ''; position: absolute; left: 8px; top: 8px; bottom: 8px; width: 3px; background: #e2e8f0; border-radius: 2px; }
+  .phase { position: relative; padding: 1rem 1.25rem; margin-bottom: 0.75rem; border-radius: 10px; border: 1px solid #e2e8f0; background: #fff; }
+  .phase::before { content: ''; position: absolute; left: -24px; top: 1.1rem; width: 12px; height: 12px; border-radius: 50%; background: #cbd5e1; border: 3px solid #fff; box-shadow: 0 0 0 1px #e2e8f0; }
+  .phase.active::before { background: #2563eb; }
+  .phase.react::before { background: #f59e0b; }
+  .phase.paint::before { background: #22c55e; }
+  .phase-label { font-size: 0.65rem; font-weight: 800; text-transform: uppercase; letter-spacing: 0.08em; color: #94a3b8; margin-bottom: 0.25rem; }
+  .phase-title { font-weight: 700; font-size: 1rem; margin-bottom: 0.35rem; }
+  .phase-desc { font-size: 0.875rem; color: #475569; }
+  .badge { display: inline-block; font-size: 0.625rem; font-weight: 700; padding: 0.15rem 0.5rem; border-radius: 4px; margin-left: 0.4rem; vertical-align: middle; }
+  .badge-react { background: #fef3c7; color: #92400e; }
+  .badge-paint { background: #dcfce7; color: #166534; }
+
+  code { background: #f1f5f9; padding: 0.15rem 0.4rem; border-radius: 4px; font-family: 'SF Mono', Monaco, monospace; font-size: 0.85em; color: #334155; }
+  pre { background: #0f172a; color: #e2e8f0; padding: 1.25rem; border-radius: 10px; overflow-x: auto; font-family: 'SF Mono', Monaco, monospace; font-size: 0.8rem; line-height: 1.6; margin: 1rem 0; }
+  pre .comment { color: #64748b; }
+  pre .keyword { color: #c084fc; }
+  pre .string { color: #86efac; }
+  pre .func { color: #60a5fa; }
+  pre .tag { color: #f87171; }
+  pre .prop { color: #fbbf24; }
+
+  .viz { margin: 1.5rem 0; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.25rem; background: #fff; }
+  .viz-title { font-weight: 700; font-size: 0.9rem; margin-bottom: 0.75rem; }
+  .frame { height: 44px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 0.8rem; font-weight: 700; color: #fff; margin-bottom: 0.5rem; }
+  .frame-render { background: #f59e0b; }
+  .frame-layout { background: #ef4444; }
+  .frame-paint { background: #22c55e; }
+  .frame-effect { background: #3b82f6; }
+  .arrow { text-align: center; color: #94a3b8; font-size: 1.25rem; margin: 0.25rem 0; }
+
+  table { width: 100%; border-collapse: collapse; margin: 1rem 0; font-size: 0.875rem; }
+  th, td { padding: 0.75rem 1rem; text-align: left; border: 1px solid #e2e8f0; }
+  th { background: #f1f5f9; font-weight: 600; }
+  tr:nth-child(even) { background: #f8fafc; }
+
+  .rule-box { background: #fff; border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.25rem; margin: 1rem 0; }
+  .rule-box h4 { font-size: 0.9rem; margin-bottom: 0.5rem; color: #334155; }
+  .rule-box ul { margin-left: 1.25rem; color: #475569; font-size: 0.875rem; }
+  .rule-box li { margin-bottom: 0.35rem; }
+
+  .highlight { background: #fef9c3; padding: 0 3px; border-radius: 3px; }
+  .warning { background: #fef2f2; border-left: 4px solid #ef4444; padding: 1rem 1.25rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: 0.875rem; color: #7f1d1d; }
+  .tip { background: #eff6ff; border-left: 4px solid #3b82f6; padding: 1rem 1.25rem; border-radius: 0 8px 8px 0; margin: 1rem 0; font-size: 0.875rem; color: #1e3a8a; }
+
+  .comparison { display: grid; grid-template-columns: 1fr 1fr; gap: 1rem; margin: 1.5rem 0; }
+  .comp-box { border: 1px solid #e2e8f0; border-radius: 10px; padding: 1.25rem; background: #fff; }
+  .comp-box h4 { font-size: 0.9rem; margin-bottom: 0.5rem; }
+  .comp-box ul { margin-left: 1.1rem; font-size: 0.85rem; color: #475569; }
+  .comp-box .when { margin-top: 0.75rem; padding-top: 0.75rem; border-top: 1px solid #e2e8f0; font-size: 0.8rem; color: #64748b; }
+  @media (max-width: 640px) { .comparison { grid-template-columns: 1fr; } }
+</style>
+</head>
+<body>
+<div class="container">
+
+<h1>🌐 Browser Lifecycle + React Hooks</h1>
+<p class="subtitle">Where exactly do <code>useEffect</code> and <code>useLayoutEffect</code> sit in the browser's render pipeline?</p>
+
+<h2>1. The Full Browser Pipeline</h2>
+
+<div class="timeline">
+  <div class="phase">
+    <div class="phase-label">Phase 1</div>
+    <div class="phase-title">HTML Parsing Starts</div>
+    <div class="phase-desc">Browser reads HTML top-to-bottom. When it hits <code>&lt;script&gt;</code> (without <code>defer/async</code>), it <strong>blocks</strong> parsing and executes JS immediately.</div>
+  </div>
+
+  <div class="phase">
+    <div class="phase-label">Phase 2</div>
+    <div class="phase-title">Scripts Execute <span class="badge badge-react">React mounts here</span></div>
+    <div class="phase-desc"><code>ReactDOM.createRoot().render()</code> runs. React builds the <strong>virtual DOM</strong>, compares it (diff), then updates the <strong>real DOM</strong>. This is the <em>render phase</em> — pure, no side effects.</div>
+  </div>
+
+  <div class="phase active">
+    <div class="phase-label">Phase 3</div>
+    <div class="phase-title">DOM is Built → DOMContentLoaded</div>
+    <div class="phase-desc">Initial HTML + DOM fully parsed. <code>document.readyState === "interactive"</code>. Images, CSS, fonts may still be loading.</div>
+  </div>
+
+  <div class="phase react">
+    <div class="phase-label">Phase 4 — Inside React</div>
+    <div class="phase-title">useLayoutEffect Fires <span class="badge badge-react">Synchronous</span></div>
+    <div class="phase-desc">Runs <strong>immediately after</strong> React commits DOM changes but <strong>before</strong> the browser paints to screen. <strong>Blocks paint.</strong> Use for measuring DOM (scroll position, layout).</div>
+  </div>
+
+  <div class="phase paint">
+    <div class="phase-label">Phase 5</div>
+    <div class="phase-title">Browser Paints the Frame <span class="badge badge-paint">User sees it</span></div>
+    <div class="phase-desc">Browser calculates styles, layout, and paints pixels to the screen. The user <strong>sees</strong> the update. This is the visual commit.</div>
+  </div>
+
+  <div class="phase react">
+    <div class="phase-label">Phase 6 — Inside React</div>
+    <div class="phase-title">useEffect Fires <span class="badge badge-react">Asynchronous</span></div>
+    <div class="phase-desc">Runs <strong>after</strong> paint. Non-blocking. Perfect for data fetching, subscriptions, event listeners, DOM mutations that don't affect layout.</div>
+  </div>
+
+  <div class="phase paint">
+    <div class="phase-label">Phase 7</div>
+    <div class="phase-title">Images/Fonts Finish → window.load</div>
+    <div class="phase-desc">All external resources loaded. <code>document.readyState === "complete"</code>. <code>window.onload</code> fires.</div>
+  </div>
+</div>
+
+<h2>2. The Exact Timing Difference</h2>
+
+<div class="viz">
+  <div class="viz-title">🎬 Visual Timeline: One React Update</div>
+  <div class="frame frame-render">React Render + Commit (DOM updated)</div>
+  <div class="arrow">↓</div>
+  <div class="frame frame-layout">🔴 useLayoutEffect (sync, blocks paint)</div>
+  <div class="arrow">↓</div>
+  <div class="frame frame-paint">🟢 Browser Paint (user sees it)</div>
+  <div class="arrow">↓</div>
+  <div class="frame frame-effect">🔵 useEffect (async, after paint)</div>
+</div>
+
+<h2>3. useLayoutEffect — The Sync Hook</h2>
+
+<p>Runs <strong>immediately after</strong> React's Commit, <strong>before</strong> the browser calculates layout and paints.</p>
+
+<pre>
+function Tooltip({ targetRef }) {
+  const tooltipRef = useRef(null);
+  const [position, setPosition] = useState({ top: 0, left: 0 });
+
+  <span class="keyword">useLayoutEffect</span>(() => {
+    <span class="comment">// DOM is updated but NOT painted yet</span>
+    const targetRect = targetRef.current.getBoundingClientRect();
+    const tooltipHeight = tooltipRef.current.offsetHeight;
+
+    <span class="comment">// Calculate position to avoid overflow</span>
+    setPosition({
+      top: targetRect.bottom + 8,
+      left: targetRect.left,
+    });
+    <span class="comment">// This setState triggers a RE-RENDER before paint!</span>
+    <span class="comment">// Result: user sees correctly positioned tooltip first time</span>
+  }, [targetRef]);
+
+  return &lt;<span class="tag">div</span> <span class="prop">ref</span>={tooltipRef} <span class="prop">style</span>={{ position: 'absolute', ...position }}&gt;Tooltip&lt;/<span class="tag">div</span>&gt;;
+}
+</pre>
+
+<div class="warning">
+  <strong>Why not useEffect here?</strong> If you used <code>useEffect</code>, the browser would paint the tooltip at the wrong position first, then correct it — causing a <strong>visual flicker</strong>.
+</div>
+
+<h2>4. useEffect — The Async Hook</h2>
+
+<p>Runs <strong>after</strong> paint, scheduled as a deferred task. The user already sees the updated UI.</p>
+
+<pre>
+function UserProfile({ userId }) {
+  const [user, setUser] = useState(null);
+
+  <span class="keyword">useEffect</span>(() => {
+    <span class="comment">// User already sees the loading state / previous data</span>
+    fetch(`/api/users/${userId}`)
+      .then(r => r.json())
+      .then(setUser);
+  }, [userId]);
+
+  if (!user) return &lt;<span class="tag">Spinner</span> /&gt;;
+  return &lt;<span class="tag">div</span>&gt;{user.name}&lt;/<span class="tag">div</span>&gt;;
+}
+</pre>
+
+<div class="tip">
+  <strong>Why useEffect here?</strong> Data fetching doesn't need to block paint. The user sees a loading spinner immediately, then data fills in. If this were <code>useLayoutEffect</code>, the UI would freeze until the fetch completes.
+</div>
+
+<h2>5. Concrete Comparison: Measuring a Div</h2>
+
+<pre>
+function MeasureExample() {
+  const divRef = useRef(null);
+  const [width, setWidth] = useState(0);
+
+  <span class="comment">// ❌ With useEffect: user sees width=0 briefly, then jump</span>
+  useEffect(() => {
+    setWidth(divRef.current.offsetWidth);
+  }, []);
+
+  <span class="comment">// ✅ With useLayoutEffect: correct width before paint</span>
+  useLayoutEffect(() => {
+    setWidth(divRef.current.offsetWidth);
+  }, []);
+
+  return &lt;<span class="tag">div</span> <span class="prop">ref</span>={divRef}&gt;Width: {width}px&lt;/<span class="tag">div</span>&gt;;
+}
+</pre>
+
+<h2>6. Another Real Example: Auto-Focus Input</h2>
+
+<pre>
+function Modal({ isOpen }) {
+  const inputRef = useRef(null);
+
+  <span class="keyword">useLayoutEffect</span>(() => {
+    if (isOpen) {
+      inputRef.current?.focus();
+      <span class="comment">// Focus happens BEFORE paint</span>
+      <span class="comment">// User sees modal with cursor already blinking</span>
+    }
+  }, [isOpen]);
+
+  return isOpen ? &lt;<span class="tag">input</span> <span class="prop">ref</span>={inputRef} /&gt; : null;
+}
+</pre>
+
+<div class="warning">
+  If you used <code>useEffect</code>, the modal would paint first, then focus would jump — potentially causing a <strong>scroll jump</strong> or visible focus ring appearing after render.
+</div>
+
+<h2>7. The Golden Rules</h2>
+
+<div class="rule-box">
+  <h4>📌 Rule 1: Start with useEffect</h4>
+  <p>99% of side effects don't need to block paint. It's the safe default.</p>
+</div>
+
+<div class="rule-box">
+  <h4>📌 Rule 2: Use useLayoutEffect only for layout measurements</h4>
+  <p>Reading DOM size/position and synchronously re-rendering based on it.</p>
+</div>
+
+<div class="rule-box">
+  <h4>📌 Rule 3: useLayoutEffect can cause performance issues</h4>
+  <p>It blocks the browser's paint cycle. If it does heavy work, the UI freezes. Keep it fast.</p>
+</div>
+
+<div class="rule-box">
+  <h4>📌 Rule 4: useEffect with empty deps []</h4>
+  <p>Runs once after initial mount + paint. Equivalent to <code>componentDidMount</code>.</p>
+</div>
+
+<div class="rule-box">
+  <h4>📌 Rule 5: useEffect cleanup</h4>
+  <p>Runs before the component unmounts or before re-running the effect. Use for cleanup (removeEventListener, abort fetch, clearInterval).</p>
+</div>
+
+<h2>8. Summary Table</h2>
+
+<table>
+  <thead>
+    <tr>
+      <th>Hook</th>
+      <th>Runs when</th>
+      <th>Blocks paint?</th>
+      <th>Use for</th>
+    </tr>
+  </thead>
+  <tbody>
+    <tr>
+      <td><code>useEffect</code></td>
+      <td>After paint</td>
+      <td>❌ No</td>
+      <td>API calls, subscriptions, timers, analytics</td>
+    </tr>
+    <tr>
+      <td><code>useLayoutEffect</code></td>
+      <td>Before paint</td>
+      <td>✅ Yes</td>
+      <td>DOM measurement, preventing flicker, sync focus/scroll</td>
+    </tr>
+  </tbody>
+</table>
+
+<div class="comparison">
+  <div class="comp-box">
+    <h4>🔴 useLayoutEffect</h4>
+    <ul>
+      <li>Runs <strong>synchronously</strong> after DOM mutation</li>
+      <li><strong>Before</strong> browser paint</li>
+      <li><strong>Blocks</strong> the visual update</li>
+      <li>Can read and <strong>synchronously re-write</strong> DOM</li>
+    </ul>
+    <div class="when">
+      <strong>Use when:</strong> Measuring DOM nodes, preventing visual flicker (tooltip positioning), reading scroll position before paint, animating from measured values.
+    </div>
+  </div>
+
+  <div class="comp-box">
+    <h4>🔵 useEffect</h4>
+    <ul>
+      <li>Runs <strong>asynchronously</strong> after paint</li>
+      <li><strong>After</strong> browser paint</li>
+      <li><strong>Non-blocking</strong> — user sees UI first</li>
+      <li>Standard for side effects</li>
+    </ul>
+    <div class="when">
+      <strong>Use when:</strong> API calls, subscriptions, timers, event listeners, document title changes, analytics — anything that doesn't need to happen before the user sees the frame.
+    </div>
+  </div>
+</div>
+
+<div class="tip" style="margin-top: 2rem;">
+  <strong>The key mental model:</strong> <code>useLayoutEffect</code> is for when the user must <strong>NEVER</strong> see the intermediate state. If the first paint looks wrong and needs immediate correction, reach for <code>useLayoutEffect</code>. Otherwise, stick with <code>useEffect</code>.
+</div>
+
+</div>
+</body>
+</html>
