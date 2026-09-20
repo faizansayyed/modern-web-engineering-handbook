@@ -3051,13 +3051,13 @@ Before building custom UI behavior, check whether the browser already provides i
 
 **Short Answer:**
 
-Design around performance, scalability, modularity, reliability, observability and team ownership.
-Performance → How fast and efficiently the system responds.
-Scalability → Ability to handle increasing users, traffic, or data.
-Modularity → Breaking the system into independent, reusable components.
-Reliability → Ability to work correctly and consistently, even when failures occur.
-Observability → Ability to understand system health and problems through logs, metrics, and traces.
-Team ownership → A team is responsible for building, maintaining, deploying, and supporting its part of the system.
+* **Performance** → How fast and efficiently the system responds.
+* **Scalability** → Ability to handle increasing users, traffic, or data.
+* **Modularity** → Breaking the system into independent, reusable components.
+* **Reliability** → Ability to work correctly and consistently, even when failures occur.
+* **Observability** → Ability to understand system health and problems through logs, metrics, and traces.
+* **Team ownership** → A team is responsible for building, maintaining, deploying, and supporting its part of the system.
+  
 
 **Areas to cover:**
 
