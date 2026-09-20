@@ -3116,6 +3116,14 @@ A senior answer should discuss both user experience and engineering tradeoffs.
 **Senior insight:**
 
 Frontend system design is not only component structure. It includes data flow, performance budgets, team boundaries and operational reliability.
+It means **frontend system design is bigger than just designing React components**.
+
+You need to think about:
+* **Component structure** → How UI is divided into reusable components.
+* **Data flow** → How data moves between API → state → components.
+* **Performance budgets** → Limits for bundle size, page load time, API response time, Core Web Vitals, etc.
+* **Team boundaries** → Which team owns which feature/module, especially in large apps or micro-frontends.
+* **Operational reliability** → How the frontend handles failures, monitoring, errors, deployments, and recovery.
 
 ---
 
