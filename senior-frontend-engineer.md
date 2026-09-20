@@ -3050,6 +3050,7 @@ Before building custom UI behavior, check whether the browser already provides i
 ### Q43.1 `[Staff+]` How would you design a large-scale frontend for an e-commerce platform?
 
 **Short Answer:**
+Design around performance, scalability, modularity, reliability, observability and team ownership.
 
 * **Performance** → How fast and efficiently the system responds.
 * **Scalability** → Ability to handle increasing users, traffic, or data.
