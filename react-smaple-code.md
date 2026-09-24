@@ -511,18 +511,73 @@ requests.
 Keep page state and request the corresponding server page.
 
 ``` jsx
+import { useEffect, useState } from "react";
+
 function Users() {
+  const [users, setUsers] = useState([]);
   const [page, setPage] = useState(1);
+  const [loading, setLoading] = useState(false);
 
   useEffect(() => {
-    fetch(`/api/users?page=${page}&limit=20`)
-      .then((res) => res.json())
-      .then(setUsers);
+    const fetchUsers = async () => {
+      setLoading(true);
+
+      try {
+        const res = await fetch(`/api/users?page=${page}&limit=20`);
+        const data = await res.json();
+        setUsers(data);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchUsers();
   }, [page]);
 
   return (
     <>
-      <UserList />
+      {loading ? (
+        <p>Loading...</p>
+      ) : (
+        <UserList users={users} />
+      )}
+
+      <button
+        disabled={page === 1}
+        onClick={() => setPage((p) => p - 1)}
+      >
+        Previous
+      </button>
+
+      <button onClick={() => setPage((p) => p + 1)}>
+        Next
+      </button>
+    </>
+  );
+}
+
+import { useState } from "react";
+import { useQuery } from "@tanstack/react-query";
+
+function Users() {
+  const [page, setPage] = useState(1);
+
+  const { data: users = [], isLoading } = useQuery({
+    queryKey: ["users", page],
+    queryFn: async () => {
+      const res = await fetch(`/api/users?page=${page}&limit=20`);
+      return res.json();
+    },
+    placeholderData: (prevData) => prevData, // keep previous page data
+  });
+
+  return (
+    <>
+      {isLoading ? (
+        <p>Loading...</p>
+      ) : (
+        <UserList users={users} />
+      )}
 
       <button
         disabled={page === 1}
