@@ -387,6 +387,68 @@ function LoginForm() {
     </form>
   );
 }
+
+function formReducer(state, action) {
+  switch (action.type) {
+    case "CHANGE":
+      return {
+        ...state,
+        [action.field]: action.value,
+      };
+
+    case "RESET":
+      return {
+        name: "",
+        email: "",
+      };
+
+    default:
+      return state;
+  }
+}
+
+function UserForm() {
+  const [form, dispatch] = useReducer(formReducer, {
+    name: "",
+    email: "",
+  });
+
+  const handleChange = (e) => {
+    dispatch({
+      type: "CHANGE",
+      field: e.target.name,
+      value: e.target.value,
+    });
+  };
+
+  const handleSubmit = (e) => {
+    e.preventDefault();
+    console.log(form);
+  };
+
+  return (
+    <form onSubmit={handleSubmit}>
+      <input
+        name="name"
+        value={form.name}
+        onChange={handleChange}
+        placeholder="Name"
+      />
+
+      <input
+        name="email"
+        value={form.email}
+        onChange={handleChange}
+        placeholder="Email"
+      />
+
+      <button type="submit">Submit</button>
+      <button type="button" onClick={() => dispatch({ type: "RESET" })}>
+        Reset
+      </button>
+    </form>
+  );
+}
 ```
 
 **Interview:** Schema validation keeps business rules centralized and
