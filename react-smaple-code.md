@@ -75,11 +75,22 @@ Use Redux Toolkit when multiple unrelated parts of the application need
 shared client-side state.
 
 ``` jsx
+
+// Async action
+export const fetchUser = createAsyncThunk(
+  "user/fetchUser",
+  async (id: string) => {
+    const response = await fetch(`/api/users/${id}`);
+    return response.json();
+  }
+);
+
 const userSlice = createSlice({
   name: "user",
   initialState: {
-    name: "",
-    role: "user",
+    user: null,
+    loading: false,
+    error: null,
   },
   reducers: {
     setUser: (state, action) => {
@@ -87,7 +98,35 @@ const userSlice = createSlice({
       state.role = action.payload.role;
     },
   },
+
+  extraReducers: (builder) => {
+    builder
+      .addCase(fetchUser.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
+      .addCase(fetchUser.fulfilled, (state, action) => {
+        state.loading = false;
+        state.user = action.payload;
+      })
+      .addCase(fetchUser.rejected, (state, action) => {
+        state.loading = false;
+        state.error = action.error.message;
+      });
+  },
 });
+
+// Component
+const { user, loading, error } = useSelector(
+  (state) => state.user
+);
+
+const dispatch = useDispatch();
+
+useEffect(() => {
+  dispatch(fetchUser("123"));
+}, [dispatch]);
+
 
 // Component
 const user = useSelector((state) => state.user);
